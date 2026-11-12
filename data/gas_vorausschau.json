@@ -2385,7 +2385,7 @@
    "laenge_tage": 141
   },
   "einspeicherleistung_gemeldet_gwh": 4294,
-  "importe_gwh": 1200
+  "importe_gwh": 1205
  },
  "ohne_importe": {
   "jahresverbrauch_twh": 904,
@@ -2393,6 +2393,6 @@
   "verbrauch_tag_twh": 2.48,
   "tage": 58
  },
- "stand": "2026-11-12T07:50:45Z",
+ "stand": "2026-11-12T07:54:31Z",
  "quelle": "GIE AGSI+ (Speicherdaten seit 2018), Open-Meteo (Temperaturen), eigene Berechnung"
 }
