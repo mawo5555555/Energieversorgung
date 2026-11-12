@@ -1037,7 +1037,7 @@ def gas_vorausschau():
     old = read("gas_vorausschau.json", {})
     try:
         alt = datetime.strptime(old["stand"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
-        if NOW - alt < timedelta(hours=5) and old.get("szenarien") and old.get("einspeicherung") and old.get("importausfall") and "abweichung_letzte_tage_gwh" in (old.get("verstromung") or {}) and old.get("modell_version") == 5 and read("gas_preisanalyse.json", {}).get("jahre") and read("gas_umfeld_vorausschau.json", {}).get("anlagen") and not old.get("fehler"):
+        if NOW - alt < timedelta(hours=5) and old.get("szenarien") and old.get("einspeicherung") and old.get("importausfall") and "abweichung_letzte_tage_gwh" in (old.get("verstromung") or {}) and old.get("modell_version") == 6 and read("gas_preisanalyse.json", {}).get("jahre") and read("gas_umfeld_vorausschau.json", {}).get("anlagen") and not old.get("fehler"):
             return None  # aufwendig (Historie seit 2018), deshalb nur alle paar Stunden
     except (KeyError, ValueError):
         pass
@@ -1065,7 +1065,7 @@ def gas_vorausschau():
                                    "kaelte_ausland_gwh": (-ausl["effekt_kaltwelle_gwh"] if ausl.get("effekt_kaltwelle_gwh") and ausl["effekt_kaltwelle_gwh"] < 0 else None),
                                    "kaelte_ausland_beleg": bool(ausl.get("belegt"))}, strom_daten)
     res["stand"] = stamp()
-    res["modell_version"] = 5
+    res["modell_version"] = 6
     # Verlauf der Prognose festhalten, damit sichtbar wird, wie sie sich mit dem tatsächlichen Verlauf ändert
     try:
         pv = read("prognose_verlauf.json", {"eintraege": []}).get("eintraege", [])
@@ -1073,9 +1073,20 @@ def gas_vorausschau():
         sz = res["szenarien"]
         eintrag = {"tag": tag, "fuellstand": res["ausgangslage"]["fuellstand_prozent"], "mild_feb": sz["mild"]["konstant"]["fuellstand_ziel_tag"],
                    "normal_feb": sz["normal"]["konstant"]["fuellstand_ziel_tag"], "kalt_feb": sz["kalt"]["konstant"]["fuellstand_ziel_tag"],
-                   "normal_ende": sz["normal"]["konstant"]["fuellstand_ende"], "normal_unter30": sz["normal"]["konstant"]["erreicht"].get(30), "stand": stamp()}
+                   "normal_ende": sz["normal"]["konstant"]["fuellstand_ende"], "normal_unter30": sz["normal"]["konstant"]["erreicht"].get(30), "normal_unter20": sz["normal"]["konstant"]["erreicht"].get(20),
+                   "pfad14": sz["normal"]["konstant"]["verlauf"][:8], "stand": stamp()}
         pv = [e for e in pv if e.get("tag") != tag] + [eintrag]
         write("prognose_verlauf.json", {"eintraege": sorted(pv, key=lambda e: e["tag"])[-120:]})
+        # Gegenprobe: frühere Vorhersagen gegen den tatsächlichen Verlauf
+        fehler_h = {"bis3": [], "bis7": [], "bis14": []}
+        for e_ in pv:
+            for dt_, pct in e_.get("pfad14", []):
+                if dt_ in hist and dt_ > e_["tag"]:
+                    hz = (datetime.strptime(dt_, "%Y-%m-%d").date() - datetime.strptime(e_["tag"], "%Y-%m-%d").date()).days
+                    err_ = pct - hist[dt_]["full"]
+                    fehler_h["bis3" if hz <= 3 else "bis7" if hz <= 7 else "bis14"].append(abs(err_))
+        res["gegenprobe"] = {k_: (round(sum(v_) / len(v_), 1) if v_ else None) for k_, v_ in fehler_h.items()}
+        res["gegenprobe"]["anzahl"] = sum(len(v_) for v_ in fehler_h.values())
     except Exception as e:  # noqa: BLE001
         print("FEHL prognose_verlauf", e, file=sys.stderr)
     # Gaspreis (TTF) und Einspeicherung seit 2018
