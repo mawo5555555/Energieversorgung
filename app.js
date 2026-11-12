@@ -227,24 +227,36 @@
       var up = an.band.max.map(function (p, i) { return X(p[0]).toFixed(1) + "," + Y(p[1]).toFixed(1); }), lo = an.band.min.map(function (p) { return X(p[0]).toFixed(1) + "," + Y(p[1]).toFixed(1); }).reverse();
       g += '<polygon points="' + up.concat(lo).join(" ") + '" fill="var(--blue)" opacity="0.14"/>';
     }
-    var rows = "", fruehestes = null;
+    var sel = state.sel || "normal", rows = "", fruehestes = null, info = "", marks = "";
     ["mild", "normal", "kalt"].forEach(function (k) {
       var s = sz[k].konstant, vl = s.verlauf, er = s.erreicht || {}, hr = leerHochgerechnet(vl);
       var pts = vl.map(function (p) { return [p[0], p[1]]; });
       if (hr && !er.leer) { var lastp = vl[vl.length - 1]; pts = pts.concat([[hr > "2027-04-30" ? "2027-04-30" : hr, hr > "2027-04-30" ? Math.max(0, lastp[1] * (1 - (new Date("2027-04-30") - new Date(lastp[0])) / (new Date(hr) - new Date(lastp[0])))) : 0]]); }
-      g += '<path d="' + pts.map(function (p, i) { return (i ? "L" : "M") + X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1); }).join(" ") + '" fill="none" stroke="' + farben[k] + '" stroke-width="' + (k === "normal" ? 2.2 : 1.4) + '"/>';
-      if (er["20"]) g += '<circle cx="' + X(er["20"]) + '" cy="' + Y(20) + '" r="2.6" fill="' + farben[k] + '"/>';
+      var pd = pts.map(function (p, i) { return (i ? "L" : "M") + X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1); }).join(" "), istSel = k === sel;
+      g += '<path d="' + pd + '" fill="none" stroke="' + farben[k] + '" stroke-width="' + (istSel ? 3 : 1.4) + '" opacity="' + (istSel ? 1 : 0.5) + '"/>' +
+        '<path data-k="' + k + '" d="' + pd + '" fill="none" stroke="transparent" stroke-width="14" style="cursor:pointer"><title>' + namen[k] + ': anklicken</title></path>';
+      var nullTag = er.leer || hr;
+      if (er["20"]) marks += '<circle cx="' + X(er["20"]) + '" cy="' + Y(20) + '" r="' + (istSel ? 4 : 2.4) + '" fill="' + farben[k] + '" stroke="#fff" stroke-width="' + (istSel ? 1.2 : 0) + '"/>';
+      if (nullTag) marks += '<circle cx="' + X(nullTag > "2027-04-30" ? "2027-04-30" : nullTag) + '" cy="' + Y(0) + '" r="' + (istSel ? 4 : 2.4) + '" fill="' + (er.leer ? farben[k] : "var(--card)") + '" stroke="' + farben[k] + '" stroke-width="1.4"/>';
+      if (istSel) {
+        if (er["20"]) marks += '<text x="' + Math.min(X(er["20"]), W - 60) + '" y="' + (Y(20) - 7) + '" font-size="9" font-weight="700" fill="' + farben[k] + '">' + dat(er["20"]) + "</text>";
+        if (nullTag) marks += '<text x="' + Math.min(X(nullTag > "2027-04-30" ? "2027-04-30" : nullTag), W - 60) + '" y="' + (Y(0) - 7) + '" font-size="9" font-weight="700" fill="' + farben[k] + '">' + (er.leer ? "" : "ca. ") + dat(nullTag) + "</text>";
+        var heuteD = new Date(); heuteD.setHours(12, 0, 0, 0); var tage20 = er["20"] ? Math.round((new Date(er["20"] + "T12:00:00") - heuteD) / 86400000) : null, tage0 = nullTag ? Math.round((new Date(nullTag + "T12:00:00") - heuteD) / 86400000) : null;
+        info = '<div class="hint" style="border-left-color:' + farben[k] + ';background:color-mix(in srgb,' + farben[k] + ' 12%, transparent)"><strong>' + namen[k] + "er Winter:</strong> " + (er["20"] ? "20 % am <strong>" + dat(er["20"]) + "</strong> (in " + tage20 + " Tagen)" : "20 % bis 31. März nicht unterschritten") + "; " + (er.leer ? "leer am <strong>" + dat(er.leer) + "</strong> (in " + tage0 + " Tagen)" : nullTag ? "theoretisch leer ca. <strong>" + dat(nullTag) + "</strong> (hochgerechnet, in " + tage0 + " Tagen)" : "bis Ende Mai nicht leer") + ". Füllstand am 1. Februar " + nf0.format(s.fuellstand_ziel_tag != null ? s.fuellstand_ziel_tag : 0) + " %, am 31. März " + nf0.format(s.fuellstand_ende) + " %.</div>";
+      }
       if (er["20"] && (fruehestes == null || er["20"] < fruehestes)) fruehestes = er["20"];
       var leer = er.leer ? "ca. " + dat(er.leer) : hr ? "theoretisch ca. " + dat(hr) : "nicht absehbar, im Frühjahr sinkt der Verbrauch";
-      rows += '<tr><td><span style="color:' + farben[k] + '">■</span> ' + namen[k] + '</td><td class="n"><strong>' + (er["20"] ? dat(er["20"]) : "nicht bis 31.3.") + '</strong></td><td class="n">' + leer + (er.leer || !hr ? "" : '<div class="meta" style="margin:0">hochgerechnet</div>') + "</td></tr>";
+      rows += '<tr data-k="' + k + '" style="cursor:pointer;' + (k === sel ? "background:var(--fill)" : "") + '"><td><span style="color:' + farben[k] + '">■</span> ' + namen[k] + '</td><td class="n"><strong>' + (er["20"] ? dat(er["20"]) : "nicht bis 31.3.") + '</strong></td><td class="n">' + leer + (er.leer || !hr ? "" : '<div class="meta" style="margin:0">hochgerechnet</div>') + "</td></tr>";
     });
     var nm = sz.normal.konstant.erreicht || {}, farbe = nm["20"] ? "bad" : "ok";
     var kopf = nm["20"] ? "Kritisch ab " + dat(nm["20"]) : "Bis 31. März nicht unter 20 %";
     set("cUeberblick", '<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap"><div class="big" style="color:var(--' + farbe + ')">' + kopf + '</div></div><p style="margin:4px 0 0">' + (bb ? "Speicher im Umfeld Brandenburgs" : "Gasspeicher Deutschland") + ": heute <strong>" + nf.format(jetzt) + " %</strong> gefüllt. Im normalen Winter fällt der Füllstand " + (nm["20"] ? "ab " + dat(nm["20"]) + " unter 20 %." : "nicht unter 20 %.") + "</p>" +
-      '<svg viewBox="0 0 ' + W + " " + H + '" style="width:100%;height:auto;margin-top:6px" role="img" aria-label="Verlauf der Füllstände bis April">' + g + "</svg>" +
-      '<p class="meta" style="margin-top:0">Roter Bereich: unter 20 % Füllstand (Gasmangellage-Anzeige, eine Annahme, keine amtliche Schwelle). Punkte: Zeitpunkt, an dem 20 % unterschritten werden. Linien nach dem 31. März: Hochrechnung bei gleichbleibendem Tempo.</p>' +
+      '<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">' + ["mild", "normal", "kalt"].map(function (k) { return '<button type="button" data-k="' + k + '" aria-pressed="' + (k === sel) + '" style="font:inherit;font-size:14px;padding:5px 12px;border-radius:999px;border:2px solid ' + farben[k] + ";background:" + (k === sel ? farben[k] : "transparent") + ";color:" + (k === sel ? "#fff" : "var(--label)") + ';cursor:pointer">' + namen[k] + "</button>"; }).join("") + '<span class="meta" style="align-self:center;margin:0">Linie oder Knopf antippen</span></div>' +
+      '<svg viewBox="0 0 ' + W + " " + H + '" style="width:100%;height:auto;margin-top:6px" role="img" aria-label="Verlauf der Füllstände bis April">' + g + marks + "</svg>" + info +
+      '<p class="meta" style="margin-top:0">Roter Bereich: unter 20 % Füllstand (Gasmangellage-Anzeige, eine Annahme, keine amtliche Schwelle). Gefüllte Punkte: 20 % unterschritten (auf der roten Linie) und Speicher leer (unten). Hohle Punkte unten: nur hochgerechnet. Linien nach dem 31. März: Hochrechnung bei gleichbleibendem Tempo.</p>' +
       '<table><tr><th>Winter</th><th class="n">Gasmangellage-Anzeige (unter 20 %)</th><th class="n">Speicher theoretisch erschöpft (0 %)</th></tr>' + rows + "</table>" +
 (an ? '<p style="margin:8px 0 0"><strong>Wetterläufe der letzten ' + an.anzahl + ' Winter:</strong> Füllstand am 1. Februar ' + nf0.format(an.ziel.min) + " bis " + nf0.format(an.ziel.max) + " % (Mitte " + nf0.format(an.ziel.median) + " %), unter 20 % zwischen dem " + dat(an.unter20.frueh) + " und dem " + dat(an.unter20.spaet) + ", am 31. März zwischen " + nf0.format(an.ende.min) + " und " + nf0.format(an.ende.max) + " % (blaue Fläche im Diagramm).</p>" : "") +       '<p class="meta"><strong>Unterschied:</strong> Unter 20 % wird es kritisch, weil die Entnahmeleistung sinkt und kaum noch Reserve bleibt. „Erschöpft“ heißt, die Speicher wären rechnerisch ganz leer, das ist ein theoretischer Wert ohne Reaktion von Markt, Importen und Politik. Details und Annahmen weiter unten.</p>' + meta(q, ""));
+    [].forEach.call(document.querySelectorAll("#cUeberblick [data-k]"), function (el) { el.addEventListener("click", function () { state.sel = el.getAttribute("data-k"); renderUeberblick(state.ueber[0], state.ueber[1]); }); });
   }
   function renderVerstromung(v, w) {
     var nd = noData(v, "Verstromung"); if (nd) return set("cVerstromung", nd);
