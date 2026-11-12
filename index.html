@@ -20,17 +20,30 @@
     <button type="button" data-scope="bb" aria-pressed="true">Brandenburg</button>
     <button type="button" data-scope="de" aria-pressed="false">Deutschland</button>
   </div>
-  <p class="meta scopehint" data-scope="bb">Brandenburg zeigt, was sich regional belegen lässt: den Speicher Rüdersdorf, Tankstellen, Wetter Potsdam und Schwedt. Gasimporte und Strom gibt es nur für Deutschland insgesamt (Ansicht „Deutschland“).</p>
+  <p class="meta scopehint" data-scope="bb">Brandenburg zeigt, was sich regional belegen lässt: den Speicher Rüdersdorf, Tankstellen, und Wetter Potsdam. Gasimporte und Strom gibt es nur für Deutschland insgesamt (Ansicht „Deutschland“).</p>
 </header>
+
+<nav class="tabbar" aria-label="Bereiche">
+  <div class="tabs">
+    <a href="#gas"><span>🔥</span>Gas</a>
+    <a href="#cReichBB" data-scope="bb"><span>🔮</span>Vorausschau</a>
+    <a href="#cReichDE" data-scope="de"><span>🔮</span>Vorausschau</a>
+    <a href="#strom" data-scope="de"><span>⚡</span>Strom</a>
+    <a href="#frequenz"><span>〰️</span>Frequenz</a>
+    <a href="#wetter"><span>🌡️</span>Wetter</a>
+    <a href="#kraftstoff" data-scope="bb"><span>⛽</span>Kraftstoff</a>
+    <a href="#rohoel"><span>🛢️</span>Rohöl</a>
+  </div>
+</nav>
 
 <main>
   <section id="gas">
     <h2>Gas</h2>
     <div class="grid">
       <article class="card wide" id="cSpeicherBB" data-scope="bb"><h3>Gasspeicher Brandenburg</h3><div class="body">…</div></article>
-      <article class="card wide" id="cReichBB" data-scope="bb"><h3>Wie lange reicht der Vorrat? (Schätzung)</h3><div class="body">…</div></article>
+      <article class="card wide" id="cReichBB" data-scope="bb"><h3>Vorausschau: Wie lange reicht der Vorrat? (Schätzung)</h3><div class="body">…</div></article>
       <article class="card wide" id="cSpeicherDE" data-scope="de"><h3>Gasspeicher Deutschland</h3><div class="body">…</div></article>
-      <article class="card wide" id="cReichDE" data-scope="de"><h3>Wie lange reicht der Vorrat? (Schätzung)</h3><div class="body">…</div></article>
+      <article class="card wide" id="cReichDE" data-scope="de"><h3>Vorausschau: Wie lange reicht der Vorrat? (Schätzung)</h3><div class="body">…</div></article>
       <article class="card wide" id="cHist" data-scope="de"><h3>Füllstand im Jahresvergleich</h3><div class="body">…</div></article>
       <article class="card" id="cLng" data-scope="de"><h3>LNG-Terminals</h3><div class="body">…</div></article>
       <article class="card" id="cPipe" data-scope="de"><h3>Pipeline-Importe</h3><div class="body">…</div></article>
@@ -64,11 +77,6 @@
     <h2>Rohöl</h2>
     <div class="grid"><article class="card wide" id="cOel"><h3>Brent</h3><div class="body">…</div></article></div>
   </section>
-
-  <section id="schwedt" data-scope="bb">
-    <h2>Raffinerie Schwedt</h2>
-    <div class="grid"><article class="card wide" id="cSchwedt"><h3>PCK Raffinerie Schwedt/Oder</h3><div class="body">…</div></article></div>
-  </section>
 </main>
 
 <footer>
@@ -81,15 +89,6 @@
     Rohöl: Yahoo Finance (verzögert) · Wetter: <a href="https://open-meteo.com" rel="noopener">Open-Meteo.com</a> (CC BY 4.0).</p>
   <p>Alle Angaben ohne Gewähr, keine Handels- oder Versorgungsempfehlung. Die Daten werden in festen Abständen abgeholt, der Stand steht an jeder Kachel.</p>
 </footer>
-<nav class="tabbar" aria-label="Bereiche">
-  <a href="#gas"><span>🔥</span>Gas</a>
-  <a href="#strom" data-scope="de"><span>⚡</span>Strom</a>
-  <a href="#frequenz"><span>〰️</span>Frequenz</a>
-  <a href="#wetter"><span>🌡️</span>Wetter</a>
-  <a href="#kraftstoff" data-scope="bb"><span>⛽</span>Kraftstoff</a>
-  <a href="#rohoel"><span>🛢️</span>Rohöl</a>
-  <a href="#schwedt" data-scope="bb"><span>🏭</span>Schwedt</a>
-</nav>
 <script src="app.js"></script>
 </body>
 </html>

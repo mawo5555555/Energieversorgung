@@ -10,9 +10,9 @@
     --blue: #0a84ff; --green: #30d158; --orange: #ff9f0a; --red: #ff453a; --fill: rgba(120, 120, 128, .32); --bar: rgba(28, 28, 30, .82); }
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html { scroll-behavior: smooth; scroll-padding-top: 16px; }
+html { scroll-behavior: smooth; scroll-padding-top: 108px; }
 body { margin: 0; font: 17px/1.35 var(--font); color: var(--label); background: var(--bg); -webkit-font-smoothing: antialiased;
-  padding-bottom: calc(86px + env(safe-area-inset-bottom)); }
+  padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
 header, main, footer { max-width: 760px; margin: 0 auto; padding-left: 16px; padding-right: 16px; }
 header { padding-top: calc(28px + env(safe-area-inset-top)); }
 h1 { margin: 0; font-size: 34px; line-height: 1.1; font-weight: 700; letter-spacing: .2px; }
@@ -59,12 +59,14 @@ td { text-align: left; padding: 9px 4px; border-top: 1px solid var(--sep); }
 td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
 a { color: var(--blue); text-decoration: none; }
 
-/* Tab-Leiste unten */
-.tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; display: flex; justify-content: space-around; padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
-  background: var(--bar); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); border-top: .5px solid var(--sep); }
-.tabbar a { flex: 1; max-width: 110px; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 0; color: var(--muted); font-size: 10px; font-weight: 500; }
-.tabbar a span { font-size: 22px; line-height: 1.1; filter: grayscale(1); opacity: .75; }
-.tabbar a:active, .tabbar a:hover { color: var(--blue); } .tabbar a:active span, .tabbar a:hover span { filter: none; opacity: 1; }
+/* Navigation oben, bleibt beim Scrollen sichtbar */
+.tabbar { position: sticky; top: 0; z-index: 10; margin-top: 10px; background: var(--bar); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); border-bottom: .5px solid var(--sep); }
+.tabs { display: flex; gap: 6px; max-width: 760px; margin: 0 auto; padding: 8px 12px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.tabs::-webkit-scrollbar { display: none; }
+.tabbar a { flex: none; display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 76px; padding: 8px 10px; border-radius: 14px; color: var(--muted); font-size: 13px; font-weight: 600; }
+.tabbar a span { font-size: 26px; line-height: 1.1; }
+.tabbar a:hover { background: var(--fill); color: var(--label); }
+.tabbar a[aria-current="true"] { background: color-mix(in srgb, var(--blue) 14%, transparent); color: var(--blue); }
 
 footer { padding-top: 26px; padding-bottom: 10px; color: var(--muted); font-size: 12px; }
 
