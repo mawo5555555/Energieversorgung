@@ -43,6 +43,66 @@ def fit_entnahme(hist, temp, basis=15.0):
     return {"a": a, "b": b, "r2": 1 - ss_res / ss_tot, "n": n}
 
 
+def ols(X, y):
+    """Kleinste Quadrate für wenige Merkmale (Spalte 0 ist die Konstante). Gibt Koeffizienten und R² zurück."""
+    k = len(X[0])
+    A = [[sum(r[i] * r[j] for r in X) for j in range(k)] for i in range(k)]
+    b = [sum(r[i] * yy for r, yy in zip(X, y)) for i in range(k)]
+    for i in range(k):
+        piv = max(range(i, k), key=lambda r: abs(A[r][i]))
+        A[i], A[piv] = A[piv], A[i]
+        b[i], b[piv] = b[piv], b[i]
+        d = A[i][i]
+        if abs(d) < 1e-12:
+            raise ValueError("Merkmale nicht unabhängig")
+        for j in range(i + 1, k):
+            fct = A[j][i] / d
+            for c in range(i, k):
+                A[j][c] -= fct * A[i][c]
+            b[j] -= fct * b[i]
+    coef = [0.0] * k
+    for i in range(k - 1, -1, -1):
+        coef[i] = (b[i] - sum(A[i][j] * coef[j] for j in range(i + 1, k))) / A[i][i]
+    my = sum(y) / len(y)
+    ss_tot = sum((yy - my) ** 2 for yy in y)
+    ss_res = sum((yy - sum(c * v for c, v in zip(coef, r))) ** 2 for r, yy in zip(X, y))
+    return coef, (1 - ss_res / ss_tot) if ss_tot else 0.0
+
+
+def verstromung_fit(gas_mwh, temp, wind, basis, eta):
+    """Gas-Stromerzeugung (GWh Strom/Tag) ~ Heizgradtage + Wind + Strahlung, Heizperiode Okt-Mär."""
+    X, y = [], []
+    for t, mwh in gas_mwh.items():
+        m = int(t[5:7])
+        if (m >= 10 or m <= 3) and t in temp and t in wind:
+            X.append([1.0, hdd(temp[t], basis), wind[t][0], wind[t][1]])
+            y.append(mwh / 1000.0)
+    if len(y) < 300:
+        raise ValueError("zu wenig Daten für die Verstromung")
+    coef, r2 = ols(X, y)
+    return {"a": coef[0], "b_hdd": coef[1], "c_wind": coef[2], "d_rad": coef[3], "r2": r2, "n": len(y), "eta": eta}
+
+
+def gas_fuer_strom(fv, T, wind, rad, basis):
+    """Erdgas-Einsatz der Kraftwerke (GWh/Tag) aus Wetter."""
+    el = max(0.0, fv["a"] + fv["b_hdd"] * hdd(T, basis) + fv["c_wind"] * wind + fv["d_rad"] * rad)
+    return el / fv["eta"]
+
+
+def fit_entnahme_mit_strom(hist, temp, gas_mwh, eta, basis=15.0):
+    """Entnahme ~ Heizgradtage + Erdgas-Einsatz der Kraftwerke (beobachtet), Heizperiode, Füllstand 35-95 %."""
+    X, y = [], []
+    for t, r in hist.items():
+        m = int(t[5:7])
+        if (m >= 11 or m <= 3) and 35 <= r["full"] <= 95 and t in temp and t in gas_mwh:
+            X.append([1.0, hdd(temp[t], basis), gas_mwh[t] / 1000.0 / eta])
+            y.append(r["w"])
+    if len(y) < 100:
+        raise ValueError("zu wenig Daten")
+    coef, r2 = ols(X, y)
+    return {"a": coef[0], "b": coef[1], "e": coef[2], "r2": r2, "n": len(y)}
+
+
 def cap_hoch(hist):
     w = sorted(r["w"] for r in hist.values() if r["full"] >= 30)
     return w[int(0.995 * (len(w) - 1))]
@@ -100,7 +160,7 @@ def winter_abweichungen(temp):
     return alle, min(mittel.values()) - alle, max(mittel.values()) - alle, mittel
 
 
-def simuliere(start, stock, kap, i_tag, tmap, bis, fit, cap, basis=15.0, extra=0.0):
+def simuliere(start, stock, kap, i_tag, tmap, bis, fit, cap, basis=15.0, extra=0.0, extra_fn=None):
     """Tagesweise Simulation. tmap(datum) -> Temperatur. extra = zusätzlicher Entnahmebedarf je Tag (GWh), z. B. bei Importausfall.
 
     Fehlmenge = Bedarf, den die Speicher nicht liefern können (wegen Leistungsgrenze oder weil sie leer sind).
@@ -112,7 +172,7 @@ def simuliere(start, stock, kap, i_tag, tmap, bis, fit, cap, basis=15.0, extra=0
     d = start
     while d <= bis:
         f = stock / kap * 100
-        bedarf = max(0.0, fit["a"] + fit["b"] * hdd(tmap(d), basis)) + extra
+        bedarf = max(0.0, fit["a"] + fit["b"] * hdd(tmap(d), basis) + (extra_fn(d) if extra_fn else 0.0)) + extra
         c = cap(f)
         w = min(bedarf, c)
         if bedarf > c + 1e-9:
@@ -150,7 +210,7 @@ def wert_am(verlauf, tag):
     return None
 
 
-def rueckrechnung(hist, temp, fit, cap, basis=15.0):
+def rueckrechnung(hist, temp, fit, cap, basis=15.0, extra_fn=None):
     """Prüft das Modell an vergangenen Wintern: Start 12.11. mit tatsächlicher Lage, echte Temperaturen, Ergebnis am 1.2. und 31.3."""
     out = []
     for y in range(2018, 2026):
@@ -161,7 +221,7 @@ def rueckrechnung(hist, temp, fit, cap, basis=15.0):
         r = hist[t0]
         letzte = [hist[d2s(start - timedelta(days=k))]["i"] for k in range(1, 8) if d2s(start - timedelta(days=k)) in hist]
         i_tag = sum(letzte) / len(letzte) if letzte else 0.0
-        sim = simuliere(start, r["twh"], r["kap"], i_tag, lambda d: temp.get(d2s(d), 5.0), date(y + 1, 3, 31), fit, cap, basis)
+        sim = simuliere(start, r["twh"], r["kap"], i_tag, lambda d: temp.get(d2s(d), 5.0), date(y + 1, 3, 31), fit, cap, basis, 0.0, extra_fn)
         feb, mrz = d2s(date(y + 1, 2, 1)), d2s(date(y + 1, 3, 31))
         if feb in hist and mrz in hist:
             out.append({"winter": f"{y}/{str(y + 1)[2:]}", "start_prozent": round(r["full"], 1),
@@ -173,10 +233,10 @@ def rueckrechnung(hist, temp, fit, cap, basis=15.0):
     return out
 
 
-def mindest_einspeicherung(start, stock, kap, tmap, bis, fit, cap, basis, metrik, ziel, i_max=4000.0):
+def mindest_einspeicherung(start, stock, kap, tmap, bis, fit, cap, basis, metrik, ziel, i_max=4000.0, extra_fn=None):
     """Kleinste konstante Einspeicherung (GWh/Tag), bei der metrik(sim) >= ziel gilt. 0 = schon ohne Mehr erreicht, None = nicht erreichbar."""
     def ok(i):
-        return metrik(simuliere(start, stock, kap, i, tmap, bis, fit, cap, basis)) >= ziel
+        return metrik(simuliere(start, stock, kap, i, tmap, bis, fit, cap, basis, 0.0, extra_fn)) >= ziel
     if ok(0.0):
         return 0.0
     if not ok(i_max):
@@ -292,7 +352,7 @@ def umfeld_vorausschau(anlagen, nat_hist, nat_fit, temp, tmaps, start, bis, ziel
             "gesamt_gas_twh": round(sum(a["gas_twh"] for a in res), 2)}
 
 
-def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None):
+def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None, strom=None):
     """Hauptfunktion: Szenarien mild/normal/kalt, je mit konstanter und fallender Ausspeicherleistung."""
     basis = cfg.get("heizgrenze_c", 15)
     fit = fit_entnahme(hist, temp, basis)
@@ -322,13 +382,85 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None):
             return normal.get(s[5:], 5.0) + (offset if (fc_ende is None or s > fc_ende) else 0.0)
         return f
 
+    # Verstromung: Gaskraftwerke hängen von Kälte, Wind und Sonne ab
+    verstr = {"aktiv": False, "grund": "keine Daten"}
+    extra_fn_fuer = None
+    wp10 = None
+    try:
+        if strom and strom.get("gas_mwh") and strom.get("wind"):
+            eta = strom.get("eta", 0.5)
+            fv = verstromung_fit(strom["gas_mwh"], temp, strom["wind"], basis, eta)
+            fit2 = fit_entnahme_mit_strom(hist, temp, strom["gas_mwh"], eta, basis)
+            wclim = klima({t: v[0] for t, v in strom["wind"].items()}, heute.year - 1)
+            rclim = klima({t: v[1] for t, v in strom["wind"].items()}, heute.year - 1)
+            fcw, fcr = {}, {}
+            if wetter and wetter.get("wind"):
+                for t, w_, r_ in zip(wetter["tage"], wetter["wind"], wetter.get("strahlung") or [None] * len(wetter["tage"])):
+                    if w_ is not None and r_ is not None:
+                        fcw[t], fcr[t] = w_, r_
+            winter_w = sorted(v[0] for t, v in strom["wind"].items() if int(t[5:7]) >= 11 or int(t[5:7]) <= 3)
+            winter_r = sorted(v[1] for t, v in strom["wind"].items() if int(t[5:7]) >= 11 or int(t[5:7]) <= 3)
+            wp10 = winter_w[int(0.10 * (len(winter_w) - 1))]
+            rp25 = winter_r[int(0.25 * (len(winter_r) - 1))]
+            jahr_f = bis.year if bis.month >= 1 else bis.year
+
+            def wetter_tag(d):
+                sd = d2s(d)
+                if sd in fcw:
+                    return fcw[sd], fcr[sd]
+                return wclim.get(sd[5:], winter_w[len(winter_w) // 2]), rclim.get(sd[5:], winter_r[len(winter_r) // 2])
+
+            def extra_fn_fuer(tmap, flaute=False):
+                def fnc(d):
+                    w_, r_ = wetter_tag(d)
+                    if flaute and date(jahr_f, 1, 11) <= d <= date(jahr_f, 1, 24):
+                        w_, r_ = min(w_, wp10), min(r_, rp25)
+                    return fit2["e"] * gas_fuer_strom(fv, tmap(d), w_, r_, basis)
+                return fnc
+
+            nutzen = fit2["r2"] - fit["r2"]
+            winter_tage = [t for t in strom["gas_mwh"] if int(t[5:7]) >= 11 or int(t[5:7]) <= 3]
+            gw = sorted(strom["gas_mwh"][t] / 1000.0 / eta for t in winter_tage)
+            tg = sorted(strom["gas_mwh"])
+            mw14 = 0.0
+            for i in range(0, len(tg) - 14):
+                fen = tg[i:i + 14]
+                if all(int(t[5:7]) >= 11 or int(t[5:7]) <= 3 for t in fen):
+                    mw14 = max(mw14, sum(strom["gas_mwh"][t] for t in fen) / 14 / 1000.0 / eta)
+            w_win = [h_["w"] for t, h_ in hist.items() if (int(t[5:7]) >= 11 or int(t[5:7]) <= 3) and 35 <= h_["full"] <= 95]
+            anteil = fit2["e"] * (sum(gw) / len(gw)) / (sum(w_win) / len(w_win)) * 100 if w_win else None
+            aktiv = fit2["e"] > 0 and nutzen > 0.005 and fv["r2"] > 0.3
+            verstr = {"aktiv": aktiv, "grund": None if aktiv else "kein ausreichender Zusammenhang in den Daten",
+                      "wirkungsgrad": eta, "fit_strom": {"r2": round(fv["r2"], 2), "n": fv["n"], "wind_gwh_je_ms": round(fv["c_wind"], 2), "kaelte_gwh_je_grad": round(fv["b_hdd"], 2), "strahlung_gwh_je_mj": round(fv["d_rad"], 2)},
+                      "fit_entnahme": {"e": round(fit2["e"], 2), "r2_neu": round(fit2["r2"], 2), "r2_alt": round(fit["r2"], 2)},
+                      "winter": {"mittel_gwh_gas": round(sum(gw) / len(gw)), "p95_gwh_gas": round(gw[int(0.95 * (len(gw) - 1))]), "max14_gwh_gas": round(mw14)},
+                      "anteil_entnahme_prozent": round(anteil) if anteil is not None else None, "wind_p10_ms": round(wp10, 1)}
+            if strom.get("aktuell_mw"):
+                verstr["aktuell"] = {"gas_mw": strom["aktuell_mw"], "gas_gwh_tag": round(strom["aktuell_mw"] * 24 / 1000.0 / eta)}
+            vor = []
+            for k in range(0, 14):
+                dd = heute + timedelta(days=k)
+                w_, r_ = wetter_tag(dd)
+                tm_ = fcw.get(d2s(dd))
+                vor.append([d2s(dd), round(w_, 1), round(gas_fuer_strom(fv, (wetter["deutschland"][wetter["tage"].index(d2s(dd))] if wetter and d2s(dd) in wetter.get("tage", []) else 5.0), w_, r_, basis))])
+            verstr["vorschau"] = vor
+            if aktiv:
+                fit = {"a": fit2["a"], "b": fit2["b"], "r2": fit2["r2"], "n": fit2["n"]}
+            else:
+                extra_fn_fuer = None
+        else:
+            verstr = {"aktiv": False, "grund": (strom or {}).get("fehler") or "keine Daten"}
+    except Exception as e:  # noqa: BLE001
+        verstr = {"aktiv": False, "grund": f"{type(e).__name__}: {e}"[:200]}
+        extra_fn_fuer = None
+
     szen = {}
     tmaps = {}
     for name, off in (("mild", off_mild), ("normal", 0.0), ("kalt", off_kalt)):
         tmaps[name] = tmap_fuer(off)
         szen[name] = {"abweichung_c": round(off, 1)}
         for var in ("konstant", "faellt"):
-            sim = simuliere(start_tag + timedelta(days=1), r0["twh"], r0["kap"], i_tag, tmap_fuer(off), bis, fit, cap_fn(var, hoch, tief), basis)
+            sim = simuliere(start_tag + timedelta(days=1), r0["twh"], r0["kap"], i_tag, tmap_fuer(off), bis, fit, cap_fn(var, hoch, tief), basis, 0.0, extra_fn_fuer(tmap_fuer(off)) if extra_fn_fuer else None)
             ziel_tag = cfg["ziel"]["datum"]
             szen[name][var] = {"verlauf": sim["verlauf"][::2], "fuellstand_ziel_tag": wert_am(sim["verlauf"], ziel_tag),
                                "fuellstand_ende": sim["verlauf"][-1][1], "erreicht": sim["erreicht"],
@@ -346,7 +478,15 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None):
         d = date(y0, 11, 11) + timedelta(days=k)
         if d2s(d) in hist:
             vorjahr_verlauf.append([d2s(date(d.year + 1, d.month, d.day)), round(hist[d2s(d)]["full"], 1)])
-    rr = rueckrechnung(hist, temp, fit, cap_fn("konstant", hoch, tief), basis)
+    exr = None
+    if verstr.get("aktiv") and strom:
+        def exr(d):
+            sd = d2s(d)
+            w_ = strom["wind"].get(sd)
+            if not w_:
+                return 0.0
+            return fit2["e"] * gas_fuer_strom(fv, temp.get(sd, 5.0), w_[0], w_[1], basis)
+    rr = rueckrechnung(hist, temp, fit, cap_fn("konstant", hoch, tief), basis, exr)
     fehler = [abs(o["fehler_1_feb"]) for o in rr]
     # Empfindlichkeit: Was, wenn Importe teilweise wegfallen (zusätzlicher Entnahmebedarf je Tag)?
     start_sim = start_tag + timedelta(days=1)
@@ -361,10 +501,22 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None):
     if nor:
         faelle.append(("Norwegen fällt ganz aus", nor))
     empf = []
+    if verstr.get("aktiv") and extra_fn_fuer:
+        gn = extra_fn_fuer(tmaps["normal"], False)
+        gf = extra_fn_fuer(tmaps["normal"], True)
+        tage_fl = [date(bis.year, 1, 11) + timedelta(days=k) for k in range(14)]
+        extra_mittel = sum(gf(x) - gn(x) for x in tage_fl) / 14
+        verstr["flaute"] = {"zeitraum": "11. bis 24. Januar", "zusatz_gwh_tag": round(extra_mittel)}
+        eintrag_f = {"fall": "Windflaute und trübes Wetter, 14 Tage im Januar (Gaskraftwerke laufen mehr)", "gwh_tag": round(extra_mittel)}
+        for name in ("normal", "kalt"):
+            sim = simuliere(start_sim, r0["twh"], r0["kap"], i_tag, tmaps[name], bis, fit, cap_fn("faellt", hoch, tief), basis, 0.0, extra_fn_fuer(tmaps[name], True))
+            eintrag_f[name] = {"fuellstand_ziel_tag": wert_am(sim["verlauf"], ziel_tag), "fuellstand_ende": sim["verlauf"][-1][1], "erreicht": sim["erreicht"],
+                               "fehl_twh": sim["fehl_twh"], "fehl_tage": sim["fehl_tage"], "fehl_erster": sim["fehl_erster"], "fehl_spitze_gwh": sim["fehl_spitze_gwh"]}
+        empf.append(eintrag_f)
     for text, extra in faelle:
         eintrag = {"fall": text, "gwh_tag": round(extra)}
         for name in ("normal", "kalt"):
-            sim = simuliere(start_sim, r0["twh"], r0["kap"], i_tag, tmaps[name], bis, fit, cap_fn("faellt", hoch, tief), basis, extra)
+            sim = simuliere(start_sim, r0["twh"], r0["kap"], i_tag, tmaps[name], bis, fit, cap_fn("faellt", hoch, tief), basis, extra, extra_fn_fuer(tmaps[name]) if extra_fn_fuer else None)
             eintrag[name] = {"fuellstand_ziel_tag": wert_am(sim["verlauf"], ziel_tag), "fuellstand_ende": sim["verlauf"][-1][1], "erreicht": sim["erreicht"],
                              "fehl_twh": sim["fehl_twh"], "fehl_tage": sim["fehl_tage"], "fehl_erster": sim["fehl_erster"], "fehl_spitze_gwh": sim["fehl_spitze_gwh"]}
         empf.append(eintrag)
@@ -378,9 +530,9 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None):
     bedarf = {}
     for name in ("mild", "normal", "kalt"):
         cf = cap_fn("konstant", hoch, tief)
-        a1 = mindest_einspeicherung(start_sim, r0["twh"], r0["kap"], tmaps[name], bis, fit, cf, basis, lambda x: x["verlauf"][-1][1], mind_ende)
+        a1 = mindest_einspeicherung(start_sim, r0["twh"], r0["kap"], tmaps[name], bis, fit, cf, basis, lambda x: x["verlauf"][-1][1], mind_ende, 4000.0, extra_fn_fuer(tmaps[name]) if extra_fn_fuer else None)
         a2 = mindest_einspeicherung(start_sim, r0["twh"], r0["kap"], tmaps[name], bis, fit, cf, basis,
-                                    lambda x: wert_am(x["verlauf"], ziel_tag) if wert_am(x["verlauf"], ziel_tag) is not None else 0.0, ziel_p)
+                                    lambda x: wert_am(x["verlauf"], ziel_tag) if wert_am(x["verlauf"], ziel_tag) is not None else 0.0, ziel_p, 4000.0, extra_fn_fuer(tmaps[name]) if extra_fn_fuer else None)
         def paket(x):
             if x is None:
                 return {"noetig_gwh": None}
@@ -402,7 +554,7 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None):
         "szenarien": szen,
         "vorjahre": vor, "vorjahr_verlauf": vorjahr_verlauf,
         "rueckrechnung": rr, "rueckrechnung_mittlerer_fehler_pp": round(sum(fehler) / len(fehler), 1) if fehler else None,
-        "ziel": cfg["ziel"], "einspeicherung": einsp, "importausfall": empf, "importe_ref": {"pipeline_netto": pn, "lng": lg, "norwegen": nor},
+        "ziel": cfg["ziel"], "einspeicherung": einsp, "importausfall": empf, "verstromung": verstr, "importe_ref": {"pipeline_netto": pn, "lng": lg, "norwegen": nor},
         "ohne_importe": {"jahresverbrauch_twh": cfg["jahresverbrauch_twh"], "quelle": cfg.get("jahresverbrauch_quelle"), "verbrauch_tag_twh": round(verbrauch_tag, 2),
                          "tage": round(r0["twh"] / verbrauch_tag)},
     }
