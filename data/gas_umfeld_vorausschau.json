@@ -105,15 +105,15 @@
    "szenarien": {
     "mild": {
      "konstant": {
-      "fuellstand_ziel_tag": 71.7,
-      "fuellstand_ende": 66.6,
+      "fuellstand_ziel_tag": 70.3,
+      "fuellstand_ende": 64.5,
       "erreicht": {},
       "erster_engpass": null,
       "engpass_tage": 0
      },
      "faellt": {
-      "fuellstand_ziel_tag": 71.7,
-      "fuellstand_ende": 66.6,
+      "fuellstand_ziel_tag": 70.3,
+      "fuellstand_ende": 64.5,
       "erreicht": {},
       "erster_engpass": null,
       "engpass_tage": 0
@@ -121,15 +121,15 @@
     },
     "normal": {
      "konstant": {
-      "fuellstand_ziel_tag": 66.7,
-      "fuellstand_ende": 58.5,
+      "fuellstand_ziel_tag": 65.4,
+      "fuellstand_ende": 56.2,
       "erreicht": {},
       "erster_engpass": null,
       "engpass_tage": 0
      },
      "faellt": {
-      "fuellstand_ziel_tag": 66.7,
-      "fuellstand_ende": 58.5,
+      "fuellstand_ziel_tag": 65.4,
+      "fuellstand_ende": 56.2,
       "erreicht": {},
       "erster_engpass": null,
       "engpass_tage": 0
@@ -137,15 +137,15 @@
     },
     "kalt": {
      "konstant": {
-      "fuellstand_ziel_tag": 63.2,
-      "fuellstand_ende": 52.3,
+      "fuellstand_ziel_tag": 61.9,
+      "fuellstand_ende": 50.0,
       "erreicht": {},
       "erster_engpass": null,
       "engpass_tage": 0
      },
      "faellt": {
-      "fuellstand_ziel_tag": 63.2,
-      "fuellstand_ende": 52.3,
+      "fuellstand_ziel_tag": 61.9,
+      "fuellstand_ende": 50.0,
       "erreicht": {},
       "erster_engpass": null,
       "engpass_tage": 0
@@ -162,22 +162,22 @@
    "kapazitaet_twh": 3.88,
    "ausspeicherleistung_gemeldet_gwh": 244,
    "hoechste_entnahme_gwh": 208,
-   "leistung_hoch_gwh": 128,
-   "leistung_tief_gwh": 128,
+   "leistung_hoch_gwh": 135,
+   "leistung_tief_gwh": 135,
    "einspeicherung_7t_gwh": 0.0,
    "hinweise": [],
    "szenarien": {
     "mild": {
      "konstant": {
-      "fuellstand_ziel_tag": 49.2,
-      "fuellstand_ende": 31.6,
+      "fuellstand_ziel_tag": 50.0,
+      "fuellstand_ende": 33.1,
       "erreicht": {},
       "erster_engpass": null,
       "engpass_tage": 0
      },
      "faellt": {
-      "fuellstand_ziel_tag": 49.2,
-      "fuellstand_ende": 31.6,
+      "fuellstand_ziel_tag": 50.0,
+      "fuellstand_ende": 33.1,
       "erreicht": {},
       "erster_engpass": null,
       "engpass_tage": 0
@@ -185,21 +185,21 @@
     },
     "normal": {
      "konstant": {
-      "fuellstand_ziel_tag": 41.9,
-      "fuellstand_ende": 18.0,
+      "fuellstand_ziel_tag": 42.6,
+      "fuellstand_ende": 19.3,
       "erreicht": {
-       "30": "2027-02-23",
-       "20": "2027-03-20"
+       "30": "2027-02-25",
+       "20": "2027-03-26"
       },
       "erster_engpass": null,
       "engpass_tage": 0
      },
      "faellt": {
-      "fuellstand_ziel_tag": 41.9,
-      "fuellstand_ende": 18.0,
+      "fuellstand_ziel_tag": 42.6,
+      "fuellstand_ende": 19.3,
       "erreicht": {
-       "30": "2027-02-23",
-       "20": "2027-03-20"
+       "30": "2027-02-25",
+       "20": "2027-03-26"
       },
       "erster_engpass": null,
       "engpass_tage": 0
@@ -207,23 +207,23 @@
     },
     "kalt": {
      "konstant": {
-      "fuellstand_ziel_tag": 36.7,
-      "fuellstand_ende": 8.4,
+      "fuellstand_ziel_tag": 37.3,
+      "fuellstand_ende": 9.5,
       "erreicht": {
-       "30": "2027-02-11",
-       "20": "2027-03-01",
-       "10": "2027-03-24"
+       "30": "2027-02-12",
+       "20": "2027-03-02",
+       "10": "2027-03-29"
       },
       "erster_engpass": null,
       "engpass_tage": 0
      },
      "faellt": {
-      "fuellstand_ziel_tag": 36.7,
-      "fuellstand_ende": 8.4,
+      "fuellstand_ziel_tag": 37.3,
+      "fuellstand_ende": 9.5,
       "erreicht": {
-       "30": "2027-02-11",
-       "20": "2027-03-01",
-       "10": "2027-03-24"
+       "30": "2027-02-12",
+       "20": "2027-03-02",
+       "10": "2027-03-29"
       },
       "erster_engpass": null,
       "engpass_tage": 0
@@ -482,7 +482,7 @@
      ],
      [
       "2026-12-23",
-      57.0
+      57.1
      ],
      [
       "2026-12-25",
@@ -775,7 +775,7 @@
      ],
      [
       "2026-12-23",
-      57.0
+      57.1
      ],
      [
       "2026-12-25",
@@ -1038,7 +1038,7 @@
      ],
      [
       "2026-12-07",
-      61.3
+      61.2
      ],
      [
       "2026-12-09",
@@ -1162,7 +1162,7 @@
      ],
      [
       "2027-02-07",
-      34.4
+      34.3
      ],
      [
       "2027-02-09",
@@ -1174,7 +1174,7 @@
      ],
      [
       "2027-02-13",
-      31.4
+      31.3
      ],
      [
       "2027-02-15",
@@ -1194,7 +1194,7 @@
      ],
      [
       "2027-02-23",
-      28.2
+      28.1
      ],
      [
       "2027-02-25",
@@ -1206,7 +1206,7 @@
      ],
      [
       "2027-03-01",
-      25.8
+      25.7
      ],
      [
       "2027-03-03",
@@ -1230,7 +1230,7 @@
      ],
      [
       "2027-03-13",
-      22.1
+      22.0
      ],
      [
       "2027-03-15",
@@ -1262,7 +1262,7 @@
      ],
      [
       "2027-03-29",
-      19.0
+      18.9
      ],
      [
       "2027-03-31",
@@ -1332,7 +1332,7 @@
      ],
      [
       "2026-12-07",
-      61.3
+      61.2
      ],
      [
       "2026-12-09",
@@ -1456,7 +1456,7 @@
      ],
      [
       "2027-02-07",
-      34.4
+      34.3
      ],
      [
       "2027-02-09",
@@ -1468,7 +1468,7 @@
      ],
      [
       "2027-02-13",
-      31.4
+      31.3
      ],
      [
       "2027-02-15",
@@ -1488,7 +1488,7 @@
      ],
      [
       "2027-02-23",
-      28.2
+      28.1
      ],
      [
       "2027-02-25",
@@ -1500,7 +1500,7 @@
      ],
      [
       "2027-03-01",
-      25.8
+      25.7
      ],
      [
       "2027-03-03",
@@ -1524,7 +1524,7 @@
      ],
      [
       "2027-03-13",
-      22.1
+      22.0
      ],
      [
       "2027-03-15",
@@ -1556,7 +1556,7 @@
      ],
      [
       "2027-03-29",
-      19.0
+      18.9
      ],
      [
       "2027-03-31",
@@ -1652,7 +1652,7 @@
      ],
      [
       "2026-12-19",
-      55.2
+      55.1
      ],
      [
       "2026-12-21",
@@ -1736,7 +1736,7 @@
      ],
      [
       "2027-01-30",
-      34.6
+      34.5
      ],
      [
       "2027-02-01",
@@ -1760,7 +1760,7 @@
      ],
      [
       "2027-02-11",
-      28.4
+      28.3
      ],
      [
       "2027-02-13",
@@ -1780,7 +1780,7 @@
      ],
      [
       "2027-02-21",
-      24.3
+      24.2
      ],
      [
       "2027-02-23",
@@ -1788,15 +1788,15 @@
      ],
      [
       "2027-02-25",
-      22.8
+      22.7
      ],
      [
       "2027-02-27",
-      21.9
+      21.8
      ],
      [
       "2027-03-01",
-      20.9
+      20.8
      ],
      [
       "2027-03-03",
@@ -1812,7 +1812,7 @@
      ],
      [
       "2027-03-09",
-      17.7
+      17.6
      ],
      [
       "2027-03-11",
@@ -1844,7 +1844,7 @@
      ],
      [
       "2027-03-25",
-      13.4
+      13.3
      ],
      [
       "2027-03-27",
@@ -1946,7 +1946,7 @@
      ],
      [
       "2026-12-19",
-      55.2
+      55.1
      ],
      [
       "2026-12-21",
@@ -2030,7 +2030,7 @@
      ],
      [
       "2027-01-30",
-      34.6
+      34.5
      ],
      [
       "2027-02-01",
@@ -2054,7 +2054,7 @@
      ],
      [
       "2027-02-11",
-      28.4
+      28.3
      ],
      [
       "2027-02-13",
@@ -2074,7 +2074,7 @@
      ],
      [
       "2027-02-21",
-      24.3
+      24.2
      ],
      [
       "2027-02-23",
@@ -2082,15 +2082,15 @@
      ],
      [
       "2027-02-25",
-      22.8
+      22.7
      ],
      [
       "2027-02-27",
-      21.9
+      21.8
      ],
      [
       "2027-03-01",
-      20.9
+      20.8
      ],
      [
       "2027-03-03",
@@ -2106,7 +2106,7 @@
      ],
      [
       "2027-03-09",
-      17.7
+      17.6
      ],
      [
       "2027-03-11",
@@ -2138,7 +2138,7 @@
      ],
      [
       "2027-03-25",
-      13.4
+      13.3
      ],
      [
       "2027-03-27",
@@ -2164,7 +2164,7 @@
  },
  "gesamt_kapazitaet_twh": 42.35,
  "gesamt_gas_twh": 29.52,
- "stand": "2026-11-12T11:28:08Z",
+ "stand": "2026-11-12T11:31:15Z",
  "quelle": "GIE AGSI+ (je Anlage seit 2018), Open-Meteo, eigene Berechnung",
  "ziel": {
   "prozent": 30,
