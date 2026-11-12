@@ -2,7 +2,8 @@ name: Daten abrufen
 
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: "17 * * * *"
+    - cron: "42 3 * * *"
   workflow_dispatch:
 
 permissions:

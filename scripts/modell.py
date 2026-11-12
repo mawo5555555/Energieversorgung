@@ -496,6 +496,7 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None, strom=None)
     basis = cfg.get("heizgrenze_c", 15)
     fit = fit_entnahme(hist, temp, basis)
     fit_alt_r2 = fit["r2"]
+    fit_einfach = dict(fit)
     hoch, tief = cap_hoch(hist), cap_tief(hist)
     if tief is not None:
         tief = min(tief, hoch)
@@ -640,6 +641,32 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None, strom=None)
         extra_fn_fuer = None
         modell2 = None
 
+    # Nachführung: Weicht die tatsächliche Entnahme der letzten 7 Tage vom Modell ab, wird die Abweichung auf die Vorschau übertragen (klingt über 4 Wochen ab)
+    nach_wert, nach_n = 0.0, 0
+    if extra_fn_fuer and verstr.get("aktiv") and modell2:
+        try:
+            tm0 = tmap_fuer(0.0)
+            fn0 = modell2["rest_fn"](tm0)
+            res_l = []
+            for k in range(0, 7):
+                dd = start_tag - timedelta(days=k)
+                sd = d2s(dd)
+                if sd in hist and sd in fc:
+                    pred = max(0.0, fit["a"] + fit["b"] * hdd(tm0(dd), basis) + fn0(dd))
+                    res_l.append(hist[sd]["w"] - pred)
+            if len(res_l) >= 4:
+                nach_wert, nach_n = sum(res_l) / len(res_l), len(res_l)
+        except Exception:  # noqa: BLE001
+            nach_wert, nach_n = 0.0, 0
+        _basis_fn = extra_fn_fuer
+
+        def extra_fn_fuer(tmap, flaute=False, _b=_basis_fn):  # noqa: F811
+            f0 = _b(tmap, flaute)
+            return lambda d: f0(d) + nach_wert * max(0.0, 1.0 - max(0, (d - heute).days) / 28.0)
+        if modell2:
+            _rest0 = modell2["rest_fn"]
+            modell2["rest_fn"] = lambda tmap, wfun=None, flaute=False: (lambda f1: (lambda d: f1(d) + nach_wert * max(0.0, 1.0 - max(0, (d - heute).days) / 28.0)))(_rest0(tmap, wfun, flaute))
+
     szen = {}
     tmaps = {}
     for name, off in (("mild", off_mild), ("normal", 0.0), ("kalt", off_kalt)):
@@ -652,6 +679,14 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None, strom=None)
                                "fuellstand_ende": sim["verlauf"][-1][1], "erreicht": sim["erreicht"],
                                "engpass_tage": sim["engpass_tage"], "ungedeckt_twh": sim["ungedeckt_twh"],
                                "fehl_twh": sim["fehl_twh"], "fehl_tage": sim["fehl_tage"], "fehl_erster": sim["fehl_erster"], "fehl_spitze_gwh": sim["fehl_spitze_gwh"]}
+    # Einfaches Vergleichsmodell: nur Temperatur, ohne Zusatzfaktoren
+    einfach = {}
+    try:
+        for name in ("mild", "normal", "kalt"):
+            sim_e = simuliere(start_tag + timedelta(days=1), r0["twh"], r0["kap"], i_tag, tmaps[name], bis, fit_einfach, cap_fn("konstant", hoch, tief), basis)
+            einfach[name] = {"fuellstand_ziel_tag": wert_am(sim_e["verlauf"], cfg["ziel"]["datum"]), "fuellstand_ende": sim_e["verlauf"][-1][1], "unter20": sim_e["erreicht"].get(20), "leer": sim_e["erreicht"].get("leer")}
+    except Exception:  # noqa: BLE001
+        einfach = {}
     # Vorjahre tatsächlich
     vor = []
     for y in range(2018, heute.year):
@@ -839,6 +874,8 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None, strom=None)
             fakt.append({"name": "Gaspreis (Preiselastizität)", "status": "eingerechnet", "wirkung": f"Je +10 €/MWh im 30-Tage-Mittel {z(f2['ttf'] * 10)} GWh/Tag Entnahme. Der Preis wird auf dem heutigen Stand gehalten."})
         elif modell2.get("ttf_geprueft") is not None:
             fakt.append({"name": "Gaspreis (Preiselastizität)", "status": "geprüft, nicht eingerechnet", "wirkung": f"In den Daten seit 2018 ergibt sich ein unplausibler Zusammenhang (höherer Preis, mehr Entnahme: {z(modell2['ttf_geprueft'] * 10)} GWh/Tag je +10 €/MWh), das ist eine Scheinkorrelation mit den Krisenjahren. Ein dämpfender Preiseffekt auf den Verbrauch ist plausibel, aber aus diesen Daten nicht belegbar."})
+        if nach_n:
+            fakt.append({"name": "Nachführung an die letzten Tage", "status": "eingerechnet", "wirkung": f"Die tatsächliche Entnahme lag in den letzten {nach_n} Tagen im Mittel {z(nach_wert)} GWh/Tag {'über' if nach_wert >= 0 else 'unter'} der Modellrechnung. Diese Abweichung wird auf die Vorschau übertragen und klingt über 4 Wochen ab, damit Änderungen bei Importen oder Verhalten schneller durchschlagen."})
         fakt.append({"name": "Konjunktur und Heizverhalten", "status": "eingerechnet", "wirkung": "Jüngere Winter zählen stärker (Gewicht 0,7 je Jahr zurück), damit das sparsamere Verhalten nach 2022 stärker durchschlägt."})
     if analog and analog.get("winter"):
         fakt.append({"name": "Wetterläufe der Vorjahre", "status": "eingerechnet", "wirkung": f"Die Wetterabläufe von {analog['anzahl']} Wintern seit 2018 werden ab Ende der Vorhersage durchgerechnet. Füllstand am 1. Februar: {round(analog['ziel']['min'])} bis {round(analog['ziel']['max'])} %."})
@@ -851,7 +888,7 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None, strom=None)
         "szenarien": szen,
         "vorjahre": vor, "vorjahr_verlauf": vorjahr_verlauf,
         "rueckrechnung": rr, "rueckrechnung_mittlerer_fehler_pp": round(sum(fehler) / len(fehler), 1) if fehler else None,
-        "ziel": cfg["ziel"], "einspeicherung": einsp, "analog": analog, "faktoren_modell": fakt, "importausfall": empf, "sparen": sparen, "verstromung": verstr, "importe_ref": {"pipeline_netto": pn, "lng": lg, "norwegen": nor},
+        "ziel": cfg["ziel"], "einspeicherung": einsp, "analog": analog, "faktoren_modell": fakt, "einfaches_modell": einfach, "nachfuehrung": {"abweichung_gwh": round(nach_wert), "tage": nach_n}, "importausfall": empf, "sparen": sparen, "verstromung": verstr, "importe_ref": {"pipeline_netto": pn, "lng": lg, "norwegen": nor},
         "ohne_importe": {"jahresverbrauch_twh": cfg["jahresverbrauch_twh"], "quelle": cfg.get("jahresverbrauch_quelle"), "verbrauch_tag_twh": round(verbrauch_tag, 2),
                          "tage": round(r0["twh"] / verbrauch_tag)},
     }
