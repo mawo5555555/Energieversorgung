@@ -1,5 +1,5 @@
 {
- "stand": "2026-11-12T13:14:07Z",
+ "stand": "2026-11-12T13:18:06Z",
  "daten_stand_ms": 1794486600000,
  "erzeugung_mw": {
   "Braunkohle": 11760,
@@ -8,7 +8,7 @@
   "Kernenergie": 0,
   "Wind offshore": 6492,
   "Wind onshore": 14191,
-  "Photovoltaik": 8602,
+  "Photovoltaik": 8509,
   "Wasserkraft": 1174,
   "Sonstige Konventionelle": 2052,
   "Sonstige Erneuerbare": 91,

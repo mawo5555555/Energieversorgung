@@ -1,11 +1,11 @@
 {
- "stand": "2026-11-12T13:14:07Z",
+ "stand": "2026-11-12T13:18:06Z",
  "rhein": {
-  "pegel_cm": 40.0,
+  "pegel_cm": 41.0,
   "zustand": "low",
   "min_30t": 5.0,
   "max_30t": 61.0,
-  "zeit": "2026-11-12T14:00:00+01:00",
+  "zeit": "2026-11-12T14:15:00+01:00",
   "quelle": "Pegelonline (WSV), Pegel Kaub"
  },
  "industrie": {
