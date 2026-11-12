@@ -3,12 +3,12 @@
   {
    "tag": "2026-11-10",
    "fuellstand": 58.0,
-   "mild_feb": 24.9,
-   "normal_feb": 20.9,
-   "kalt_feb": 18.1,
-   "normal_ende": 2.4,
-   "normal_unter30": "2027-01-14",
-   "stand": "2026-11-12T11:36:36Z"
+   "mild_feb": 20.9,
+   "normal_feb": 16.2,
+   "kalt_feb": 12.8,
+   "normal_ende": 0.0,
+   "normal_unter30": "2027-01-09",
+   "stand": "2026-11-12T12:25:09Z"
   }
  ]
 }
