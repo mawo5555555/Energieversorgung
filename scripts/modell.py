@@ -69,6 +69,36 @@ def ols(X, y):
     return coef, (1 - ss_res / ss_tot) if ss_tot else 0.0
 
 
+def ols_se(X, y):
+    """Kleinste Quadrate mit Standardfehlern: (Koeffizienten, Standardfehler, R²)."""
+    k = len(X[0])
+    A = [[sum(r[i] * r[j] for r in X) for j in range(k)] for i in range(k)]
+    # Inverse per Gauß-Jordan
+    inv = [[1.0 if i == j else 0.0 for j in range(k)] for i in range(k)]
+    M = [row[:] + inv[i] for i, row in enumerate(A)]
+    for i in range(k):
+        piv = max(range(i, k), key=lambda r: abs(M[r][i]))
+        M[i], M[piv] = M[piv], M[i]
+        d = M[i][i]
+        if abs(d) < 1e-12:
+            raise ValueError("Merkmale nicht unabhängig")
+        M[i] = [v / d for v in M[i]]
+        for r in range(k):
+            if r != i:
+                f = M[r][i]
+                M[r] = [a_ - f * b_ for a_, b_ in zip(M[r], M[i])]
+    inv = [row[k:] for row in M]
+    b = [sum(r[i] * yy for r, yy in zip(X, y)) for i in range(k)]
+    coef = [sum(inv[i][j] * b[j] for j in range(k)) for i in range(k)]
+    res = [yy - sum(c * v for c, v in zip(coef, r)) for r, yy in zip(X, y)]
+    n = len(y)
+    sigma2 = sum(e * e for e in res) / max(1, n - k)
+    se = [(sigma2 * inv[i][i]) ** 0.5 for i in range(k)]
+    my = sum(y) / n
+    ss_tot = sum((yy - my) ** 2 for yy in y)
+    return coef, se, (1 - sum(e * e for e in res) / ss_tot) if ss_tot else 0.0
+
+
 def verstromung_fit(gas_mwh, temp, wind, basis, eta):
     """Gas-Stromerzeugung (GWh Strom/Tag) ~ Heizgradtage + Wind + Strahlung, Heizperiode Okt-Mär."""
     X, y = [], []
@@ -686,6 +716,19 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None, strom=None)
             eintrag_f[name] = {"fuellstand_ziel_tag": wert_am(sim["verlauf"], ziel_tag), "fuellstand_ende": sim["verlauf"][-1][1], "erreicht": sim["erreicht"],
                                "fehl_twh": sim["fehl_twh"], "fehl_tage": sim["fehl_tage"], "fehl_erster": sim["fehl_erster"], "fehl_spitze_gwh": sim["fehl_spitze_gwh"]}
         empf.append(eintrag_f)
+    if (import_ref or {}).get("kaelte_ausland_gwh"):
+        xk = float(import_ref["kaelte_ausland_gwh"])
+        eintrag_k = {"fall": "Kältewelle in den Nachbarländern, 14 Tage im Januar (weniger Importe)", "gwh_tag": round(xk), "schwach": not import_ref.get("kaelte_ausland_beleg", False)}
+        for name in ("normal", "kalt"):
+            basis_fn = extra_fn_fuer(tmaps[name]) if extra_fn_fuer else None
+
+            def ex_k(d, basis_fn=basis_fn):
+                z = basis_fn(d) if basis_fn else 0.0
+                return z + (xk if date(bis.year, 1, 11) <= d <= date(bis.year, 1, 24) else 0.0)
+            sim = simuliere(start_sim, r0["twh"], r0["kap"], i_tag, tmaps[name], bis, fit, cap_fn("faellt", hoch, tief), basis, 0.0, ex_k)
+            eintrag_k[name] = {"fuellstand_ziel_tag": wert_am(sim["verlauf"], ziel_tag), "fuellstand_ende": sim["verlauf"][-1][1], "erreicht": sim["erreicht"],
+                               "fehl_twh": sim["fehl_twh"], "fehl_tage": sim["fehl_tage"], "fehl_erster": sim["fehl_erster"], "fehl_spitze_gwh": sim["fehl_spitze_gwh"]}
+        empf.append(eintrag_k)
     for text, extra in faelle:
         eintrag = {"fall": text, "gwh_tag": round(extra)}
         for name in ("normal", "kalt"):
