@@ -1,0 +1,144 @@
+{
+ "stand": "2026-11-12T06:58:55Z",
+ "annahmen": "Reine Schätzung nur für die Gasspeicher, ohne Importe, LNG und Verbrauchsänderungen. Grundlage: mittlere Ein- und Ausspeicherung der letzten 7 Tage. Mit Wetter: Die Ausspeicherung folgt dem Heizbedarf (Heizgradtage, Basis 15 °C) der Temperaturvorhersage.",
+ "deutschland": {
+  "name": "Deutschland",
+  "inhalt_twh": 143.591,
+  "kapazitaet_twh": 247.356,
+  "fuellstand_prozent": 58.1,
+  "ausspeicherung_7t_gwh": 952.5,
+  "einspeicherung_7t_gwh": 61.8,
+  "netto_7t_gwh": 890.7,
+  "tage_aktuell": 161,
+  "projektion": [
+   [
+    "2026-11-12",
+    57.7
+   ],
+   [
+    "2026-11-13",
+    57.4
+   ],
+   [
+    "2026-11-14",
+    57.0
+   ],
+   [
+    "2026-11-15",
+    56.6
+   ],
+   [
+    "2026-11-16",
+    56.4
+   ],
+   [
+    "2026-11-17",
+    56.1
+   ],
+   [
+    "2026-11-18",
+    55.8
+   ],
+   [
+    "2026-11-19",
+    55.5
+   ],
+   [
+    "2026-11-20",
+    55.1
+   ],
+   [
+    "2026-11-21",
+    54.8
+   ],
+   [
+    "2026-11-22",
+    54.5
+   ],
+   [
+    "2026-11-23",
+    54.3
+   ],
+   [
+    "2026-11-24",
+    54.0
+   ],
+   [
+    "2026-11-25",
+    53.6
+   ]
+  ],
+  "tage_wetter": 148
+ },
+ "brandenburg": [
+  {
+   "name": "UGS Rüdersdorf H (EWE)",
+   "inhalt_twh": 0.91,
+   "kapazitaet_twh": 0.999,
+   "fuellstand_prozent": 91.1,
+   "ausspeicherung_7t_gwh": 3.0,
+   "einspeicherung_7t_gwh": 0.0,
+   "netto_7t_gwh": 3.0,
+   "tage_aktuell": 307,
+   "projektion": [
+    [
+     "2026-11-12",
+     90.8
+    ],
+    [
+     "2026-11-13",
+     90.6
+    ],
+    [
+     "2026-11-14",
+     90.3
+    ],
+    [
+     "2026-11-15",
+     90.1
+    ],
+    [
+     "2026-11-16",
+     89.9
+    ],
+    [
+     "2026-11-17",
+     89.7
+    ],
+    [
+     "2026-11-18",
+     89.5
+    ],
+    [
+     "2026-11-19",
+     89.3
+    ],
+    [
+     "2026-11-20",
+     89.0
+    ],
+    [
+     "2026-11-21",
+     88.8
+    ],
+    [
+     "2026-11-22",
+     88.6
+    ],
+    [
+     "2026-11-23",
+     88.4
+    ],
+    [
+     "2026-11-24",
+     88.2
+    ],
+    [
+     "2026-11-25",
+     87.9
+    ]
+   ],
+   "tage_wetter": 307
+  }
+ ]
+}
