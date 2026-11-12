@@ -349,6 +349,8 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None):
     rr = rueckrechnung(hist, temp, fit, cap_fn("konstant", hoch, tief), basis)
     fehler = [abs(o["fehler_1_feb"]) for o in rr]
     # Empfindlichkeit: Was, wenn Importe teilweise wegfallen (zusätzlicher Entnahmebedarf je Tag)?
+    start_sim = start_tag + timedelta(days=1)
+    ziel_tag = cfg["ziel"]["datum"]
     pn = (import_ref or {}).get("pipeline_netto") or 0
     lg = (import_ref or {}).get("lng") or 0
     nor = (import_ref or {}).get("norwegen") or 0
