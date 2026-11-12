@@ -126,14 +126,49 @@
     var nd = noData(d, "LNG-Tanks"); if (nd) return set("cLngTanks", nd);
     if (!d.terminals && !d.deutschland) return set("cLngTanks", errNote(d) + hint(d.hinweis || "Keine Daten."));
     var de = d.deutschland, h = errNote(d);
-    if (de && de.fuellstand_prozent != null) h += '<div class="gauge"><div>' + gauge(de.fuellstand_prozent, false, "Tankfüllstand LNG Deutschland") + '</div><div><div class="big">' + nf.format(de.fuellstand_prozent) + ' <span class="unit">%</span></div><div class="num">LNG-Tanks in Deutschland</div>' +
-      '<p class="meta" style="margin-top:4px">' + (de.inhalt_gwh != null ? nf0.format(de.inhalt_gwh) + " GWh gelagert" : "") + (de.ausspeisung_gwh != null ? " · Ausspeisung ins Netz " + nf0.format(de.ausspeisung_gwh) + " GWh/Tag" : "") + "</p></div></div>";
-    if (de && de.verlauf) h += spark(de.verlauf.map(function (p) { return [0, p[1]]; }), { label: "Tankfüllstand LNG, 10 Tage", minSpan: 5 });
-    h += (d.terminals || []).map(function (t) {
-      var col = t.fuellstand_prozent == null ? "var(--muted)" : t.fuellstand_prozent < 30 ? "var(--red)" : t.fuellstand_prozent < 60 ? "var(--orange)" : "var(--green)";
-      return '<div class="row"><span>' + esc(t.name) + '</span><div class="bar"><span style="width:' + Math.min(100, t.fuellstand_prozent || 0) + "%;background:" + col + '"></span></div><span class="val">' + (t.fuellstand_prozent == null ? "–" : nf.format(t.fuellstand_prozent) + " %") + "</span></div>";
+    if (de) h += '<div class="big">' + (de.inhalt_gwh != null ? nf0.format(de.inhalt_gwh) : "–") + ' <span class="unit">GWh in den Tanks</span></div><p class="meta" style="margin-top:4px">Ausspeisung ins Gasnetz ' + (de.ausspeisung_gwh != null ? nf0.format(de.ausspeisung_gwh) : "–") + " GWh/Tag (alle Terminals zusammen)</p>";
+    if (de && de.verlauf) { var vv = de.verlauf.filter(function (p) { return p[1] != null; }); if (vv.length > 1) h += spark(vv.map(function (p) { return [0, p[1]]; }), { label: "Tankfüllstand LNG, 10 Tage", minSpan: 5 }); }
+    var rows = (d.terminals || []).map(function (t) {
+      return "<tr><td>" + esc(t.name) + '<div class="meta" style="margin:0">' + esc(t.firma || "") + '</div></td><td class="n">' + (t.inhalt_gwh == null ? "–" : nf0.format(t.inhalt_gwh)) + '</td><td class="n">' + (t.ausspeisung_gwh == null ? "–" : nf0.format(t.ausspeisung_gwh)) + "</td></tr>";
     }).join("");
-    set("cLngTanks", h + '<p class="meta">Tankfüllstand der LNG-Terminals und Ausspeisung ins Gasnetz, letzter gemeldeter Gastag' + (de && de.gastag ? " " + esc(de.gastag) : "") + "</p>" + meta(d, esc(d.quelle || "")));
+    set("cLngTanks", h + (rows ? '<table><tr><th>Terminal (schwimmende LNG-Terminals)</th><th class="n">Tankinhalt GWh</th><th class="n">Ausspeisung GWh/Tag</th></tr>' + rows + "</table>" : "") +
+      '<p class="meta">Tankinhalt und Ausspeisung der LNG-Terminals, letzter gemeldeter Gastag' + (de && de.gastag ? " " + esc(de.gastag) : "") + ". Einen Prozent-Füllstand melden die Terminals nicht.</p>" + meta(d, esc(d.quelle || "")));
+  }
+
+  function renderVorausschau(d) {
+    var nd = noData(d, "Vorausschau"); if (nd) return set("cVorausschau", nd);
+    if (!d.szenarien) return set("cVorausschau", errNote(d) + hint(d.hinweis || "Keine Daten."));
+    var W = 340, H = 170, L = 28, T0 = 8, B = 22, pw = W - L - 8, ph = H - T0 - B;
+    var t0 = new Date("2026-11-10T12:00:00").getTime(), t1 = new Date(d.ziel.datum.slice(0, 4) === "2027" ? "2027-03-31T12:00:00" : "2027-03-31T12:00:00").getTime();
+    function X(s) { return L + (new Date(s + "T12:00:00").getTime() - t0) / (t1 - t0) * pw; }
+    function Y(v) { return T0 + (100 - v) / 100 * ph; }
+    var g = "";
+    [0, 25, 50, 75, 100].forEach(function (v) { g += '<line x1="' + L + '" x2="' + (W - 8) + '" y1="' + Y(v) + '" y2="' + Y(v) + '" stroke="var(--sep)" stroke-width="0.6"/><text x="' + (L - 4) + '" y="' + (Y(v) + 3) + '" text-anchor="end" font-size="8" fill="var(--muted)">' + v + "</text>"; });
+    [["2026-12-01", "Dez"], ["2027-01-01", "Jan"], ["2027-02-01", "Feb"], ["2027-03-01", "Mär"]].forEach(function (m) { g += '<line x1="' + X(m[0]) + '" x2="' + X(m[0]) + '" y1="' + T0 + '" y2="' + (T0 + ph) + '" stroke="var(--sep)" stroke-width="0.5"/><text x="' + (X(m[0]) + 2) + '" y="' + (H - 8) + '" font-size="8" fill="var(--muted)">' + m[1] + "</text>"; });
+    var zl = d.ziel;
+    g += '<line x1="' + L + '" x2="' + (W - 8) + '" y1="' + Y(zl.prozent) + '" y2="' + Y(zl.prozent) + '" stroke="var(--red)" stroke-width="0.8" stroke-dasharray="2 3"/><text x="' + (W - 10) + '" y="' + (Y(zl.prozent) - 3) + '" text-anchor="end" font-size="8" fill="var(--red)">Vorgabe ' + zl.prozent + " % am 1.2.</text>";
+    function line(v, col, w, dash) { return '<path d="' + v.map(function (p, i) { return (i ? "L" : "M") + X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1); }).join(" ") + '" fill="none" stroke="' + col + '" stroke-width="' + w + '" stroke-linejoin="round"' + (dash ? ' stroke-dasharray="3 2"' : "") + "/>"; }
+    if (d.vorjahr_verlauf && d.vorjahr_verlauf.length) g += line(d.vorjahr_verlauf, "var(--muted)", 1, false);
+    var farben = { mild: "var(--green)", normal: "var(--blue)", kalt: "var(--red)" }, namen = { mild: "Milder Winter", normal: "Normaler Winter", kalt: "Kalter Winter" };
+    ["mild", "normal", "kalt"].forEach(function (n) { g += line(d.szenarien[n].konstant.verlauf, farben[n], 1.8, false) + line(d.szenarien[n].faellt.verlauf, farben[n], 1.2, true); });
+    function dat(s) { return s ? new Date(s + "T12:00:00").toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" }) : "nicht erreicht"; }
+    var rows = ["mild", "normal", "kalt"].map(function (n) {
+      var s = d.szenarien[n], a = s.konstant, b = s.faellt;
+      return '<tr><td><span style="color:' + farben[n] + '">■</span> ' + namen[n] + '<div class="meta" style="margin:0">' + (n === "normal" ? "Klima wie im Mittel seit 2018" : (s.abweichung_c > 0 ? "+" : "") + nf.format(s.abweichung_c) + " °C zum Mittel") + '</div></td><td class="n"><strong>' + nf0.format(a.fuellstand_ziel_tag) + " %</strong><div class=\"meta\" style=\"margin:0\">mit Leistungsabfall " + nf0.format(b.fuellstand_ziel_tag) + ' %</div></td><td class="n">' + nf0.format(a.fuellstand_ende) + " %</td><td class=\"n\">" + dat(a.erreicht[30]) + "</td><td class=\"n\">" + (b.engpass_tage > 0 ? b.engpass_tage + " Tage" : "–") + "</td></tr>";
+    }).join("");
+    var al = d.ausgangslage, m = d.modell, rr = (d.rueckrechnung || []).map(function (o) { return "<tr><td>" + esc(o.winter) + '</td><td class="n">' + nf0.format(o.ist_1_feb) + ' %</td><td class="n">' + nf0.format(o.modell_1_feb) + ' %</td><td class="n">' + (o.fehler_1_feb > 0 ? "+" : "") + nf0.format(o.fehler_1_feb) + "</td></tr>"; }).join("");
+    var oi = d.ohne_importe;
+    set("cVorausschau", errNote(d) +
+      "<p style=\"margin:0 0 6px\">Ausgangslage " + esc(al.gastag) + ": <strong>" + nf.format(al.fuellstand_prozent) + " %</strong> (" + nf.format(al.gas_twh) + " TWh). Die Berechnung nutzt die Temperaturvorhersage bis " + esc(al.wetter_bis || "–") + ", danach das mittlere Klima seit 2018.</p>" +
+      '<svg viewBox="0 0 ' + W + " " + H + '" style="width:100%;height:auto" role="img" aria-label="Voraussichtlicher Füllstand Deutschland bis 31. März">' + g + "</svg>" +
+      '<p class="meta">Durchgezogen: Ausspeicherleistung bleibt auf dem höchsten beobachteten Niveau. Gestrichelt: Leistung sinkt bei niedrigem Füllstand (Annahme). Grau: tatsächlicher Verlauf im Vorjahr.</p>' +
+      '<table><tr><th>Szenario</th><th class="n">Füllstand 1. Feb.</th><th class="n">31. März</th><th class="n">unter 30 % ab</th><th class="n">Engpass</th></tr>' + rows + "</table>" +
+      '<p class="meta">Engpass: Tage, an denen der kältebedingte Entnahmebedarf die angenommene Ausspeicherleistung übersteigt. Dieses Gas müsste aus Importen oder anderen Quellen kommen.</p>' +
+      '<h3 style="margin-top:14px">Ohne Importe</h3><p style="margin:0">Müssten die Speicher den <strong>gesamten</strong> Verbrauch decken (Durchschnitt ' + nf0.format(oi.jahresverbrauch_twh) + " TWh im Jahr, " + nf2.format(oi.verbrauch_tag_twh) + " TWh am Tag), reichte der Vorrat rechnerisch <strong>" + oi.tage + " Tage</strong>. Das ist eine andere Frage als oben bei der Reichweite, dort geht es nur um den Anteil, den die Speicher heute tatsächlich liefern. Im Winter liegt der Verbrauch über dem Jahresdurchschnitt, die echte Reichweite wäre dann kürzer. Quelle der Jahreszahl: " + esc(oi.quelle || "") + ".</p>" +
+      '<h3 style="margin-top:14px">Wie gut ist das Modell?</h3><p class="meta" style="margin-top:0">Entnahme ≈ ' + nf0.format(m.a_gwh) + " + " + nf0.format(m.b_gwh_je_grad) + " GWh je Grad unter " + m.heizgrenze_c + " °C (aus " + m.tage + " Wintertagen seit 2018, Bestimmtheit " + nf2.format(m.r2) + "). Höchste beobachtete Entnahme " + nf0.format(m.leistung_hoch_gwh) + " GWh/Tag, bei 10 bis 20 % Füllstand nur " + (m.leistung_tief_gwh != null ? nf0.format(m.leistung_tief_gwh) : "–") + " GWh/Tag.</p>" +
+      '<table><tr><th>Rückrechnung ab 12.11.</th><th class="n">tatsächlich 1.2.</th><th class="n">Modell</th><th class="n">Abweichung</th></tr>' + rr + "</table>" +
+      '<p class="meta">Mittlere Abweichung ' + (d.rueckrechnung_mittlerer_fehler_pp != null ? nf.format(d.rueckrechnung_mittlerer_fehler_pp) : "–") + " Prozentpunkte mit den echten Temperaturen der jeweiligen Winter. Die Rückrechnung nutzt dieselben Daten wie die Schätzung und ist deshalb zu optimistisch, und sie prüft nicht die Unsicherheit der Wettervorhersage.</p>" +
+      '<p class="hint">Das ist ein Rechenbeispiel, keine Prognose der Versorgungssicherheit. Annahmen: Einspeicherung bleibt wie im Mittel der letzten 7 Tage; Importe und Verbrauch reagieren nicht auf niedrige Füllstände. Wie stark die Ausspeicherleistung bei niedrigem Füllstand sinkt, lässt sich aus den Daten nicht sicher bestimmen: Die gemeldete technische Leistung bleibt über alle Füllstände gleich, beobachtet wurden unter 20 % Füllstand nur wenige Tage. Die gestrichelte Variante ist deshalb eine Annahme. Die Szenarien Mild und Kalt entsprechen dem wärmsten und kältesten Winter seit 2018.</p>" + meta(d, esc(d.quelle || "")));
   }
 
   function renderUmfeld(d) {
@@ -266,12 +301,12 @@
   }
 
   function load() {
-    Promise.all(["meta.json", "gas_speicher.json", "gas_lng.json", "gas_pipeline.json", "strom.json", "frequenz.json", "kraftstoff.json", "rohoel.json", "reichweite.json", "gas_historie.json", "wetter.json", "gas_europa.json", "gas_anlagen.json", "gaspreis.json", "lng_tanks.json", "gas_umfeld.json"].map(get)).then(function (r) {
+    Promise.all(["meta.json", "gas_speicher.json", "gas_lng.json", "gas_pipeline.json", "strom.json", "frequenz.json", "kraftstoff.json", "rohoel.json", "reichweite.json", "gas_historie.json", "wetter.json", "gas_europa.json", "gas_anlagen.json", "gaspreis.json", "lng_tanks.json", "gas_umfeld.json", "gas_vorausschau.json"].map(get)).then(function (r) {
       document.getElementById("stand").textContent = r[0] && r[0].letzter_lauf ? "Letzter Datenabruf: " + when(r[0].letzter_lauf) : "Noch kein Datenabruf.";
       [function () { renderSpeicherDE(r[1]); }, function () { renderSpeicherBB(r[1]); },
         function () { renderLngEin(r[2]); }, function () { renderPipe(r[3]); },
         function () { renderPreis(r[4]); }, function () { renderMix(r[4]); }, function () { renderFreq(r[5]); }, function () { renderKraft(r[6]); },
-        function () { renderOel(r[7]); }, function () { renderReich(r[8]); }, function () { renderHist(r[9]); }, function () { renderWetter(r[10]); }, function () { renderEuropa(r[11]); }, function () { renderAnlagen(r[12]); }, function () { renderTtf(r[13]); }, function () { renderLngTanks(r[14]); }, function () { renderUmfeld(r[15]); }
+        function () { renderOel(r[7]); }, function () { renderReich(r[8]); }, function () { renderHist(r[9]); }, function () { renderWetter(r[10]); }, function () { renderEuropa(r[11]); }, function () { renderAnlagen(r[12]); }, function () { renderTtf(r[13]); }, function () { renderLngTanks(r[14]); }, function () { renderUmfeld(r[15]); }, function () { renderVorausschau(r[16]); }
       ].forEach(function (f) { try { f(); } catch (e) { if (window.console) console.error(e); } });
     });
   }

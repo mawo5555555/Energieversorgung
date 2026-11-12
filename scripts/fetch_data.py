@@ -18,6 +18,7 @@ import urllib.parse
 import urllib.request
 from datetime import datetime, timedelta, timezone
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 CFG = os.path.join(ROOT, "config")
@@ -628,45 +629,24 @@ def temp_historie():
     return tage
 
 
-def modell_diagnose():
+def gas_vorausschau():
     key = os.environ.get("GIE_API_KEY", "").strip()
     if not key:
-        return {"stand": stamp(), "hinweis": "Kein GIE-Schlüssel."}
+        return {"stand": stamp(), "hinweis": "Noch kein GIE-Schlüssel hinterlegt."}
+    old = read("gas_vorausschau.json", {})
+    try:
+        alt = datetime.strptime(old["stand"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+        if NOW - alt < timedelta(hours=5) and old.get("szenarien") and not old.get("fehler"):
+            return None  # aufwendig (Historie seit 2018), deshalb nur alle paar Stunden
+    except (KeyError, ValueError):
+        pass
+    import modell
     hist = agsi_de_historie(key)
     temp = temp_historie()
-    tage = sorted(hist)
-    # Zusammenhang Entnahme ~ Heizgradtage (Heizperiode, Füllstand 35-95 %)
-    xs, ys = [], []
-    for t in tage:
-        m = int(t[5:7])
-        if (m >= 11 or m <= 3) and 35 <= hist[t]["full"] <= 95 and t in temp:
-            xs.append(max(0.0, 15.0 - temp[t]))
-            ys.append(hist[t]["w"])
-    n = len(xs)
-    mx, my = sum(xs) / n, sum(ys) / n
-    sxx = sum((x - mx) ** 2 for x in xs)
-    b = sum((x - mx) * (y - my) for x, y in zip(xs, ys)) / sxx
-    a = my - b * mx
-    ss_res = sum((y - (a + b * x)) ** 2 for x, y in zip(xs, ys))
-    ss_tot = sum((y - my) ** 2 for y in ys)
-    # Bins nach Füllstand: gemeldete Leistung und beobachtete Entnahmen (Okt-Mär)
-    bins = []
-    for lo in range(0, 100, 10):
-        w, wc = [], []
-        for t in tage:
-            m = int(t[5:7])
-            f = hist[t]["full"]
-            if lo <= f < lo + 10 and (m >= 10 or m <= 3):
-                w.append(hist[t]["w"])
-                if hist[t]["wcap"] > 0:
-                    wc.append(hist[t]["wcap"])
-        w.sort(); wc.sort()
-        q = lambda v, p: round(v[min(len(v) - 1, int(p * len(v)))], 1) if v else None
-        bins.append({"von": lo, "bis": lo + 10, "tage": len(w), "entnahme_median": q(w, .5), "entnahme_p95": q(w, .95), "entnahme_max": round(max(w), 1) if w else None,
-                     "gemeldete_leistung_median": q(wc, .5), "gemeldete_leistung_min": round(min(wc), 1) if wc else None})
-    return {"stand": stamp(), "tage_historie": len(tage), "erster_tag": tage[0], "letzter_tag": tage[-1], "temp_tage": len(temp),
-            "fit": {"a": round(a, 1), "b": round(b, 1), "r2": round(1 - ss_res / ss_tot, 3), "n": n}, "bins": bins,
-            "beispiel_leistung": [[t, hist[t]["full"], hist[t]["w"], hist[t]["wcap"]] for t in tage[::90]]}
+    res = modell.vorausschau(hist, temp, read("wetter.json", {}), read_cfg("modell.json"), max(hist))
+    res["stand"] = stamp()
+    res["quelle"] = "GIE AGSI+ (Speicherdaten seit 2018), Open-Meteo (Temperaturen), eigene Berechnung"
+    return res
 
 
 # ---------- Reichweite der Gasspeicher (Schätzung) ----------
@@ -748,7 +728,7 @@ def main():
         ("gas_lng.json", gas_lng), ("gas_speicher.json", gas_speicher), ("kraftstoff.json", kraftstoff), ("rohoel.json", rohoel),
         ("wetter.json", wetter), ("gas_historie.json", gas_historie), ("reichweite.json", reichweite),
         ("gas_europa.json", gas_europa), ("gas_anlagen.json", gas_anlagen),
-        ("gaspreis.json", gaspreis), ("lng_tanks.json", lng_tanks), ("gas_umfeld.json", gas_umfeld), ("modell_diagnose.json", modell_diagnose),
+        ("gaspreis.json", gaspreis), ("lng_tanks.json", lng_tanks), ("gas_umfeld.json", gas_umfeld), ("gas_vorausschau.json", gas_vorausschau),
     ]
     for name, fn in jobs:
         if nur and name.split(".")[0] not in nur:
