@@ -287,7 +287,7 @@
     function dat(s) { return s ? new Date(s + "T12:00:00").toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" }) : "–"; }
     var n = v.szenarien, nk = n.normal.konstant, nf_ = n.normal.faellt, kk = n.kalt.faellt;
     var ok = nk.fehl_twh === 0 && nf_.fehl_twh === 0;
-    var kopf = ok ? "Im normalen Winter ja" : "Im normalen Winter nicht ganz";
+    var kopf = ok ? (nk.fuellstand_ende < 10 ? "Im normalen Winter gerade noch" : "Im normalen Winter ja") : "Im normalen Winter nicht ganz";
     var namen = { mild: "Milder Winter", normal: "Normaler Winter", kalt: "Kalter Winter" }, farben = { mild: "var(--green)", normal: "var(--blue)", kalt: "var(--red)" };
     var rows = ["mild", "normal", "kalt"].map(function (k) {
       var a = n[k].konstant, b = n[k].faellt;
