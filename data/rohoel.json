@@ -1,4 +1,4 @@
 {
- "fehler": "URLError: <urlopen error [Errno 104] Connection reset by peer>",
- "fehler_stand": "2026-11-12T06:29:28Z"
+ "fehler": "ValueError: keine Kursdaten, Antwort: <!DOCTYPE html><html><head><meta charset=\"utf-8\"><meta name=\"robots\" content=\"no",
+ "fehler_stand": "2026-11-12T06:44:54Z"
 }
