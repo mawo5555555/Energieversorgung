@@ -112,7 +112,7 @@
       (txt ? '<p style="margin:8px 0 0">' + esc(txt) + "</p>" : "") + meta(d, esc(d.quelle || "")));
   }
 
-  var state = { scope: "bb", wetter: null };
+  var state = { scope: "de", wetter: null };
   function renderWetter(d) {
     state.wetter = d;
     var nd = noData(d, "Wetter"); if (nd) return set("cWetter", nd);
@@ -131,7 +131,7 @@
     state.scope = sc;
     document.body.classList.toggle("scope-bb", sc === "bb"); document.body.classList.toggle("scope-de", sc === "de");
     document.querySelectorAll(".seg button").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.ansicht === sc ? "true" : "false"); });
-    try { localStorage.setItem("energie.scope", sc); } catch (e) {}
+    try { localStorage.setItem("energie.ansicht", sc); } catch (e) {}
     if (state.wetter) renderWetter(state.wetter);
   }
 
@@ -205,8 +205,8 @@
     });
   }
   document.querySelectorAll(".seg button").forEach(function (b) { b.addEventListener("click", function () { applyScope(b.dataset.ansicht); }); });
-  var sc = "bb"; try { sc = localStorage.getItem("energie.scope") || "bb"; } catch (e) {}
-  applyScope(sc === "de" ? "de" : "bb");
+  var sc = "de"; try { sc = localStorage.getItem("energie.ansicht") || "de"; } catch (e) {}
+  applyScope(sc === "bb" ? "bb" : "de");
   var links = [].slice.call(document.querySelectorAll(".tabbar a"));
   function spy() {
     var y = window.scrollY + 130, cur = null;
