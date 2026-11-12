@@ -69,6 +69,36 @@ def ols(X, y):
     return coef, (1 - ss_res / ss_tot) if ss_tot else 0.0
 
 
+def ols_se(X, y):
+    """Kleinste Quadrate mit Standardfehlern: (Koeffizienten, Standardfehler, R²)."""
+    k = len(X[0])
+    A = [[sum(r[i] * r[j] for r in X) for j in range(k)] for i in range(k)]
+    # Inverse per Gauß-Jordan
+    inv = [[1.0 if i == j else 0.0 for j in range(k)] for i in range(k)]
+    M = [row[:] + inv[i] for i, row in enumerate(A)]
+    for i in range(k):
+        piv = max(range(i, k), key=lambda r: abs(M[r][i]))
+        M[i], M[piv] = M[piv], M[i]
+        d = M[i][i]
+        if abs(d) < 1e-12:
+            raise ValueError("Merkmale nicht unabhängig")
+        M[i] = [v / d for v in M[i]]
+        for r in range(k):
+            if r != i:
+                f = M[r][i]
+                M[r] = [a_ - f * b_ for a_, b_ in zip(M[r], M[i])]
+    inv = [row[k:] for row in M]
+    b = [sum(r[i] * yy for r, yy in zip(X, y)) for i in range(k)]
+    coef = [sum(inv[i][j] * b[j] for j in range(k)) for i in range(k)]
+    res = [yy - sum(c * v for c, v in zip(coef, r)) for r, yy in zip(X, y)]
+    n = len(y)
+    sigma2 = sum(e * e for e in res) / max(1, n - k)
+    se = [(sigma2 * inv[i][i]) ** 0.5 for i in range(k)]
+    my = sum(y) / n
+    ss_tot = sum((yy - my) ** 2 for yy in y)
+    return coef, se, (1 - sum(e * e for e in res) / ss_tot) if ss_tot else 0.0
+
+
 def verstromung_fit(gas_mwh, temp, wind, basis, eta):
     """Gas-Stromerzeugung (GWh Strom/Tag) ~ Heizgradtage + Wind + Strahlung, Heizperiode Okt-Mär."""
     X, y = [], []

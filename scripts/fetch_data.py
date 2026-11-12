@@ -879,6 +879,103 @@ def faktoren_extra():
     return out
 
 
+# ---------- Einfluss des Auslands: Importe und Wetter der Nachbarländer seit 2019 ----------
+NACHBARN = [("Frankreich", 48.85, 2.35), ("Polen", 52.23, 21.01), ("Niederlande", 52.37, 4.90), ("Österreich", 48.21, 16.37), ("Italien", 41.90, 12.50)]
+
+
+def nachbarn_temp_historie():
+    alt = read("nachbarn_temp_historie.json", {"tage": {}})
+    tage = alt.get("tage", {})
+    bis = (NOW - timedelta(days=7)).date()
+    start = (datetime.strptime(max(tage), "%Y-%m-%d").date() + timedelta(days=1)) if tage else datetime(2019, 1, 1).date()
+    while start <= bis:
+        ende = min(bis, start + timedelta(days=730))
+        q = urllib.parse.urlencode({"latitude": ",".join(str(o[1]) for o in NACHBARN), "longitude": ",".join(str(o[2]) for o in NACHBARN),
+                                    "start_date": start.isoformat(), "end_date": ende.isoformat(), "daily": "temperature_2m_mean", "timezone": "Europe/Berlin"})
+        d = get_json("https://archive-api.open-meteo.com/v1/archive?" + q, timeout=120)
+        if isinstance(d, dict):
+            d = [d]
+        for i, t in enumerate(d[0]["daily"]["time"]):
+            w = [x["daily"]["temperature_2m_mean"][i] for x in d if x["daily"]["temperature_2m_mean"][i] is not None]
+            if w:
+                tage[t] = round(sum(w) / len(w), 2)
+        start = ende + timedelta(days=1)
+    write("nachbarn_temp_historie.json", {"stand": stamp(), "quelle": "Open-Meteo Archiv (CC BY 4.0), Mittel aus Paris, Warschau, Amsterdam, Wien, Rom", "tage": tage})
+    return tage
+
+
+def entsog_jahre(punkte, ab=2019):
+    """Tageswerte (Physical Flow) je Punkt und Richtung seit dem Jahr ab, höchster Wert der Betreiber."""
+    best = {}
+    for y in range(ab, NOW.year + 1):
+        von = f"{y}-01-01"
+        bis = min(f"{y}-12-31", NOW.strftime("%Y-%m-%d"))
+        q = urllib.parse.urlencode({"indicator": "Physical Flow", "periodType": "day", "timezone": "CET", "from": von, "to": bis, "pointKey": ",".join(punkte), "limit": -1})
+        try:
+            rows = get_json("https://transparency.entsog.eu/api/v1/operationaldatas?" + q, timeout=240).get("operationaldatas", [])
+        except Exception:  # noqa: BLE001
+            continue
+        for r in rows:
+            try:
+                v = float(str(r.get("value")).replace(",", "."))
+            except (TypeError, ValueError):
+                continue
+            k = (r["pointKey"], r.get("directionKey"), r["periodFrom"][:10])
+            best[k] = max(best.get(k, 0), v)
+    return best
+
+
+def auslandseinfluss():
+    old = read("auslandseinfluss.json", {})
+    try:
+        alt = datetime.strptime(old["stand"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+        if NOW - alt < timedelta(hours=20) and old.get("koeff_nachbarn") is not None and not old.get("fehler"):
+            return None
+    except (KeyError, ValueError):
+        pass
+    import modell
+    cfg = read_cfg("gas-punkte.json")
+    gruppen = {**cfg["pipeline"], **{"LNG " + k: v for k, v in cfg["lng"].items()}}
+    alle = sorted({p for pts in gruppen.values() for p in pts})
+    best = entsog_jahre(alle)
+    tage = sorted({t for (_, _, t) in best})
+    pipe_g = list(cfg["pipeline"])
+    netto = {}
+    for t in tage:
+        ok = all(any((p, "entry", t) in best for p in cfg["pipeline"][g]) for g in ("Norwegen", "Niederlande", "Belgien"))
+        if not ok:
+            continue
+        n = 0.0
+        for g in pipe_g:
+            e = sum(best.get((p, "entry", t), 0) for p in cfg["pipeline"][g]) / 1e6
+            a = sum(best.get((p, "exit", t), 0) for p in cfg["pipeline"][g]) / 1e6
+            n += e - a
+        lng = sum(best.get((p, "entry", t), 0) for pts in cfg["lng"].values() for p in pts) / 1e6
+        netto[t] = n + lng
+    tempde = read("temp_historie.json", {}).get("tage", {})
+    nb = nachbarn_temp_historie()
+    X, y, zeilen = [], [], {}
+    for t, v in netto.items():
+        m = int(t[5:7])
+        if (m >= 11 or m <= 3) and t in tempde and t in nb:
+            hd_de, hd_nb = max(0.0, 15 - tempde[t]), max(0.0, 15 - nb[t])
+            X.append([1.0, hd_de, hd_nb])
+            y.append(v)
+            saison = int(t[:4]) if m >= 11 else int(t[:4]) - 1
+            zeilen.setdefault(saison, []).append((v, hd_de, hd_nb))
+    if len(y) < 200:
+        raise ValueError(f"zu wenig Tage ({len(y)})")
+    coef, se, r2 = modell.ols_se(X, y)
+    t_nb = coef[2] / se[2] if se[2] else 0.0
+    t_de = coef[1] / se[1] if se[1] else 0.0
+    tab = [{"winter": f"{s}/{str(s + 1)[2:]}", "netto_gwh": round(sum(z[0] for z in v) / len(v)), "hdd_de": round(sum(z[1] for z in v) / len(v), 1), "hdd_nachbarn": round(sum(z[2] for z in v) / len(v), 1), "tage": len(v)}
+           for s, v in sorted(zeilen.items()) if len(v) > 60]
+    return {"stand": stamp(), "quelle": "ENTSOG (Importe), Open-Meteo (Wetter)", "n": len(y), "r2": round(r2, 2),
+            "koeff_nachbarn": round(coef[2], 1), "t_nachbarn": round(t_nb, 1), "koeff_de": round(coef[1], 1), "t_de": round(t_de, 1),
+            "belegt": bool(coef[2] < 0 and t_nb < -2.0), "winter": tab,
+            "kaltwelle_delta_hdd": 5.0, "effekt_kaltwelle_gwh": round(coef[2] * 5.0, 0)}
+
+
 def preisanalyse(hist):
     """Zusammenhang zwischen TTF-Preis und Einspeicherung im Sommer (Apr-Okt) je Jahr, und wo der Preis jetzt im Verhältnis zur Historie steht."""
     preise = {}
@@ -1081,7 +1178,7 @@ def main():
         ("gas_lng.json", gas_lng), ("gas_speicher.json", gas_speicher), ("kraftstoff.json", kraftstoff), ("rohoel.json", rohoel),
         ("wetter.json", wetter), ("gas_historie.json", gas_historie), ("reichweite.json", reichweite),
         ("gas_europa.json", gas_europa), ("gas_anlagen.json", gas_anlagen),
-        ("gaspreis.json", gaspreis), ("lng_tanks.json", lng_tanks), ("gas_umfeld.json", gas_umfeld), ("gas_stoerungen.json", gas_stoerungen), ("faktoren_extra.json", faktoren_extra), ("gas_vorausschau.json", gas_vorausschau),
+        ("gaspreis.json", gaspreis), ("lng_tanks.json", lng_tanks), ("gas_umfeld.json", gas_umfeld), ("gas_stoerungen.json", gas_stoerungen), ("faktoren_extra.json", faktoren_extra), ("auslandseinfluss.json", auslandseinfluss), ("gas_vorausschau.json", gas_vorausschau),
     ]
     for name, fn in jobs:
         if nur and name.split(".")[0] not in nur:
