@@ -85,12 +85,30 @@
       '<p class="meta">Voraussichtlicher Füllstand in %, nächste ' + r.projektion.length + " Tage (bis " + esc(r.projektion[r.projektion.length - 1][0]) + "): " + nf.format(r.projektion[r.projektion.length - 1][1]) + " %</p>";
     return h;
   }
-  function renderReich(d) {
+  function winterBlock(v) {
+    function dat(x) { return new Date(x + "T12:00:00").toLocaleDateString("de-DE", { day: "numeric", month: "long" }); }
+    var n = v.szenarien, nm = n.normal.konstant, kt = n.kalt.konstant, kf = n.kalt.faellt, ml = n.mild.konstant;
+    function satz(x, name) {
+      if (x.erreicht.leer) return "leer ca. " + dat(x.erreicht.leer);
+      var s = "reichen bis Winterende (31. März), Rest ca. " + nf0.format(x.fuellstand_ende) + " %";
+      if (x.erreicht["10"]) s += ", unter 10 % ab " + dat(x.erreicht["10"]);
+      return s;
+    }
+    var kopf = nm.erreicht.leer ? "bis ca. " + dat(nm.erreicht.leer) : "bis Winterende";
+    var h = '<div class="big">' + kopf + '</div><p style="margin:6px 0 0">im <strong>normalen Winter</strong>' + (nm.erreicht.leer ? "" : ", dann sind sie fast leer (ca. " + nf0.format(nm.fuellstand_ende) + " % am 31. März)") + ".</p>" +
+      '<table style="margin-top:10px"><tr><th>Winter</th><th>Speicher</th></tr>' +
+      '<tr><td><span style="color:var(--green)">■</span> mild</td><td>' + satz(ml) + "</td></tr>" +
+      '<tr><td><span style="color:var(--blue)">■</span> normal</td><td>' + satz(nm) + "</td></tr>" +
+      '<tr><td><span style="color:var(--red)">■</span> kalt</td><td>' + satz(kt) + (kf.engpass_tage > 0 ? ". Bei sinkender Ausspeicherleistung ab ca. " + dat(kf.erreicht["30"] || kt.erreicht["30"]) + " unter 30 %, an " + kf.engpass_tage + " Tagen reicht die Leistung nicht für den Bedarf" : "") + "</td></tr></table>" +
+      '<p class="meta">Ausgangslage ' + nf.format(v.ausgangslage.fuellstand_prozent) + " % (" + nf.format(v.ausgangslage.gas_twh) + " TWh). Die Entnahme steigt mit der Kälte. Deshalb ist die Dauer deutlich kürzer als bei einer einfachen Rechnung mit der heutigen Entnahme. Typische Abweichung des Modells etwa " + nf0.format(v.rueckrechnung_mittlerer_fehler_pp || 8) + " Prozentpunkte. Verlauf, Szenarien und Annahmen: Kachel „Vorausschau bis Winterende“.</p>";
+    return h;
+  }
+  function renderReich(d, v) {
     var nd = noData(d, "Reichweite");
     if (nd) { set("cReichDE", nd); set("cReichBB", nd); return; }
     if (!d.deutschland && !d.brandenburg) { set("cReichDE", hint(d.hinweis || "Keine Daten.")); set("cReichBB", hint(d.hinweis || "Keine Daten.")); return; }
     var ann = '<p class="hint">' + esc(d.annahmen || "") + " Das ist eine Schätzung, keine Prognose der Versorgungssicherheit.</p>";
-    set("cReichDE", errNote(d) + reichBlock(d.deutschland) + ann + meta(d, ""));
+    set("cReichDE", errNote(d) + (v && v.szenarien ? winterBlock(v) : reichBlock(d.deutschland) + ann) + meta(d, ""));
     set("cReichBB", errNote(d) + ((d.brandenburg || []).length ? d.brandenburg.map(function (r) { return "<h3>" + esc(r.name) + "</h3>" + reichBlock(r); }).join("") : hint("Keine Brandenburger Speicherdaten.")) + ann + meta(d, ""));
   }
 
@@ -376,7 +394,7 @@
       [function () { renderSpeicherDE(r[1]); }, function () { renderSpeicherBB(r[1]); },
         function () { renderLngEin(r[2]); }, function () { renderPipe(r[3]); },
         function () { renderPreis(r[4]); }, function () { renderMix(r[4]); }, function () { renderFreq(r[5]); }, function () { renderKraft(r[6]); },
-        function () { renderOel(r[7]); }, function () { renderReich(r[8]); }, function () { renderHist(r[9]); }, function () { renderWetter(r[10]); }, function () { renderEuropa(r[11]); }, function () { renderAnlagen(r[12]); }, function () { renderTtf(r[13]); }, function () { renderLngTanks(r[14]); }, function () { renderUmfeld(r[15]); }, function () { renderVorausschau(r[16]); }, function () { renderEinsp(r[16]); }, function () { renderUmfeldVor(r[17], r[15]); }
+        function () { renderOel(r[7]); }, function () { renderReich(r[8], r[16]); }, function () { renderHist(r[9]); }, function () { renderWetter(r[10]); }, function () { renderEuropa(r[11]); }, function () { renderAnlagen(r[12]); }, function () { renderTtf(r[13]); }, function () { renderLngTanks(r[14]); }, function () { renderUmfeld(r[15]); }, function () { renderVorausschau(r[16]); }, function () { renderEinsp(r[16]); }, function () { renderUmfeldVor(r[17], r[15]); }
       ].forEach(function (f) { try { f(); } catch (e) { if (window.console) console.error(e); } });
     });
   }
