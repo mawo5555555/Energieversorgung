@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Energie">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="stylesheet" href="style.css?v=8">
+<link rel="stylesheet" href="style.css?v=13">
 </head>
 <body>
 <header>
@@ -41,14 +41,18 @@
     <h2>Gas</h2>
     <div class="grid">
       <article class="card wide" id="cSpeicherBB" data-scope="bb"><h3>Gasspeicher Brandenburg</h3><div class="body">…</div></article>
+      <article class="card wide" id="cUmfeld" data-scope="bb"><h3>Speicher im Umfeld und Ausspeicherleistung</h3><div class="body">…</div></article>
       <article class="card wide" id="cReichBB" data-scope="bb"><h3>Vorausschau: Wie lange reicht der Vorrat? (Schätzung)</h3><div class="body">…</div></article>
       <article class="card wide" id="cSpeicherDE" data-scope="de"><h3>Gasspeicher Deutschland</h3><div class="body">…</div></article>
       <article class="card wide" id="cReichDE" data-scope="de"><h3>Vorausschau: Wie lange reicht der Vorrat? (Schätzung)</h3><div class="body">…</div></article>
+      <article class="card wide full" id="cVorausschau" data-scope="de"><h3>Vorausschau bis Winterende: Szenarien</h3><div class="body">…</div></article>
       <article class="card wide full" id="cHist" data-scope="de"><h3>Füllstand im Jahresvergleich</h3><div class="body">…</div></article>
       <article class="card wide" id="cEuropa" data-scope="de"><h3>Füllstand im europäischen Vergleich</h3><div class="body">…</div></article>
       <article class="card wide" id="cAnlagen" data-scope="de"><h3>Die größten Gasspeicher in Deutschland</h3><div class="body">…</div></article>
-      <article class="card" id="cLng" data-scope="de"><h3>LNG-Terminals</h3><div class="body">…</div></article>
-      <article class="card" id="cPipe" data-scope="de"><h3>Pipeline-Importe</h3><div class="body">…</div></article>
+      <article class="card wide" id="cLngTanks" data-scope="de"><h3>LNG-Terminals: Tankfüllstand und Ausspeisung</h3><div class="body">…</div></article>
+      <article class="card wide" id="cTtf"><h3>Erdgaspreis (TTF)</h3><div class="body">…</div></article>
+      <article class="card" id="cLng" data-scope="de"><h3>LNG-Einspeisung ins Gasnetz</h3><div class="body">…</div></article>
+      <article class="card" id="cPipe" data-scope="de"><h3>Pipeline-Importe nach Herkunft</h3><div class="body">…</div></article>
     </div>
   </section>
 
@@ -79,18 +83,27 @@
     <h2>Rohöl</h2>
     <div class="grid"><article class="card wide" id="cOel"><h3>Brent</h3><div class="body">…</div></article></div>
   </section>
+  <section id="quellen">
+    <h2>Weiterführend</h2>
+    <div class="grid"><article class="card wide"><h3>Offizielle Lagebewertungen und Dashboards</h3><ul class="plain">
+      <li><a href="https://www.bundesnetzagentur.de/DE/Fachthemen/ElektrizitaetundGas/Versorgungssicherheit/aktuelle_gasversorgung/" rel="noopener">Bundesnetzagentur: Aktuelle Lage der Gasversorgung</a> (offizielle Einschätzung, Gasflüsse, Verbrauch, Füllstandsvorgabe)</li>
+      <li><a href="https://agsi.gie.eu" rel="noopener">GIE AGSI+: Gasspeicher in Europa</a> · <a href="https://alsi.gie.eu" rel="noopener">GIE ALSI: LNG-Terminals</a></li>
+      <li><a href="https://transparency.entsog.eu" rel="noopener">ENTSOG Transparency Platform</a> (Gasflüsse an allen Grenzpunkten)</li>
+      <li><a href="https://www.smard.de" rel="noopener">SMARD: Strommarktdaten der Bundesnetzagentur</a></li>
+    </ul><p class="meta">Diese Seite zeigt Rechenbeispiele und Schätzungen auf Basis offener Daten. Verbindlich sind die Bewertungen der Behörden.</p></article></div>
+  </section>
 </main>
 
 <footer>
   <p><strong>Quellen:</strong>
-    Gasspeicher und LNG: <a href="https://agsi.gie.eu" rel="noopener">Gas Infrastructure Europe (GIE), AGSI+</a> ·
+    Gasspeicher und LNG: <a href="https://agsi.gie.eu" rel="noopener">Gas Infrastructure Europe (GIE), AGSI+ und ALSI</a> ·
     Pipelines und LNG-Einspeisung: <a href="https://transparency.entsog.eu" rel="noopener">ENTSOG Transparency Platform</a> ·
     Strom: <a href="https://www.smard.de" rel="noopener">Bundesnetzagentur | SMARD.de</a> (CC BY 4.0) ·
     Netzfrequenz: netzfrequenz.info (inoffiziell) ·
     Kraftstoff: <a href="https://www.tankerkoenig.de" rel="noopener">Tankerkönig.de</a> (CC BY 4.0) ·
-    Rohöl: Yahoo Finance (verzögert) · Wetter: <a href="https://open-meteo.com" rel="noopener">Open-Meteo.com</a> (CC BY 4.0).</p>
+    Rohöl und Erdgaspreis: Yahoo Finance (verzögert) · Wetter: <a href="https://open-meteo.com" rel="noopener">Open-Meteo.com</a> (CC BY 4.0).</p>
   <p>Alle Angaben ohne Gewähr, keine Handels- oder Versorgungsempfehlung. Die Daten werden in festen Abständen abgeholt, der Stand steht an jeder Kachel.</p>
 </footer>
-<script src="app.js?v=8"></script>
+<script src="app.js?v=13"></script>
 </body>
 </html>

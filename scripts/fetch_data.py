@@ -18,6 +18,7 @@ import urllib.parse
 import urllib.request
 from datetime import datetime, timedelta, timezone
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 CFG = os.path.join(ROOT, "config")
@@ -63,7 +64,7 @@ def keep_on_error(name, fn):
         print("ok  ", name)
     except Exception as e:  # noqa: BLE001
         old = read(name, {})
-        old["fehler"] = f"{type(e).__name__}: {e}"[:300]
+        old["fehler"] = f"{type(e).__name__}: {e}"[:700]
         old["fehler_stand"] = stamp()
         write(name, old)
         print("FEHL", name, old["fehler"], file=sys.stderr)
@@ -127,44 +128,59 @@ def entsog_tage(punkte, tage=14):
         "from": von, "to": bis, "pointKey": ",".join(punkte), "limit": -1,
     })
     rows = get_json("https://transparency.entsog.eu/api/v1/operationaldatas?" + q, timeout=120).get("operationaldatas", [])
-    best = {}  # (Punkt, Tag) -> höchster Wert der Betreiber, nur Richtung entry
+    best = {}  # (Punkt, Richtung, Tag) -> höchster Wert der Betreiber
     for r in rows:
-        if r.get("directionKey") != "entry":
-            continue
         try:
             v = float(str(r.get("value")).replace(",", "."))
         except (TypeError, ValueError):
             continue
-        k = (r["pointKey"], r["periodFrom"][:10])
+        k = (r["pointKey"], r.get("directionKey"), r["periodFrom"][:10])
         best[k] = max(best.get(k, 0), v)
     return best
 
 
-def gruppen_summe(gruppen):
+def summe_gruppe(best, pts, richtung, tag):
+    w = [best[(p, richtung, tag)] for p in pts if (p, richtung, tag) in best]
+    return sum(w) / 1e6 if w else None  # kWh/d -> GWh/d
+
+
+def gruppen_auswertung(gruppen, mit_ausfuhr):
+    """Wählt den neuesten Tag, für den alle (zuletzt gemeldeten) Gruppen Daten haben, damit die Summe nicht Tage mischt."""
     alle = sorted({p for pts in gruppen.values() for p in pts})
     best = entsog_tage(alle)
-    tage = sorted({t for (_, t) in best})
-    out = {}
-    for name, pts in gruppen.items():
-        reihe = []
-        for t in tage:
-            werte = [best[(p, t)] for p in pts if (p, t) in best]
-            reihe.append([t, round(sum(werte) / 1e6, 1) if werte else None])  # kWh/d -> GWh/d
-        out[name] = reihe
-    return tage, out
+    tage = sorted({t for (_, _, t) in best})
+    ein = {g: {t: summe_gruppe(best, pts, "entry", t) for t in tage} for g, pts in gruppen.items()}
+    aus = {g: {t: summe_gruppe(best, pts, "exit", t) for t in tage} for g, pts in gruppen.items()}
+    letzte = tage[-7:]
+    aktiv = [g for g in gruppen if any(ein[g][t] is not None for t in letzte)]
+    vollstaendig = [t for t in tage if all(ein[g][t] is not None for g in aktiv)]
+    if not vollstaendig:
+        raise ValueError("kein Tag mit vollständigen Meldungen")
+    tag = vollstaendig[-1]
+    out, verlauf = [], []
+    for g in gruppen:
+        e, a = ein[g].get(tag), aus[g].get(tag)
+        out.append({"name": g, "einspeisung": round(e, 1) if e is not None else None,
+                    "ausfuhr": round(a or 0.0, 1) if (mit_ausfuhr and e is not None) else None,
+                    "netto": (round(e - ((a or 0) if mit_ausfuhr else 0), 1) or 0.0) if e is not None else None})
+    for t in vollstaendig[-10:]:
+        verlauf.append([t, round(sum(ein[g][t] - ((aus[g][t] or 0) if mit_ausfuhr else 0) for g in aktiv), 1)])
+    return tag, out, verlauf, [g for g in gruppen if g not in aktiv], tage[-1]
 
 
 def gas_pipeline():
     cfg = read_cfg("gas-punkte.json")
-    tage, out = gruppen_summe(cfg["pipeline"])
-    return {"stand": stamp(), "einheit": "GWh/Tag", "tage": tage, "gruppen": out,
-            "quelle": "ENTSOG Transparency Platform", "hinweis": cfg["hinweis"]}
+    tag, gr, verlauf, leer, neuester = gruppen_auswertung(cfg["pipeline"], True)
+    return {"stand": stamp(), "einheit": "GWh/Tag", "tag": tag, "neuester_tag_in_daten": neuester, "gruppen": gr,
+            "summe_einspeisung": round(sum(g["einspeisung"] or 0 for g in gr), 1), "summe_netto": round(sum(g["netto"] or 0 for g in gr), 1),
+            "verlauf": verlauf, "ohne_daten": leer, "quelle": "ENTSOG Transparency Platform", "hinweis": cfg["hinweis"]}
 
 
 def gas_lng():
     cfg = read_cfg("gas-punkte.json")
-    tage, out = gruppen_summe(cfg["lng"])
-    return {"stand": stamp(), "einheit": "GWh/Tag", "tage": tage, "terminals": out,
+    tag, gr, verlauf, leer, neuester = gruppen_auswertung(cfg["lng"], False)
+    return {"stand": stamp(), "einheit": "GWh/Tag", "tag": tag, "neuester_tag_in_daten": neuester, "terminals": gr,
+            "summe": round(sum(g["einspeisung"] or 0 for g in gr), 1), "verlauf": verlauf, "ohne_daten": leer,
             "quelle": "ENTSOG Transparency Platform (Einspeisung ins Netz)"}
 
 
@@ -174,6 +190,16 @@ def read_cfg(name):
 
 
 # ---------- Gasspeicher (GIE AGSI+) ----------
+def firma_von(eic):
+    """Firmen-EIC einer Anlage aus der AGSI+-Anlagenliste (bei mehreren Einträgen der aktuellste ohne Enddatum)."""
+    with open(os.path.join(DATA, "agsi_anlagen.json"), encoding="utf-8") as f:
+        liste = json.load(f)["roh"]
+    treffer = [(fa.get("operational_end_date") or "9999", c["eic"]) for c in liste if c.get("country") == "DE" for fa in c.get("facilities", []) if fa["eic"] == eic]
+    if not treffer:
+        raise ValueError("Anlage nicht in der Liste: " + eic)
+    return sorted(treffer)[-1][1]
+
+
 def fl(x):
     try:
         return float(x)
@@ -206,7 +232,7 @@ def gas_speicher():
     }
     # Brandenburger Speicher aus config/brandenburg-speicher.json
     for a in read_cfg("brandenburg-speicher.json").get("speicher", []):
-        url = f"https://agsi.gie.eu/api?country=DE&company={a['company']}&facility={a['eic']}&from={von}&size=60"
+        url = f"https://agsi.gie.eu/api?country=DE&company={firma_von(a['eic'])}&facility={a['eic']}&from={von}&size=60"
         d = get_json(url, h).get("data", [])
         d.sort(key=lambda r: r["gasDayStart"])
         if d:
@@ -301,6 +327,69 @@ def gas_anlagen():
     return {"stand": stamp(), "quelle": "GIE AGSI+ (agsi.gie.eu)", "anlagen": out, "ohne_daten": fehler}
 
 
+# ---------- Speicher im Umfeld Brandenburgs: Vorausschau mit Leistungsgrenze ----------
+def gas_umfeld():
+    key = os.environ.get("GIE_API_KEY", "").strip()
+    if not key:
+        return {"stand": stamp(), "hinweis": "Noch kein GIE-Schlüssel hinterlegt."}
+    h = {"x-key": key}
+    we = read("wetter.json", {})
+    temps, tage, idx = we.get("brandenburg"), we.get("tage", []), we.get("heute_index", 7)
+    anlagen, fehler = [], []
+    for a in read_cfg("brandenburg-speicher.json").get("umfeld", []):
+        try:
+            d = agsi_letzte(f"country=DE&company={firma_von(a['eic'])}&facility={a['eic']}", h, 20)
+            if not d:
+                fehler.append(a["name"])
+                continue
+            l = d[-1]
+            letzte = d[-7:]
+            w7 = sum(fl(r["withdrawal"]) for r in letzte) / len(letzte)
+            i7 = sum(fl(r["injection"]) for r in letzte) / len(letzte)
+            kap = fl(l["workingGasVolume"])
+            anlagen.append({"name": a["name"], "region": a.get("region", ""), "gastag": l["gasDayStart"], "fuellstand_prozent": fl(l["full"]),
+                            "gas_twh": fl(l["gasInStorage"]), "kapazitaet_twh": kap, "ausspeicherung_gwh": fl(l["withdrawal"]), "einspeicherung_gwh": fl(l["injection"]),
+                            "ausspeicherleistung_gwh": fl(l.get("withdrawalCapacity")), "einspeicherleistung_gwh": fl(l.get("injectionCapacity")),
+                            "ausspeicherung_7t_gwh": round(w7, 1), "einspeicherung_7t_gwh": round(i7, 1),
+                            "leistung_verlauf": [[r["gasDayStart"], fl(r.get("withdrawalCapacity")), fl(r["full"])] for r in d]})
+        except Exception as e:  # noqa: BLE001
+            fehler.append(f"{a['name']}: {str(e)[:60]}")
+    if not anlagen:
+        raise ValueError("keine Umfeld-Daten: " + "; ".join(fehler))
+    stock = sum(a["gas_twh"] for a in anlagen)
+    kap = sum(a["kapazitaet_twh"] for a in anlagen)
+    out = {"stand": stamp(), "quelle": "GIE AGSI+ (agsi.gie.eu)", "ohne_daten": fehler, "anlagen": anlagen,
+           "summe": {"gas_twh": round(stock, 2), "kapazitaet_twh": round(kap, 2), "fuellstand_prozent": round(stock / kap * 100, 1) if kap else None,
+                     "ausspeicherung_7t_gwh": round(sum(a["ausspeicherung_7t_gwh"] for a in anlagen), 1),
+                     "einspeicherung_7t_gwh": round(sum(a["einspeicherung_7t_gwh"] for a in anlagen), 1),
+                     "ausspeicherleistung_gwh": round(sum(a["ausspeicherleistung_gwh"] for a in anlagen), 1)}}
+    # Projektion: Ausspeicherung folgt dem Heizbedarf (Potsdam), gedeckelt durch die gemeldete Ausspeicherleistung je Anlage
+    if temps and temps[idx:]:
+        ref = [hdd(t) for t in temps[max(0, idx - 7):idx] if t is not None]
+        ref = sum(ref) / len(ref) if ref else None
+        ist = {a["name"]: a["gas_twh"] for a in anlagen}
+        pro, engpass = [], 0
+        for t in temps[idx:]:
+            hh = hdd(t)
+            faktor = (hh / ref) if (ref and ref > 0.5 and hh is not None) else 1.0
+            tag_netto = 0.0
+            gedeckelt = False
+            for a in anlagen:
+                wunsch = a["ausspeicherung_7t_gwh"] * faktor
+                gren = a["ausspeicherleistung_gwh"]
+                w = min(wunsch, gren) if gren > 0 else wunsch
+                if gren > 0 and wunsch > gren:
+                    gedeckelt = True
+                n = w - a["einspeicherung_7t_gwh"]
+                ist[a["name"]] = min(a["kapazitaet_twh"], max(0.0, ist[a["name"]] - n / 1000.0))
+                tag_netto += n
+            engpass += 1 if gedeckelt else 0
+            pro.append(round(sum(ist.values()) / kap * 100, 1) if kap else None)
+        out["projektion"] = [[tage[idx + k], v] for k, v in enumerate(pro)]
+        out["engpass_tage"] = engpass
+    return out
+
+
 # ---------- Kraftstoffpreise (Tankerkönig, Brandenburg) ----------
 def kraftstoff():
     key = os.environ.get("TANKERKOENIG_API_KEY", "").strip()
@@ -330,6 +419,81 @@ def kraftstoff():
 
 
 # ---------- Rohöl (Brent) ----------
+def yahoo_reihe(symbol, quelle, nachkomma=2):
+    d = get_json(f"https://query1.finance.yahoo.com/v8/finance/chart/{urllib.parse.quote(symbol)}?range=3mo&interval=1d", {"User-Agent": "Mozilla/5.0"}, 30)
+    res = d["chart"]["result"][0]
+    rows = [(datetime.fromtimestamp(t, timezone.utc).strftime("%Y-%m-%d"), c) for t, c in zip(res["timestamp"], res["indicators"]["quote"][0]["close"]) if c is not None]
+    if len(rows) < 2:
+        raise ValueError(f"keine Kursdaten ({symbol}): {json.dumps(d)[:240]}")
+    c, p = rows[-1][1], rows[-2][1]
+    return {"stand": stamp(), "datum": rows[-1][0], "preis": round(c, nachkomma), "aenderung_prozent": round((c - p) / p * 100, 2),
+            "verlauf": [[d_, round(v, nachkomma)] for d_, v in rows[-60:]], "quelle": quelle}
+
+
+def gaspreis():
+    return yahoo_reihe("TTF=F", "Yahoo Finance (TTF Erdgas-Future, Euro je MWh, verzögert)")
+
+
+# ---------- LNG-Terminals: Tankfüllstand und Ausspeisung (GIE ALSI) ----------
+def zahl(x):
+    try:
+        return float(x)
+    except (TypeError, ValueError):
+        return None
+
+
+def alsi_zeile(r, name, firma=""):
+    inv = r.get("inventory")
+    inv_gwh = zahl(inv.get("gwh")) if isinstance(inv, dict) else zahl(inv)
+    voll = zahl(r.get("full"))
+    if voll is None:
+        lng = zahl(inv.get("lng")) if isinstance(inv, dict) else None
+        dtmi = zahl(r.get("dtmi"))
+        voll = round(lng / dtmi * 100, 1) if lng is not None and dtmi else None
+    return {"name": name, "firma": firma, "gastag": r.get("gasDayStart"), "fuellstand_prozent": voll,
+            "inhalt_gwh": inv_gwh, "ausspeisung_gwh": zahl(r.get("sendOut")), "anlieferung_schiffe": zahl(r.get("dtmi"))}
+
+
+def lng_tanks():
+    key = os.environ.get("GIE_API_KEY", "").strip()
+    if not key:
+        return {"stand": stamp(), "hinweis": "Noch kein GIE-Schlüssel hinterlegt."}
+    h = {"x-key": key}
+    von = (NOW - timedelta(days=10)).strftime("%Y-%m-%d")
+
+    def letzte(query):
+        d = get_json(f"https://alsi.gie.eu/api?{query}&from={von}&size=30", h, 60).get("data", [])
+        d = [r for r in d if r.get("inventory") or r.get("sendOut") not in (None, "", "-") or r.get("full") not in (None, "", "-")]
+        d.sort(key=lambda r: r["gasDayStart"])
+        return d
+
+    lst = get_json("https://alsi.gie.eu/api/about?show=listing", h, 60)
+    # Struktur: Liste von Firmen mit Anlagen (wie bei AGSI+), je mit Länderkennung
+    firmen = lst if isinstance(lst, list) else next((v for v in lst.values() if isinstance(v, list)), [])
+    terminals, de_roh = [], None
+    d = letzte("country=DE")
+    if d:
+        de_roh = alsi_zeile(d[-1], "Deutschland gesamt")
+        de_roh["verlauf"] = [[r["gasDayStart"], alsi_zeile(r, "")["fuellstand_prozent"]] for r in d]
+    for c in firmen:
+        if c.get("country") != "DE":
+            continue
+        for f in c.get("facilities", []):
+            ende = f.get("operational_end_date")
+            if ende and ende < NOW.strftime("%Y-%m-%d"):
+                continue
+            try:
+                dd = letzte(f"country=DE&company={c['eic']}&facility={f['eic']}")
+                if dd:
+                    terminals.append(alsi_zeile(dd[-1], f["name"], c["name"].strip()))
+            except Exception:  # noqa: BLE001
+                pass
+    if not terminals and not de_roh:
+        roh = get_json(f"https://alsi.gie.eu/api?country=DE&from={von}&size=3", h, 60)
+        raise ValueError("keine LNG-Daten, Zeile: " + json.dumps((roh.get("data") or [None])[0])[:600] + " | Firmen: " + str(len(firmen)))
+    return {"stand": stamp(), "quelle": "GIE ALSI (alsi.gie.eu)", "deutschland": de_roh, "terminals": terminals}
+
+
 def rohoel_yahoo():
     d = get_json("https://query1.finance.yahoo.com/v8/finance/chart/BZ%3DF?range=3mo&interval=1d", {"User-Agent": "Mozilla/5.0"}, 30)
     res = d["chart"]["result"][0]
@@ -423,6 +587,68 @@ def gas_historie():
             "jahre": {str(y): sorted([t, v] for t, v in jahre[y].items()) for y in [*vorjahre, heute] if y in jahre}, "band": band}
 
 
+# ---------- Modell-Grundlagen: Historie der Speicher und Temperaturen ----------
+def agsi_de_historie(key, ab_jahr=2018):
+    rows, page = [], 1
+    while page <= 30:
+        d = get_json(f"https://agsi.gie.eu/api?country=DE&from={ab_jahr}-01-01&size=300&page={page}", {"x-key": key}, 90)
+        rows += d.get("data", [])
+        if page >= int(d.get("last_page", 1) or 1):
+            break
+        page += 1
+    out = {}
+    for r in rows:
+        try:
+            out[r["gasDayStart"]] = {"full": float(r["full"]), "w": fl(r["withdrawal"]), "i": fl(r["injection"]), "wcap": fl(r.get("withdrawalCapacity")),
+                                     "icap": fl(r.get("injectionCapacity")), "twh": fl(r["gasInStorage"]), "kap": fl(r["workingGasVolume"])}
+        except (KeyError, ValueError, TypeError):
+            continue
+    return out
+
+
+def temp_historie():
+    """Tagesmitteltemperatur Deutschland (Mittel aus 6 Großstädten), wächst bei jedem Lauf nur um die neuen Tage."""
+    old = read("temp_historie.json", {"tage": {}})
+    tage = old.get("tage", {})
+    bis = (NOW - timedelta(days=7)).date()
+    start = (datetime.strptime(max(tage), "%Y-%m-%d").date() + timedelta(days=1)) if tage else datetime(2018, 1, 1).date()
+    while start <= bis:
+        ende = min(bis, start + timedelta(days=730))
+        q = urllib.parse.urlencode({"latitude": ",".join(str(o[0]) for o in STAEDTE_DE), "longitude": ",".join(str(o[1]) for o in STAEDTE_DE),
+                                    "start_date": start.isoformat(), "end_date": ende.isoformat(), "daily": "temperature_2m_mean", "timezone": "Europe/Berlin"})
+        d = get_json("https://archive-api.open-meteo.com/v1/archive?" + q, timeout=120)
+        if isinstance(d, dict):
+            d = [d]
+        zeit = d[0]["daily"]["time"]
+        for i, t in enumerate(zeit):
+            w = [x["daily"]["temperature_2m_mean"][i] for x in d if x["daily"]["temperature_2m_mean"][i] is not None]
+            if w:
+                tage[t] = round(sum(w) / len(w), 2)
+        start = ende + timedelta(days=1)
+    write("temp_historie.json", {"stand": stamp(), "quelle": "Open-Meteo Archiv (CC BY 4.0), Mittel aus 6 Großstädten", "tage": tage})
+    return tage
+
+
+def gas_vorausschau():
+    key = os.environ.get("GIE_API_KEY", "").strip()
+    if not key:
+        return {"stand": stamp(), "hinweis": "Noch kein GIE-Schlüssel hinterlegt."}
+    old = read("gas_vorausschau.json", {})
+    try:
+        alt = datetime.strptime(old["stand"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+        if NOW - alt < timedelta(hours=5) and old.get("szenarien") and not old.get("fehler"):
+            return None  # aufwendig (Historie seit 2018), deshalb nur alle paar Stunden
+    except (KeyError, ValueError):
+        pass
+    import modell
+    hist = agsi_de_historie(key)
+    temp = temp_historie()
+    res = modell.vorausschau(hist, temp, read("wetter.json", {}), read_cfg("modell.json"), max(hist))
+    res["stand"] = stamp()
+    res["quelle"] = "GIE AGSI+ (Speicherdaten seit 2018), Open-Meteo (Temperaturen), eigene Berechnung"
+    return res
+
+
 # ---------- Reichweite der Gasspeicher (Schätzung) ----------
 def hdd(t):
     return max(0.0, 15.0 - t) if t is not None else None  # Heizgradtage, Basis 15 °C
@@ -443,7 +669,7 @@ def projektion(stock, kap, w7, i7, temps, idx):
     return pro
 
 
-def reichweite_fuer(name, fluss, stock, kap, temps, tage, idx):
+def reichweite_fuer(name, fluss, stock, kap, temps, tage, idx, ziel=None):
     if not fluss or not kap:
         return None
     letzte = fluss[-7:]
@@ -465,6 +691,17 @@ def reichweite_fuer(name, fluss, stock, kap, temps, tage, idx):
             if fall > 0.01:
                 leer = len(pro) + round(pro[-1] / fall)
     out["tage_wetter"] = leer
+    if ziel:
+        rest = stock - ziel["prozent"] / 100 * kap
+        heute = NOW.date()
+        stichtag = datetime.strptime(ziel["datum"], "%Y-%m-%d").date()
+        out["ziel"] = {"prozent": ziel["prozent"], "datum": ziel["datum"], "tage_bis_stichtag": (stichtag - heute).days}
+        if rest <= 0:
+            out["ziel"]["tage_bis_marke"] = 0
+        elif netto7 > 0.01:
+            tage_m = round(rest * 1000 / netto7)
+            out["ziel"]["tage_bis_marke"] = tage_m
+            out["ziel"]["marke_ca_datum"] = (heute + timedelta(days=tage_m)).isoformat()
     return out
 
 
@@ -476,7 +713,9 @@ def reichweite():
     de = sp["deutschland"]
     out = {"stand": stamp(), "annahmen": ("Reine Schätzung nur für die Gasspeicher, ohne Importe, LNG und Verbrauchsänderungen. Grundlage: mittlere Ein- und Ausspeicherung der letzten 7 Tage. "
                                            "Mit Wetter: Die Ausspeicherung folgt dem Heizbedarf (Heizgradtage, Basis 15 °C) der Temperaturvorhersage."),
-           "deutschland": reichweite_fuer("Deutschland", de.get("fluss"), de["gas_twh"], de["kapazitaet_twh"], we.get("deutschland"), tage, idx),
+           "deutschland": reichweite_fuer("Deutschland", de.get("fluss"), de["gas_twh"], de["kapazitaet_twh"], we.get("deutschland"), tage, idx,
+                                         {"prozent": 30, "datum": "2027-02-01"}),
+           "ziel_quelle": "Bundesnetzagentur, Seite „Aktuelle Lage der Gasversorgung“ (Füllstandsvorgabe 30 % zum 1. Februar 2027)",
            "brandenburg": [r for r in (reichweite_fuer(b["name"], b.get("fluss"), b["gas_twh"], b["kapazitaet_twh"], we.get("brandenburg"), tage, idx)
                                        for b in sp.get("brandenburg", [])) if r]}
     return out
@@ -489,6 +728,7 @@ def main():
         ("gas_lng.json", gas_lng), ("gas_speicher.json", gas_speicher), ("kraftstoff.json", kraftstoff), ("rohoel.json", rohoel),
         ("wetter.json", wetter), ("gas_historie.json", gas_historie), ("reichweite.json", reichweite),
         ("gas_europa.json", gas_europa), ("gas_anlagen.json", gas_anlagen),
+        ("gaspreis.json", gaspreis), ("lng_tanks.json", lng_tanks), ("gas_umfeld.json", gas_umfeld), ("gas_vorausschau.json", gas_vorausschau),
     ]
     for name, fn in jobs:
         if nur and name.split(".")[0] not in nur:

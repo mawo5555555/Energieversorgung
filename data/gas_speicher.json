@@ -1,5 +1,5 @@
 {
- "stand": "2026-11-12T07:20:12Z",
+ "stand": "2026-11-12T07:38:37Z",
  "quelle": "GIE AGSI+ (agsi.gie.eu)",
  "deutschland": {
   "gastag": "2026-11-10",
@@ -202,7 +202,7 @@
  "brandenburg": [
   {
    "eic": "21W000000000048W",
-   "name": "UGS Rüdersdorf H (EWE)",
+   "name": "Rüdersdorf H (EWE)",
    "gastag": "2026-11-10",
    "fuellstand_prozent": 91.11,
    "gas_twh": 0.9101,

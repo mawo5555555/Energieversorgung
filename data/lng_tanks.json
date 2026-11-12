@@ -1,0 +1,98 @@
+{
+ "stand": "2026-11-12T07:38:37Z",
+ "quelle": "GIE ALSI (alsi.gie.eu)",
+ "deutschland": {
+  "name": "Deutschland gesamt",
+  "firma": "",
+  "gastag": "2026-11-10",
+  "fuellstand_prozent": null,
+  "inhalt_gwh": 1708.26,
+  "ausspeisung_gwh": 312.1,
+  "anlieferung_schiffe": null,
+  "verlauf": [
+   [
+    "2026-11-02",
+    null
+   ],
+   [
+    "2026-11-03",
+    null
+   ],
+   [
+    "2026-11-04",
+    null
+   ],
+   [
+    "2026-11-05",
+    null
+   ],
+   [
+    "2026-11-06",
+    null
+   ],
+   [
+    "2026-11-07",
+    null
+   ],
+   [
+    "2026-11-08",
+    null
+   ],
+   [
+    "2026-11-09",
+    null
+   ],
+   [
+    "2026-11-10",
+    null
+   ]
+  ]
+ },
+ "terminals": [
+  {
+   "name": "Wilhelmshaven LNG Terminal 1 (FSRU Hoegh Esperanza)",
+   "firma": "Deutsche Energy Terminal GmbH",
+   "gastag": "2026-11-10",
+   "fuellstand_prozent": null,
+   "inhalt_gwh": 75.42,
+   "ausspeisung_gwh": 1.4,
+   "anlieferung_schiffe": null
+  },
+  {
+   "name": "Brunsbuettel LNG Terminal 1 (FSRU Hoegh Gannet)",
+   "firma": "Deutsche Energy Terminal GmbH",
+   "gastag": "2026-11-10",
+   "fuellstand_prozent": null,
+   "inhalt_gwh": 699.73,
+   "ausspeisung_gwh": 101.8,
+   "anlieferung_schiffe": null
+  },
+  {
+   "name": "Stade LNG Terminal 1 (FSRU Energos Force)",
+   "firma": "Deutsche Energy Terminal GmbH",
+   "gastag": "2026-11-10",
+   "fuellstand_prozent": null,
+   "inhalt_gwh": 636.39,
+   "ausspeisung_gwh": 135.0,
+   "anlieferung_schiffe": null
+  },
+  {
+   "name": "Wilhelmshaven LNG Terminal 2 (FSRU Excelerate Excelsior)",
+   "firma": "Deutsche Energy Terminal GmbH",
+   "gastag": "2026-11-10",
+   "fuellstand_prozent": null,
+   "inhalt_gwh": 86.46,
+   "ausspeisung_gwh": 72.1,
+   "anlieferung_schiffe": null
+  },
+  {
+   "name": "Mukran LNG Terminal (FSRU Neptune / FSRU Energos Power)",
+   "firma": "Deutsche ReGas GmbH & Co. KGaA",
+   "gastag": "2026-11-10",
+   "fuellstand_prozent": null,
+   "inhalt_gwh": 210.27,
+   "ausspeisung_gwh": 1.7,
+   "anlieferung_schiffe": null
+  }
+ ]
+}
