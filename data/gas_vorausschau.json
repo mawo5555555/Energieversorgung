@@ -3381,6 +3381,11 @@
    "wirkung": "Je +10 €/MWh Börsenstrompreis etwa -1 GWh Gas für Strom. Der Preis wird auf dem Stand der letzten 14 Tage gehalten."
   },
   {
+   "name": "Gaspreis (Preiselastizität)",
+   "status": "geprüft, nicht eingerechnet",
+   "wirkung": "In den Daten seit 2018 ergibt sich ein unplausibler Zusammenhang (höherer Preis, mehr Entnahme: +25 GWh/Tag je +10 €/MWh), das ist eine Scheinkorrelation mit den Krisenjahren. Ein dämpfender Preiseffekt auf den Verbrauch ist plausibel, aber aus diesen Daten nicht belegbar."
+  },
+  {
    "name": "Konjunktur und Heizverhalten",
    "status": "eingerechnet",
    "wirkung": "Jüngere Winter zählen stärker (Gewicht 0,7 je Jahr zurück), damit das sparsamere Verhalten nach 2022 stärker durchschlägt."
@@ -3783,7 +3788,7 @@
   "verbrauch_tag_twh": 2.48,
   "tage": 58
  },
- "stand": "2026-11-12T13:03:16Z",
+ "stand": "2026-11-12T13:07:20Z",
  "modell_version": 5,
  "quelle": "GIE AGSI+ (Speicherdaten seit 2018), Open-Meteo (Temperaturen), eigene Berechnung"
 }
