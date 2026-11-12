@@ -1,7 +1,35 @@
 {
- "stand": "2026-11-12T13:30:28Z",
- "hinweis": "Noch kein Tankerkönig-Schlüssel hinterlegt (Secret TANKERKOENIG_API_KEY).",
- "preise": null,
- "fehler": "ValueError: Key existiert nicht oder ist deaktiviert",
- "fehler_stand": "2026-11-12T17:10:44Z"
+ "stand": "2026-11-12T17:41:12Z",
+ "preise": {
+  "diesel": {
+   "min": 2.019,
+   "median": 2.139,
+   "max": 2.919,
+   "anzahl": 326
+  },
+  "e5": {
+   "min": 1.859,
+   "median": 1.949,
+   "max": 2.819,
+   "anzahl": 320
+  },
+  "e10": {
+   "min": 1.799,
+   "median": 1.899,
+   "max": 2.729,
+   "anzahl": 314
+  }
+ },
+ "stationen": 332,
+ "verlauf": [
+  [
+   1794441600,
+   {
+    "diesel": 2.139,
+    "e5": 1.949,
+    "e10": 1.899
+   }
+  ]
+ ],
+ "quelle": "Tankerkönig.de (Markttransparenzstelle für Kraftstoffe), CC BY 4.0"
 }
