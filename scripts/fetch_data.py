@@ -940,7 +940,7 @@ def gas_vorausschau():
     old = read("gas_vorausschau.json", {})
     try:
         alt = datetime.strptime(old["stand"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
-        if NOW - alt < timedelta(hours=5) and old.get("szenarien") and old.get("einspeicherung") and old.get("importausfall") and "abweichung_letzte_tage_gwh" in (old.get("verstromung") or {}) and old.get("faktoren_modell") is not None and read("gas_preisanalyse.json", {}).get("jahre") and read("gas_umfeld_vorausschau.json", {}).get("anlagen") and not old.get("fehler"):
+        if NOW - alt < timedelta(hours=5) and old.get("szenarien") and old.get("einspeicherung") and old.get("importausfall") and "abweichung_letzte_tage_gwh" in (old.get("verstromung") or {}) and old.get("modell_version") == 3 and read("gas_preisanalyse.json", {}).get("jahre") and read("gas_umfeld_vorausschau.json", {}).get("anlagen") and not old.get("fehler"):
             return None  # aufwendig (Historie seit 2018), deshalb nur alle paar Stunden
     except (KeyError, ValueError):
         pass
@@ -965,6 +965,7 @@ def gas_vorausschau():
                                   {"pipeline_netto": pipe.get("summe_netto"), "lng": lng.get("summe"),
                                    "norwegen": next((g["netto"] for g in pipe.get("gruppen", []) if g.get("name") == "Norwegen"), None)}, strom_daten)
     res["stand"] = stamp()
+    res["modell_version"] = 3
     # Verlauf der Prognose festhalten, damit sichtbar wird, wie sie sich mit dem tatsächlichen Verlauf ändert
     try:
         pv = read("prognose_verlauf.json", {"eintraege": []}).get("eintraege", [])
