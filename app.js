@@ -16,7 +16,7 @@
   }
   function set(id, html) { document.querySelector("#" + id + " .body").innerHTML = html; }
   function hint(t, bad) { return '<p class="hint' + (bad ? " err" : "") + '">' + esc(t) + "</p>"; }
-  function errNote(d) { return d && d.fehler ? hint("Letzter Abruf fehlgeschlagen (" + when(d.fehler_stand) + "): " + d.fehler, true) : ""; }
+  function errNote(d) { return d && d.fehler ? hint("Letzter Abruf fehlgeschlagen (" + when(d.fehler_stand) + "): " + String(d.fehler).slice(0, 140), true) : ""; }
   function meta(d, extra) { return '<p class="meta">' + (d && d.stand ? "Stand " + when(d.stand) : "") + (extra ? " · " + extra : "") + "</p>"; }
   function noData(d, what) { return !d || (!d.stand && !d.fehler) ? hint(what + ": noch keine Daten vorhanden.") : null; }
 
@@ -46,23 +46,93 @@
   }
   function lastVal(series) { for (var i = series.length - 1; i >= 0; i--) if (series[i][1] != null) return series[i]; return null; }
 
-  function renderSpeicher(d) {
-    var nd = noData(d, "Gasspeicher"); if (nd) return set("cSpeicher", nd);
+  function renderSpeicherDE(d) {
+    var nd = noData(d, "Gasspeicher"); if (nd) return set("cSpeicherDE", nd);
     var h = errNote(d), de = d.deutschland;
     if (!de) h += hint(d.hinweis || "Keine Speicherdaten.");
-    else {
-      h += '<div class="gauge"><div style="position:relative">' + gauge(de.fuellstand_prozent, false, "Füllstand Deutschland") + "</div><div><div class=\"big\">" + nf.format(de.fuellstand_prozent) + ' <span class="unit">%</span></div>' +
-        '<div class="num">Deutschland gesamt</div><p class="meta" style="margin-top:4px">' + nf.format(de.gas_twh) + " von " + nf.format(de.kapazitaet_twh) + " TWh</p></div></div>" +
-        '<p class="meta">Einspeicherung ' + nf0.format(de.einspeicherung_gwh) + " GWh/Tag · Ausspeicherung " + nf0.format(de.ausspeicherung_gwh) + " GWh/Tag · Gastag " + esc(de.gastag) + "</p>" +
-        spark(de.verlauf.map(function (p) { return [0, p[1]]; }), { label: "Füllstand Deutschland, 30 Tage", minSpan: 5 }) + '<p class="meta">Füllstand der letzten 30 Tage</p>';
-    }
-    h += "<h3 style=\"margin-top:14px\">Speicher in Brandenburg</h3>";
-    if (!d.brandenburg || !d.brandenburg.length) h += hint("Die Brandenburger Speicheranlagen sind noch nicht festgelegt (config/brandenburg-speicher.json).");
+    else h += '<div class="gauge"><div>' + gauge(de.fuellstand_prozent, false, "Füllstand Deutschland") + '</div><div><div class="big">' + nf.format(de.fuellstand_prozent) + ' <span class="unit">%</span></div>' +
+      '<div class="num">Deutschland gesamt</div><p class="meta" style="margin-top:4px">' + nf.format(de.gas_twh) + " von " + nf.format(de.kapazitaet_twh) + " TWh</p></div></div>" +
+      '<p class="meta">Einspeicherung ' + nf0.format(de.einspeicherung_gwh) + " GWh/Tag · Ausspeicherung " + nf0.format(de.ausspeicherung_gwh) + " GWh/Tag · Gastag " + esc(de.gastag) + "</p>" +
+      spark(de.verlauf.map(function (p) { return [0, p[1]]; }), { label: "Füllstand Deutschland, 30 Tage", minSpan: 5 }) + '<p class="meta">Füllstand der letzten 30 Tage</p>';
+    set("cSpeicherDE", h + meta(d, esc(d.quelle || "")));
+  }
+  function renderSpeicherBB(d) {
+    var nd = noData(d, "Gasspeicher"); if (nd) return set("cSpeicherBB", nd);
+    var h = errNote(d);
+    if (!d.brandenburg || !d.brandenburg.length) h += hint("Keine Brandenburger Speicherdaten vorhanden.");
     else h += d.brandenburg.map(function (s) {
-      return '<div class="gauge gauge-small" style="margin:6px 0">' + gauge(s.fuellstand_prozent, true, s.name) + '<div><strong>' + esc(s.name) + '</strong><div class="num">' + nf.format(s.fuellstand_prozent) + ' % gefüllt</div>' +
-        '<p class="meta" style="margin-top:2px">' + nf2.format(s.gas_twh) + " von " + nf2.format(s.kapazitaet_twh) + " TWh · Gastag " + esc(s.gastag) + "</p></div></div>";
+      return '<div class="gauge" style="margin:6px 0"><div>' + gauge(s.fuellstand_prozent, false, s.name) + '</div><div><div class="big">' + nf.format(s.fuellstand_prozent) + ' <span class="unit">%</span></div>' +
+        '<div class="num"><strong>' + esc(s.name) + '</strong></div><p class="meta" style="margin-top:2px">' + nf2.format(s.gas_twh) + " von " + nf2.format(s.kapazitaet_twh) + " TWh · Gastag " + esc(s.gastag) + "</p></div></div>" +
+        spark((s.verlauf || []).map(function (p) { return [0, p[1]]; }), { label: "Füllstand " + s.name, minSpan: 5 });
+    }).join("") + '<p class="meta">In Brandenburg liegt laut GIE-Liste nur dieser Speicher. Weitere Anlagen sind dort nicht gemeldet.</p>';
+    set("cSpeicherBB", h + meta(d, esc(d.quelle || "")));
+  }
+
+  function reichBlock(r) {
+    if (!r) return hint("Keine Berechnung möglich.");
+    var fuell = r.netto_7t_gwh <= 0, tage = r.tage_wetter != null ? r.tage_wetter : r.tage_aktuell;
+    var h = '<div class="big">' + (fuell ? "füllt sich" : tage != null ? "ca. " + nf0.format(tage) + ' <span class="unit">Tage</span>' : "–") + "</div>" +
+      '<p class="meta" style="margin-top:6px">' + (fuell ? "Im Mittel der letzten 7 Tage wird mehr eingespeichert als entnommen (netto +" + nf0.format(-r.netto_7t_gwh) + " GWh/Tag)." :
+      "bis der Speicher leer wäre. Bei gleichbleibender Entnahme: " + (r.tage_aktuell != null ? "ca. " + nf0.format(r.tage_aktuell) + " Tage" : "–") + ", mit Wettervorhersage: " + (r.tage_wetter != null ? "ca. " + nf0.format(r.tage_wetter) + " Tage" : "nicht berechenbar") + ".") + "</p>" +
+      '<p class="meta">Mittel der letzten 7 Tage: Ausspeicherung ' + nf0.format(r.ausspeicherung_7t_gwh) + " GWh/Tag, Einspeicherung " + nf0.format(r.einspeicherung_7t_gwh) + " GWh/Tag.</p>";
+    if (r.projektion && r.projektion.length > 1) h += spark(r.projektion.map(function (p) { return [0, p[1]]; }), { label: "Voraussichtlicher Füllstand, 14 Tage", min: 0, max: 100 }) +
+      '<p class="meta">Voraussichtlicher Füllstand in %, nächste ' + r.projektion.length + " Tage (bis " + esc(r.projektion[r.projektion.length - 1][0]) + "): " + nf.format(r.projektion[r.projektion.length - 1][1]) + " %</p>";
+    return h;
+  }
+  function renderReich(d) {
+    var nd = noData(d, "Reichweite");
+    if (nd) { set("cReichDE", nd); set("cReichBB", nd); return; }
+    if (!d.deutschland && !d.brandenburg) { set("cReichDE", hint(d.hinweis || "Keine Daten.")); set("cReichBB", hint(d.hinweis || "Keine Daten.")); return; }
+    var ann = '<p class="hint">' + esc(d.annahmen || "") + " Das ist eine Schätzung, keine Prognose der Versorgungssicherheit.</p>";
+    set("cReichDE", errNote(d) + reichBlock(d.deutschland) + ann + meta(d, ""));
+    set("cReichBB", errNote(d) + ((d.brandenburg || []).length ? d.brandenburg.map(function (r) { return "<h3>" + esc(r.name) + "</h3>" + reichBlock(r); }).join("") : hint("Keine Brandenburger Speicherdaten.")) + ann + meta(d, ""));
+  }
+
+  var MONATE = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"], MSTART = [1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335];
+  function renderHist(d) {
+    var nd = noData(d, "Jahresvergleich"); if (nd) return set("cHist", nd);
+    if (!d.jahre) return set("cHist", errNote(d) + hint(d.hinweis || "Keine Verlaufsdaten."));
+    var W = 320, H = 150, L = 28, T = 8, B = 20, pw = W - L - 6, ph = H - T - B;
+    function x(t) { return L + (t - 1) / 365 * pw; }
+    function y(v) { return T + (100 - v) / 100 * ph; }
+    var g = "";
+    [0, 25, 50, 75, 100].forEach(function (v) { g += '<line x1="' + L + '" x2="' + (W - 6) + '" y1="' + y(v) + '" y2="' + y(v) + '" stroke="var(--sep)" stroke-width="0.6"/><text x="' + (L - 4) + '" y="' + (y(v) + 3) + '" text-anchor="end" font-size="8" fill="var(--muted)">' + v + "</text>"; });
+    MSTART.forEach(function (t, i) { g += '<text x="' + x(t + 2) + '" y="' + (H - 6) + '" font-size="8" fill="var(--muted)">' + MONATE[i] + "</text>"; });
+    var upper = [], lower = [];
+    (d.band || []).forEach(function (b) { if (b[1] != null) { upper.push(x(b[0]).toFixed(1) + "," + y(b[2]).toFixed(1)); lower.unshift(x(b[0]).toFixed(1) + "," + y(b[1]).toFixed(1)); } });
+    if (upper.length) g += '<polygon points="' + upper.concat(lower).join(" ") + '" fill="var(--blue)" opacity="0.16"/>';
+    function line(arr, col, w, dash) { return arr && arr.length ? '<path d="' + arr.map(function (p, i) { return (i ? "L" : "M") + x(p[0]).toFixed(1) + " " + y(p[1]).toFixed(1); }).join(" ") + '" fill="none" stroke="' + col + '" stroke-width="' + w + '" stroke-linejoin="round"' + (dash ? ' stroke-dasharray="3 3"' : "") + "/>" : ""; }
+    var avg = (d.band || []).filter(function (b) { return b[3] != null; }).map(function (b) { return [b[0], b[3]]; });
+    var cur = String(d.aktuelles_jahr), prev = String(d.aktuelles_jahr - 1);
+    g += line(avg, "var(--muted)", 1, true) + line(d.jahre[prev], "var(--orange)", 1.4) + line(d.jahre[cur], "var(--blue)", 2.2);
+    var c = d.jahre[cur] || [], last = c.length ? c[c.length - 1] : null, a = last ? (d.band[last[0] - 1] || [])[3] : null;
+    var txt = last && a != null ? "Aktuell " + nf.format(last[1]) + " % gegenüber dem Mittel der Vorjahre von " + nf.format(a) + " % (" + (last[1] >= a ? "+" : "") + nf.format(last[1] - a) + " Prozentpunkte)." : "";
+    set("cHist", errNote(d) + '<svg viewBox="0 0 ' + W + " " + H + '" style="width:100%;height:auto" role="img" aria-label="Füllstand Deutschland im Jahresvergleich">' + g + "</svg>" +
+      '<p class="meta"><span style="color:var(--blue)">■</span> ' + cur + ' · <span style="color:var(--orange)">■</span> ' + prev + ' · <span style="color:var(--muted)">- - -</span> Mittel ' + d.vorjahre[0] + "–" + d.vorjahre[d.vorjahre.length - 1] + " · helle Fläche: niedrigster bis höchster Wert dieser Jahre</p>" +
+      (txt ? '<p style="margin:8px 0 0">' + esc(txt) + "</p>" : "") + meta(d, esc(d.quelle || "")));
+  }
+
+  var state = { scope: "bb", wetter: null };
+  function renderWetter(d) {
+    state.wetter = d;
+    var nd = noData(d, "Wetter"); if (nd) return set("cWetter", nd);
+    var temps = state.scope === "bb" ? d.brandenburg : d.deutschland;
+    if (!temps) return set("cWetter", errNote(d) + hint("Keine Wetterdaten."));
+    var i0 = d.heute_index || 7, ort = state.scope === "bb" ? "Potsdam (Brandenburg)" : "Deutschland (Mittel aus 6 Großstädten)";
+    var chips = d.tage.slice(i0, i0 + 7).map(function (t, k) {
+      var dt = new Date(t + "T12:00:00"), v = temps[i0 + k];
+      return '<div style="text-align:center;flex:1;min-width:0"><div class="meta" style="margin:0">' + (k ? dt.toLocaleDateString("de-DE", { weekday: "short" }) : "Heute") + '</div><div style="font-weight:600">' + (v == null ? "–" : nf0.format(v) + "°") + "</div></div>";
     }).join("");
-    set("cSpeicher", h + meta(d, esc(d.quelle || "")));
+    set("cWetter", errNote(d) + '<h3 style="margin-bottom:2px">' + esc(ort) + '</h3><div style="display:flex;gap:4px;margin:8px 0">' + chips + "</div>" +
+      spark(temps.map(function (v) { return [0, v]; }), { label: "Tagesmitteltemperatur, 7 Tage zurück und 14 Tage voraus", mid: 15 }) +
+      '<p class="meta">Tagesmittel der letzten 7 und der nächsten 14 Tage. Gestrichelt 15 °C: darunter wird geheizt, je kälter, desto mehr Gasverbrauch.</p>' + meta(d, esc(d.quelle || "")));
+  }
+  function applyScope(sc) {
+    state.scope = sc;
+    document.body.classList.toggle("scope-bb", sc === "bb"); document.body.classList.toggle("scope-de", sc === "de");
+    document.querySelectorAll(".seg button").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.scope === sc ? "true" : "false"); });
+    try { localStorage.setItem("energie.scope", sc); } catch (e) {}
+    if (state.wetter) renderWetter(state.wetter);
   }
 
   function renderGruppen(id, d, key, titelLeer) {
@@ -133,14 +203,18 @@
   }
 
   function load() {
-    Promise.all(["meta.json", "gas_speicher.json", "gas_lng.json", "gas_pipeline.json", "strom.json", "frequenz.json", "kraftstoff.json", "rohoel.json", "schwedt.json"].map(get)).then(function (r) {
+    Promise.all(["meta.json", "gas_speicher.json", "gas_lng.json", "gas_pipeline.json", "strom.json", "frequenz.json", "kraftstoff.json", "rohoel.json", "schwedt.json", "reichweite.json", "gas_historie.json", "wetter.json"].map(get)).then(function (r) {
       document.getElementById("stand").textContent = r[0] && r[0].letzter_lauf ? "Letzter Datenabruf: " + when(r[0].letzter_lauf) : "Noch kein Datenabruf.";
-      renderSpeicher(r[1]);
+      renderSpeicherDE(r[1]); renderSpeicherBB(r[1]);
       renderGruppen("cLng", r[2], "terminals", "LNG");
       renderGruppen("cPipe", r[3], "gruppen", "Pipelines");
       renderPreis(r[4]); renderMix(r[4]); renderFreq(r[5]); renderKraft(r[6]); renderOel(r[7]); renderSchwedt(r[8]);
+      renderReich(r[9]); renderHist(r[10]); renderWetter(r[11]);
     });
   }
+  document.querySelectorAll(".seg button").forEach(function (b) { b.addEventListener("click", function () { applyScope(b.dataset.scope); }); });
+  var sc = "bb"; try { sc = localStorage.getItem("energie.scope") || "bb"; } catch (e) {}
+  applyScope(sc === "de" ? "de" : "bb");
   load();
   setInterval(load, 60000);
 })();

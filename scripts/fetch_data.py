@@ -174,6 +174,13 @@ def read_cfg(name):
 
 
 # ---------- Gasspeicher (GIE AGSI+) ----------
+def fl(x):
+    try:
+        return float(x)
+    except (TypeError, ValueError):
+        return 0.0
+
+
 def gas_speicher():
     key = os.environ.get("GIE_API_KEY", "").strip()
     if not key:
@@ -193,6 +200,7 @@ def gas_speicher():
             "gas_twh": float(letzte["gasInStorage"]), "kapazitaet_twh": float(letzte["workingGasVolume"]),
             "einspeicherung_gwh": float(letzte["injection"]), "ausspeicherung_gwh": float(letzte["withdrawal"]),
             "verlauf": [[r["gasDayStart"], float(r["full"])] for r in rows],
+            "fluss": [[r["gasDayStart"], fl(r["injection"]), fl(r["withdrawal"])] for r in rows[-14:]],
         },
         "brandenburg": [],
     }
@@ -206,7 +214,8 @@ def gas_speicher():
             out["brandenburg"].append({"eic": a["eic"], "name": a.get("name") or a["eic"], "gastag": l["gasDayStart"],
                                        "fuellstand_prozent": float(l["full"]), "gas_twh": float(l["gasInStorage"]),
                                        "kapazitaet_twh": float(l["workingGasVolume"]),
-                                       "verlauf": [[r["gasDayStart"], float(r["full"])] for r in d]})
+                                       "verlauf": [[r["gasDayStart"], float(r["full"])] for r in d],
+                                       "fluss": [[r["gasDayStart"], fl(r["injection"]), fl(r["withdrawal"])] for r in d[-14:]]})
     return out
 
 
@@ -238,17 +247,157 @@ def kraftstoff():
             "quelle": "Tankerkönig.de (Markttransparenzstelle für Kraftstoffe), CC BY 4.0"}
 
 
-# ---------- Rohöl (Brent), Quelle stooq.com ----------
-def rohoel():
+# ---------- Rohöl (Brent) ----------
+def rohoel_yahoo():
+    d = get_json("https://query1.finance.yahoo.com/v8/finance/chart/BZ%3DF?range=3mo&interval=1d", {"User-Agent": "Mozilla/5.0"}, 30)
+    res = d["chart"]["result"][0]
+    ts, close = res["timestamp"], res["indicators"]["quote"][0]["close"]
+    rows = [(datetime.fromtimestamp(t, timezone.utc).strftime("%Y-%m-%d"), c) for t, c in zip(ts, close) if c is not None]
+    if len(rows) < 2:
+        raise ValueError("keine Kursdaten")
+    c, p = rows[-1][1], rows[-2][1]
+    return {"stand": stamp(), "datum": rows[-1][0], "brent_usd": round(c, 2), "aenderung_prozent": round((c - p) / p * 100, 2),
+            "verlauf": [[d_, round(v, 2)] for d_, v in rows[-60:]], "quelle": "Yahoo Finance (Brent Future BZ=F, verzögert)"}
+
+
+def rohoel_stooq():
     txt = http("https://stooq.com/q/d/l/?s=cb.f&i=d", timeout=30)
-    rows = list(csv.DictReader(io.StringIO(txt)))
-    rows = [r for r in rows if r.get("Close") not in (None, "", "null")]
+    rows = [r for r in csv.DictReader(io.StringIO(txt)) if r.get("Close") not in (None, "", "null")]
     if len(rows) < 2:
         raise ValueError("keine Kursdaten, Antwort: " + txt[:80].replace("\n", " "))
-    letzte, vor = rows[-1], rows[-2]
-    c, p = float(letzte["Close"]), float(vor["Close"])
-    return {"stand": stamp(), "datum": letzte["Date"], "brent_usd": c, "aenderung_prozent": round((c - p) / p * 100, 2),
+    c, p = float(rows[-1]["Close"]), float(rows[-2]["Close"])
+    return {"stand": stamp(), "datum": rows[-1]["Date"], "brent_usd": c, "aenderung_prozent": round((c - p) / p * 100, 2),
             "verlauf": [[r["Date"], float(r["Close"])] for r in rows[-60:]], "quelle": "stooq.com (Brent Future, verzögert)"}
+
+
+def rohoel():
+    try:
+        return rohoel_yahoo()
+    except Exception as e:  # noqa: BLE001
+        print("Yahoo fehlgeschlagen:", e, file=sys.stderr)
+        return rohoel_stooq()
+
+
+# ---------- Wetter (Open-Meteo): Temperaturen für Heizbedarf ----------
+STAEDTE_DE = [(52.52, 13.40), (53.55, 10.00), (50.94, 6.96), (48.14, 11.58), (50.11, 8.68), (51.34, 12.37)]  # Berlin, Hamburg, Köln, München, Frankfurt, Leipzig
+POTSDAM = (52.39, 13.06)
+
+
+def wetter():
+    old = read("wetter.json", {})
+    try:
+        if old.get("stand") and not old.get("fehler") and (NOW - datetime.strptime(old["stand"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)) < timedelta(hours=3):
+            return None  # frisch genug, Abrufe schonen
+    except ValueError:
+        pass
+    orte = [POTSDAM] + STAEDTE_DE
+    q = urllib.parse.urlencode({"latitude": ",".join(str(o[0]) for o in orte), "longitude": ",".join(str(o[1]) for o in orte),
+                                "daily": "temperature_2m_mean", "past_days": 7, "forecast_days": 14, "timezone": "Europe/Berlin"})
+    d = get_json("https://api.open-meteo.com/v1/forecast?" + q, timeout=60)
+    if isinstance(d, dict):
+        d = [d]
+    tage = d[0]["daily"]["time"]
+    bb = [round(v, 1) if v is not None else None for v in d[0]["daily"]["temperature_2m_mean"]]
+    de = []
+    for i in range(len(tage)):
+        w = [x["daily"]["temperature_2m_mean"][i] for x in d[1:] if x["daily"]["temperature_2m_mean"][i] is not None]
+        de.append(round(sum(w) / len(w), 1) if w else None)
+    return {"stand": stamp(), "tage": tage, "heute_index": 7, "brandenburg": bb, "deutschland": de,
+            "quelle": "Open-Meteo.com (CC BY 4.0), Brandenburg = Potsdam, Deutschland = Mittel aus 6 Großstädten"}
+
+
+# ---------- Füllstand im Jahresvergleich (AGSI+, Deutschland) ----------
+def gas_historie():
+    key = os.environ.get("GIE_API_KEY", "").strip()
+    old = read("gas_historie.json", {})
+    if not key:
+        return {"stand": stamp(), "hinweis": "Noch kein GIE-Schlüssel hinterlegt."}
+    if old.get("stand", "")[:10] == NOW.strftime("%Y-%m-%d") and not old.get("fehler") and old.get("jahre"):
+        return None  # einmal pro Tag genügt
+    von = f"{NOW.year - 6}-01-01"
+    rows, page = [], 1
+    while page <= 20:
+        d = get_json(f"https://agsi.gie.eu/api?country=DE&from={von}&size=300&page={page}", {"x-key": key}, 90)
+        rows += d.get("data", [])
+        if page >= int(d.get("last_page", 1) or 1):
+            break
+        page += 1
+    if not rows:
+        raise ValueError("AGSI+ lieferte keine Verlaufsdaten")
+    jahre = {}
+    for r in rows:
+        try:
+            dt = datetime.strptime(r["gasDayStart"], "%Y-%m-%d")
+            jahre.setdefault(dt.year, {})[dt.timetuple().tm_yday] = round(float(r["full"]), 1)
+        except (ValueError, TypeError, KeyError):
+            continue
+    heute = NOW.year
+    vorjahre = [y for y in range(heute - 5, heute) if y in jahre]
+    band = []
+    for t in range(1, 367):
+        v = [jahre[y][t] for y in vorjahre if t in jahre[y]]
+        band.append([t, min(v), max(v), round(sum(v) / len(v), 1)] if v else [t, None, None, None])
+    return {"stand": stamp(), "quelle": "GIE AGSI+ (agsi.gie.eu)", "aktuelles_jahr": heute, "vorjahre": vorjahre,
+            "jahre": {str(y): sorted([t, v] for t, v in jahre[y].items()) for y in [*vorjahre, heute] if y in jahre}, "band": band}
+
+
+# ---------- Reichweite der Gasspeicher (Schätzung) ----------
+def hdd(t):
+    return max(0.0, 15.0 - t) if t is not None else None  # Heizgradtage, Basis 15 °C
+
+
+def projektion(stock, kap, w7, i7, temps, idx):
+    """Füllstand der nächsten Tage: Ausspeicherung folgt dem Heizbedarf, Einspeicherung bleibt wie in den letzten 7 Tagen."""
+    ref = [hdd(t) for t in temps[max(0, idx - 7):idx] if t is not None]
+    ref = sum(ref) / len(ref) if ref else None
+    pro = []
+    ist = stock
+    for k, t in enumerate(temps[idx:]):
+        h = hdd(t)
+        faktor = (h / ref) if (ref and ref > 0.5 and h is not None) else 1.0
+        netto = w7 * faktor - i7
+        ist = min(kap, max(0.0, ist - netto / 1000.0))  # GWh -> TWh
+        pro.append(round(ist / kap * 100, 1) if kap else None)
+    return pro
+
+
+def reichweite_fuer(name, fluss, stock, kap, temps, tage, idx):
+    if not fluss or not kap:
+        return None
+    letzte = fluss[-7:]
+    w7 = sum(f[2] for f in letzte) / len(letzte)
+    i7 = sum(f[1] for f in letzte) / len(letzte)
+    netto7 = w7 - i7
+    out = {"name": name, "inhalt_twh": round(stock, 3), "kapazitaet_twh": round(kap, 3), "fuellstand_prozent": round(stock / kap * 100, 1),
+           "ausspeicherung_7t_gwh": round(w7, 1), "einspeicherung_7t_gwh": round(i7, 1), "netto_7t_gwh": round(netto7, 1)}
+    out["tage_aktuell"] = round(stock * 1000 / netto7) if netto7 > 0.01 else None
+    pro = projektion(stock, kap, w7, i7, temps, idx) if temps and temps[idx:] else []
+    out["projektion"] = [[tage[idx + k], v] for k, v in enumerate(pro)]
+    # Tage bis leer mit Wetter: Vorhersagezeitraum, danach Mittel der Vorhersage fortschreiben
+    leer = None
+    if pro:
+        if any(v is not None and v <= 0.05 for v in pro):
+            leer = next(k for k, v in enumerate(pro) if v is not None and v <= 0.05) + 1
+        else:
+            fall = (pro[-2] - pro[-1]) if len(pro) > 1 and pro[-2] is not None and pro[-1] is not None else 0
+            if fall > 0.01:
+                leer = len(pro) + round(pro[-1] / fall)
+    out["tage_wetter"] = leer
+    return out
+
+
+def reichweite():
+    sp, we = read("gas_speicher.json", {}), read("wetter.json", {})
+    if not sp.get("deutschland"):
+        return {"stand": stamp(), "hinweis": "Keine Speicherdaten."}
+    tage, idx = we.get("tage", []), we.get("heute_index", 7)
+    de = sp["deutschland"]
+    out = {"stand": stamp(), "annahmen": ("Reine Schätzung nur für die Gasspeicher, ohne Importe, LNG und Verbrauchsänderungen. Grundlage: mittlere Ein- und Ausspeicherung der letzten 7 Tage. "
+                                           "Mit Wetter: Die Ausspeicherung folgt dem Heizbedarf (Heizgradtage, Basis 15 °C) der Temperaturvorhersage."),
+           "deutschland": reichweite_fuer("Deutschland", de.get("fluss"), de["gas_twh"], de["kapazitaet_twh"], we.get("deutschland"), tage, idx),
+           "brandenburg": [r for r in (reichweite_fuer(b["name"], b.get("fluss"), b["gas_twh"], b["kapazitaet_twh"], we.get("brandenburg"), tage, idx)
+                                       for b in sp.get("brandenburg", [])) if r]}
+    return out
 
 
 def main():
@@ -256,6 +405,7 @@ def main():
     jobs = [
         ("frequenz.json", frequenz), ("strom.json", strom), ("gas_pipeline.json", gas_pipeline),
         ("gas_lng.json", gas_lng), ("gas_speicher.json", gas_speicher), ("kraftstoff.json", kraftstoff), ("rohoel.json", rohoel),
+        ("wetter.json", wetter), ("gas_historie.json", gas_historie), ("reichweite.json", reichweite),
     ]
     for name, fn in jobs:
         if nur and name.split(".")[0] not in nur:
