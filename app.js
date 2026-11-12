@@ -130,6 +130,24 @@
     set("cLngTanks", h + '<p class="meta">Tankfüllstand der LNG-Terminals und Ausspeisung ins Gasnetz, letzter gemeldeter Gastag' + (de && de.gastag ? " " + esc(de.gastag) : "") + "</p>" + meta(d, esc(d.quelle || "")));
   }
 
+  function renderUmfeld(d) {
+    var nd = noData(d, "Umfeld"); if (nd) return set("cUmfeld", nd);
+    if (!d.anlagen) return set("cUmfeld", errNote(d) + hint(d.hinweis || "Keine Daten."));
+    var su = d.summe, rows = d.anlagen.map(function (a) {
+      var nutz = a.ausspeicherleistung_gwh > 0 ? a.ausspeicherung_gwh / a.ausspeicherleistung_gwh * 100 : null;
+      var col = a.fuellstand_prozent < 30 ? "var(--red)" : a.fuellstand_prozent < 60 ? "var(--orange)" : "var(--green)";
+      return "<tr><td>" + esc(a.name) + '<div class="meta" style="margin:0">' + esc(a.region) + '</div></td><td class="n"><strong>' + nf.format(a.fuellstand_prozent) + ' %</strong><div class="meta" style="margin:0">' + nf2.format(a.kapazitaet_twh) + ' TWh</div></td><td class="n">' + nf0.format(a.ausspeicherung_gwh) + ' / ' + (a.ausspeicherleistung_gwh > 0 ? nf0.format(a.ausspeicherleistung_gwh) : "–") + '<div class="meta" style="margin:0">' + (nutz == null ? "" : nf0.format(nutz) + " % genutzt") + "</div></td></tr>";
+    }).join("");
+    var h = errNote(d) + '<div class="big">' + (su.fuellstand_prozent == null ? "–" : nf.format(su.fuellstand_prozent)) + ' <span class="unit">% im Umfeld</span></div><p class="meta" style="margin-top:4px">' + nf.format(su.gas_twh) + " von " + nf.format(su.kapazitaet_twh) + " TWh in " + d.anlagen.length + " Speichern · Ausspeicherung 7-Tage-Mittel " + nf0.format(su.ausspeicherung_7t_gwh) + " GWh/Tag (technisch möglich " + nf0.format(su.ausspeicherleistung_gwh) + " GWh/Tag)</p>" +
+      '<table><tr><th>Speicher</th><th class="n">Füllstand</th><th class="n">Ausspeicherung heute / möglich (GWh/Tag)</th></tr>' + rows + "</table>";
+    if (d.projektion && d.projektion.length > 1) {
+      var last = d.projektion[d.projektion.length - 1];
+      h += spark(d.projektion.map(function (p) { return [0, p[1]]; }), { label: "Voraussichtlicher Füllstand im Umfeld, 14 Tage", min: 0, max: 100 }) +
+        '<p class="meta">Voraussichtlicher Füllstand im Umfeld in 14 Tagen (' + esc(last[0]) + "): " + nf.format(last[1]) + " %. " + (d.engpass_tage > 0 ? "An " + d.engpass_tage + " von " + d.projektion.length + " Tagen würde der Heizbedarf die gemeldete Ausspeicherleistung übersteigen, die Entnahme wäre dann begrenzt." : "Die gemeldete Ausspeicherleistung wird in der Vorausschau nicht überschritten.") + "</p>";
+    }
+    set("cUmfeld", h + '<p class="hint">Die Speicher sind nach ihrer Lage in Brandenburg und Nachbarländern ausgewählt, der Netzanschluss ist nicht geprüft. Die Ausspeicherleistung ist der von den Betreibern gemeldete Wert. Ob und wie stark sie bei niedrigem Füllstand sinkt, hängt vom Speichertyp ab, das ist hier nicht berechnet.</p>' + meta(d, esc(d.quelle || "")));
+  }
+
   var MONATE = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"], MSTART = [1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335];
   function renderHist(d) {
     var nd = noData(d, "Jahresvergleich"); if (nd) return set("cHist", nd);
@@ -242,12 +260,12 @@
   }
 
   function load() {
-    Promise.all(["meta.json", "gas_speicher.json", "gas_lng.json", "gas_pipeline.json", "strom.json", "frequenz.json", "kraftstoff.json", "rohoel.json", "reichweite.json", "gas_historie.json", "wetter.json", "gas_europa.json", "gas_anlagen.json", "gaspreis.json", "lng_tanks.json"].map(get)).then(function (r) {
+    Promise.all(["meta.json", "gas_speicher.json", "gas_lng.json", "gas_pipeline.json", "strom.json", "frequenz.json", "kraftstoff.json", "rohoel.json", "reichweite.json", "gas_historie.json", "wetter.json", "gas_europa.json", "gas_anlagen.json", "gaspreis.json", "lng_tanks.json", "gas_umfeld.json"].map(get)).then(function (r) {
       document.getElementById("stand").textContent = r[0] && r[0].letzter_lauf ? "Letzter Datenabruf: " + when(r[0].letzter_lauf) : "Noch kein Datenabruf.";
       [function () { renderSpeicherDE(r[1]); }, function () { renderSpeicherBB(r[1]); },
         function () { renderLngEin(r[2]); }, function () { renderPipe(r[3]); },
         function () { renderPreis(r[4]); }, function () { renderMix(r[4]); }, function () { renderFreq(r[5]); }, function () { renderKraft(r[6]); },
-        function () { renderOel(r[7]); }, function () { renderReich(r[8]); }, function () { renderHist(r[9]); }, function () { renderWetter(r[10]); }, function () { renderEuropa(r[11]); }, function () { renderAnlagen(r[12]); }, function () { renderTtf(r[13]); }, function () { renderLngTanks(r[14]); }
+        function () { renderOel(r[7]); }, function () { renderReich(r[8]); }, function () { renderHist(r[9]); }, function () { renderWetter(r[10]); }, function () { renderEuropa(r[11]); }, function () { renderAnlagen(r[12]); }, function () { renderTtf(r[13]); }, function () { renderLngTanks(r[14]); }, function () { renderUmfeld(r[15]); }
       ].forEach(function (f) { try { f(); } catch (e) { if (window.console) console.error(e); } });
     });
   }

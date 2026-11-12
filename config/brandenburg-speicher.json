@@ -1,6 +1,37 @@
 {
-  "hinweis": "Gasspeicher in Brandenburg laut GIE-AGSI+-Anlagenliste. Derzeit nur UGS Rüdersdorf H (EWE). Kraak liegt in Mecklenburg-Vorpommern, Peckensen in Sachsen-Anhalt, der Berliner Speicher ist seit 2017 stillgelegt.",
+  "hinweis": "Gasspeicher in Brandenburg und in der Nähe, nach geografischer Lage gewählt (nicht nach Netzanschluss geprüft). Das Gasnetz ist ein Verbund, deshalb zeigt die Vorausschau die Speicher im Umfeld gemeinsam.",
   "speicher": [
-    { "eic": "21W000000000048W", "company": "21X0000000011756", "name": "UGS Rüdersdorf H (EWE)" }
+    {
+      "eic": "21W000000000048W",
+      "name": "Rüdersdorf H (EWE)",
+      "region": "Brandenburg"
+    }
+  ],
+  "umfeld": [
+    {
+      "eic": "21W000000000048W",
+      "name": "Rüdersdorf H (EWE)",
+      "region": "Brandenburg"
+    },
+    {
+      "eic": "21W000000000020H",
+      "name": "Kraak",
+      "region": "Mecklenburg-Vorpommern"
+    },
+    {
+      "eic": "21W0000000000273",
+      "name": "Peckensen",
+      "region": "Sachsen-Anhalt"
+    },
+    {
+      "eic": "21W0000000000265",
+      "name": "Staßfurt",
+      "region": "Sachsen-Anhalt"
+    },
+    {
+      "eic": "21W0000000000427",
+      "name": "VNG Storage Hub (Bernburg, Bad Lauchstädt, Katharina)",
+      "region": "Sachsen-Anhalt"
+    }
   ]
 }
