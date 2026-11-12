@@ -429,14 +429,28 @@ def kraftstoff():
 
 # ---------- Rohöl (Brent) ----------
 def yahoo_reihe(symbol, quelle, nachkomma=2):
-    d = get_json(f"https://query1.finance.yahoo.com/v8/finance/chart/{urllib.parse.quote(symbol)}?range=3mo&interval=1d", {"User-Agent": "Mozilla/5.0"}, 30)
-    res = d["chart"]["result"][0]
-    rows = [(datetime.fromtimestamp(t, timezone.utc).strftime("%Y-%m-%d"), c) for t, c in zip(res["timestamp"], res["indicators"]["quote"][0]["close"]) if c is not None]
-    if len(rows) < 2:
-        raise ValueError(f"keine Kursdaten ({symbol}): {json.dumps(d)[:240]}")
-    c, p = rows[-1][1], rows[-2][1]
-    return {"stand": stamp(), "datum": rows[-1][0], "preis": round(c, nachkomma), "aenderung_prozent": round((c - p) / p * 100, 2),
-            "verlauf": [[d_, round(v, nachkomma)] for d_, v in rows[-60:]], "quelle": quelle}
+    letzter_fehler = None
+    for bereich in ("3mo", "6mo", "1mo"):
+        try:
+            d = get_json(f"https://query1.finance.yahoo.com/v8/finance/chart/{urllib.parse.quote(symbol)}?range={bereich}&interval=1d", {"User-Agent": "Mozilla/5.0"}, 30)
+            res = d["chart"]["result"][0]
+            rows = [(datetime.fromtimestamp(t, timezone.utc).strftime("%Y-%m-%d"), c) for t, c in zip(res.get("timestamp") or [], res["indicators"]["quote"][0].get("close") or []) if c is not None]
+            meta = res.get("meta", {})
+            if len(rows) >= 2:
+                c, p = rows[-1][1], rows[-2][1]
+                return {"stand": stamp(), "datum": rows[-1][0], "preis": round(c, nachkomma), "aenderung_prozent": round((c - p) / p * 100, 2),
+                        "verlauf": [[d_, round(v, nachkomma)] for d_, v in rows[-60:]], "quelle": quelle}
+            # Rückfall: aktueller Kurs und Vortagsschluss aus den Metadaten
+            c, p = meta.get("regularMarketPrice"), meta.get("chartPreviousClose") or meta.get("previousClose")
+            if c and p:
+                verlauf = [[d_, round(v, nachkomma)] for d_, v in rows[-60:]]
+                heute = datetime.fromtimestamp(meta.get("regularMarketTime", NOW.timestamp()), timezone.utc).strftime("%Y-%m-%d")
+                return {"stand": stamp(), "datum": heute, "preis": round(c, nachkomma), "aenderung_prozent": round((c - p) / p * 100, 2),
+                        "verlauf": verlauf, "quelle": quelle + ", Tageswert"}
+            letzter_fehler = f"keine Kursdaten ({symbol}, {bereich})"
+        except Exception as e:  # noqa: BLE001
+            letzter_fehler = f"{type(e).__name__}: {e}"[:200]
+    raise ValueError(letzter_fehler or "keine Kursdaten")
 
 
 def gaspreis():
