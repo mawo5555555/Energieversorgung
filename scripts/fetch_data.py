@@ -248,7 +248,8 @@ def gas_speicher():
 # ---------- Gasspeicher Europa und einzelne Länder (AGSI+) ----------
 EUROPA = [("EU", "continent=eu", "Europäische Union"), ("DE", "country=DE", "Deutschland"), ("NL", "country=NL", "Niederlande"),
           ("AT", "country=AT", "Österreich"), ("FR", "country=FR", "Frankreich"), ("IT", "country=IT", "Italien"),
-          ("PL", "country=PL", "Polen"), ("CZ", "country=CZ", "Tschechien"), ("HU", "country=HU", "Ungarn"), ("ES", "country=ES", "Spanien")]
+          ("PL", "country=PL", "Polen"), ("CZ", "country=CZ", "Tschechien"), ("HU", "country=HU", "Ungarn"), ("ES", "country=ES", "Spanien"),
+          ("BE", "country=BE", "Belgien"), ("DK", "country=DK", "Dänemark"), ("SK", "country=SK", "Slowakei"), ("RO", "country=RO", "Rumänien")]
 
 
 def agsi_letzte(query, h, tage=10):
@@ -778,6 +779,106 @@ def wind_historie():
     return tage, variable
 
 
+# ---------- Weitere Einflussfaktoren: SMARD-Reihen, Preis, Pegel, Industrie, Europa-Wetter ----------
+def smard_reihe(fid, region, datei, mittel=False):
+    """Tägliche SMARD-Reihe seit 2018 (MWh je Tag bzw. Mittel für Preise), wächst nur um neue Tage."""
+    alt = read(datei, {"tage": {}})
+    tage = alt.get("tage", {})
+    idx = get_json(f"{SMARD}/{fid}/{region}/index_day.json")["timestamps"]
+    for ts in idx:
+        jahr = datetime.fromtimestamp(ts / 1000 + 43200, timezone.utc).year
+        if jahr < 2018:
+            continue
+        have = sum(1 for k in tage if k.startswith(str(jahr)))
+        if jahr < NOW.year and have >= 360:
+            continue
+        rows = get_json(f"{SMARD}/{fid}/{region}/{fid}_{region}_day_{ts}.json", timeout=90).get("series", [])
+        for t, v in rows:
+            if v is not None:
+                tage[datetime.fromtimestamp(t / 1000 + 43200, timezone.utc).strftime("%Y-%m-%d")] = round(v, 2)
+    write(datei, {"stand": stamp(), "einheit": "Euro je MWh" if mittel else "MWh pro Tag", "quelle": "Bundesnetzagentur | SMARD.de, CC BY 4.0", "tage": tage})
+    return tage
+
+
+def smard_kohle_tage():
+    a = smard_reihe(1223, "DE", "braunkohle_historie.json")
+    b = smard_reihe(4069, "DE", "steinkohle_historie.json")
+    return {t: a.get(t, 0) + b.get(t, 0) for t in set(a) & set(b)}
+
+
+def ttf_historie():
+    preise = {}
+    for q in ("range=10y&interval=1d", "range=max&interval=1wk"):
+        try:
+            d = get_json("https://query1.finance.yahoo.com/v8/finance/chart/TTF%3DF?" + q, {"User-Agent": "Mozilla/5.0"}, 60)
+            res = d["chart"]["result"][0]
+            preise = {datetime.fromtimestamp(t, timezone.utc).strftime("%Y-%m-%d"): c for t, c in zip(res.get("timestamp") or [], res["indicators"]["quote"][0].get("close") or []) if c is not None}
+        except Exception:  # noqa: BLE001
+            preise = {}
+        if len(preise) >= 400:
+            break
+    if len(preise) < 400:
+        raise ValueError(f"zu wenig TTF-Daten ({len(preise)})")
+    # Lücken (Wochenende) auffüllen, damit jeder Kalendertag einen Wert hat
+    tage, last = {}, None
+    d0 = datetime.strptime(min(preise), "%Y-%m-%d").date()
+    d1 = datetime.strptime(max(preise), "%Y-%m-%d").date()
+    k = d0
+    while k <= d1:
+        s = k.isoformat()
+        if s in preise:
+            last = preise[s]
+        if last is not None:
+            tage[s] = round(last, 2)
+        k += timedelta(days=1)
+    return tage
+
+
+def faktoren_extra():
+    out = {"stand": stamp()}
+    # Rheinpegel Kaub (Kühlwasser, Kohle-Logistik)
+    try:
+        m = get_json("https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations/KAUB/W/measurements.json?start=P30D", timeout=60)
+        werte = [x["value"] for x in m if x.get("value") is not None]
+        aktuell = get_json("https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations/KAUB/W/currentmeasurement.json", timeout=60)
+        out["rhein"] = {"pegel_cm": aktuell.get("value"), "zustand": aktuell.get("stateMnwMhw"), "min_30t": min(werte) if werte else None, "max_30t": max(werte) if werte else None,
+                        "zeit": aktuell.get("timestamp"), "quelle": "Pegelonline (WSV), Pegel Kaub"}
+    except Exception as e:  # noqa: BLE001
+        out["rhein"] = {"fehler": f"{type(e).__name__}: {e}"[:120]}
+    # Industrieproduktion Deutschland (Eurostat, monatlich, Index 2021=100)
+    try:
+        d = get_json("https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/sts_inpr_m?format=JSON&lang=EN&geo=DE&nace_r2=B-D&s_adj=SCA&unit=I21&sinceTimePeriod=2024-01", timeout=60)
+        zeit = d["dimension"]["time"]["category"]["index"]
+        werte = {t: d["value"].get(str(i)) for t, i in zeit.items()}
+        werte = {t: v for t, v in werte.items() if v is not None}
+        ts = sorted(werte)
+        letzter = ts[-1]
+        vj = f"{int(letzter[:4]) - 1}{letzter[4:]}"
+        out["industrie"] = {"monat": letzter, "index": round(werte[letzter], 1), "vorjahr": round(werte[vj], 1) if vj in werte else None,
+                            "verlauf": [[t, round(werte[t], 1)] for t in ts[-12:]], "quelle": "Eurostat, Produktion im produzierenden Gewerbe (saisonbereinigt, 2021=100)"}
+    except Exception as e:  # noqa: BLE001
+        out["industrie"] = {"fehler": f"{type(e).__name__}: {e}"[:120]}
+    # Wetter in Nachbarländern (Heizbedarf dort, Wettbewerb um LNG)
+    try:
+        orte = [("Frankreich", 48.85, 2.35), ("Polen", 52.23, 21.01), ("Niederlande", 52.37, 4.90), ("Österreich", 48.21, 16.37), ("Italien", 41.90, 12.50)]
+        q = urllib.parse.urlencode({"latitude": ",".join(str(o[1]) for o in orte), "longitude": ",".join(str(o[2]) for o in orte), "daily": "temperature_2m_mean",
+                                    "past_days": 7, "forecast_days": 7, "timezone": "Europe/Berlin"})
+        w = get_json("https://api.open-meteo.com/v1/forecast?" + q, timeout=60)
+        if isinstance(w, dict):
+            w = [w]
+        liste = []
+        for o, x in zip(orte, w):
+            t = x["daily"]["temperature_2m_mean"]
+            vor, nach = [v for v in t[:7] if v is not None], [v for v in t[7:] if v is not None]
+            if vor and nach:
+                liste.append({"land": o[0], "temp_naechste_7": round(sum(nach) / len(nach), 1), "temp_letzte_7": round(sum(vor) / len(vor), 1)})
+        out["nachbarn_wetter"] = liste
+    except Exception as e:  # noqa: BLE001
+        out["nachbarn_wetter"] = []
+        out["nachbarn_wetter_fehler"] = f"{type(e).__name__}: {e}"[:120]
+    return out
+
+
 def preisanalyse(hist):
     """Zusammenhang zwischen TTF-Preis und Einspeicherung im Sommer (Apr-Okt) je Jahr, und wo der Preis jetzt im Verhältnis zur Historie steht."""
     preise = {}
@@ -839,7 +940,7 @@ def gas_vorausschau():
     old = read("gas_vorausschau.json", {})
     try:
         alt = datetime.strptime(old["stand"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
-        if NOW - alt < timedelta(hours=5) and old.get("szenarien") and old.get("einspeicherung") and old.get("importausfall") and "abweichung_letzte_tage_gwh" in (old.get("verstromung") or {}) and read("gas_preisanalyse.json", {}).get("jahre") and read("gas_umfeld_vorausschau.json", {}).get("anlagen") and not old.get("fehler"):
+        if NOW - alt < timedelta(hours=5) and old.get("szenarien") and old.get("einspeicherung") and old.get("importausfall") and "abweichung_letzte_tage_gwh" in (old.get("verstromung") or {}) and old.get("modell_version") == 3 and read("gas_preisanalyse.json", {}).get("jahre") and read("gas_umfeld_vorausschau.json", {}).get("anlagen") and not old.get("fehler"):
             return None  # aufwendig (Historie seit 2018), deshalb nur alle paar Stunden
     except (KeyError, ValueError):
         pass
@@ -853,12 +954,18 @@ def gas_vorausschau():
         strom_daten["gas_mwh"] = smard_erdgas_tage()
         wtage, _var = wind_historie()
         strom_daten["wind"] = wtage
+        for schluessel, fn in (("kohle", smard_kohle_tage), ("preis", lambda: smard_reihe(4169, "DE-LU", "strompreis_historie.json", True)), ("ttf", ttf_historie)):
+            try:
+                strom_daten[schluessel] = fn()
+            except Exception as e2:  # noqa: BLE001
+                strom_daten[schluessel + "_fehler"] = f"{type(e2).__name__}: {e2}"[:120]
     except Exception as e:  # noqa: BLE001
         strom_daten["fehler"] = f"{type(e).__name__}: {e}"[:200]
     res, ctx = modell.vorausschau(hist, temp, read("wetter.json", {}), cfg, max(hist),
                                   {"pipeline_netto": pipe.get("summe_netto"), "lng": lng.get("summe"),
                                    "norwegen": next((g["netto"] for g in pipe.get("gruppen", []) if g.get("name") == "Norwegen"), None)}, strom_daten)
     res["stand"] = stamp()
+    res["modell_version"] = 3
     # Verlauf der Prognose festhalten, damit sichtbar wird, wie sie sich mit dem tatsächlichen Verlauf ändert
     try:
         pv = read("prognose_verlauf.json", {"eintraege": []}).get("eintraege", [])
@@ -974,7 +1081,7 @@ def main():
         ("gas_lng.json", gas_lng), ("gas_speicher.json", gas_speicher), ("kraftstoff.json", kraftstoff), ("rohoel.json", rohoel),
         ("wetter.json", wetter), ("gas_historie.json", gas_historie), ("reichweite.json", reichweite),
         ("gas_europa.json", gas_europa), ("gas_anlagen.json", gas_anlagen),
-        ("gaspreis.json", gaspreis), ("lng_tanks.json", lng_tanks), ("gas_umfeld.json", gas_umfeld), ("gas_stoerungen.json", gas_stoerungen), ("gas_vorausschau.json", gas_vorausschau),
+        ("gaspreis.json", gaspreis), ("lng_tanks.json", lng_tanks), ("gas_umfeld.json", gas_umfeld), ("gas_stoerungen.json", gas_stoerungen), ("faktoren_extra.json", faktoren_extra), ("gas_vorausschau.json", gas_vorausschau),
     ]
     for name, fn in jobs:
         if nur and name.split(".")[0] not in nur:

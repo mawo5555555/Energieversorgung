@@ -222,6 +222,11 @@
     var g = '<rect x="' + L + '" y="' + Y(20) + '" width="' + pw + '" height="' + (Y(0) - Y(20)) + '" fill="var(--red)" opacity="0.10"/>';
     [0, 20, 50, 100].forEach(function (x) { g += '<line x1="' + L + '" x2="' + (W - 8) + '" y1="' + Y(x) + '" y2="' + Y(x) + '" stroke="' + (x === 20 ? "var(--red)" : "var(--sep)") + '" stroke-width="' + (x === 20 ? 0.9 : 0.6) + '"' + (x === 20 ? ' stroke-dasharray="3 3"' : "") + '/><text x="' + (L - 3) + '" y="' + (Y(x) + 3) + '" text-anchor="end" font-size="8" fill="var(--muted)">' + x + "</text>"; });
     [["2026-12-01", "Dez"], ["2027-01-01", "Jan"], ["2027-02-01", "Feb"], ["2027-03-01", "Mär"], ["2027-04-01", "Apr"]].forEach(function (m) { g += '<text x="' + (X(m[0]) + 1) + '" y="' + (H - 5) + '" font-size="8" fill="var(--muted)">' + m[1] + "</text>"; });
+    var an = !bb && v && v.analog && v.analog.band ? v.analog : null;
+    if (an) {
+      var up = an.band.max.map(function (p, i) { return X(p[0]).toFixed(1) + "," + Y(p[1]).toFixed(1); }), lo = an.band.min.map(function (p) { return X(p[0]).toFixed(1) + "," + Y(p[1]).toFixed(1); }).reverse();
+      g += '<polygon points="' + up.concat(lo).join(" ") + '" fill="var(--blue)" opacity="0.14"/>';
+    }
     var rows = "", fruehestes = null;
     ["mild", "normal", "kalt"].forEach(function (k) {
       var s = sz[k].konstant, vl = s.verlauf, er = s.erreicht || {}, hr = leerHochgerechnet(vl);
@@ -239,7 +244,7 @@
       '<svg viewBox="0 0 ' + W + " " + H + '" style="width:100%;height:auto;margin-top:6px" role="img" aria-label="Verlauf der Füllstände bis April">' + g + "</svg>" +
       '<p class="meta" style="margin-top:0">Roter Bereich: unter 20 % Füllstand (Gasmangellage-Anzeige, eine Annahme, keine amtliche Schwelle). Punkte: Zeitpunkt, an dem 20 % unterschritten werden. Linien nach dem 31. März: Hochrechnung bei gleichbleibendem Tempo.</p>' +
       '<table><tr><th>Winter</th><th class="n">Gasmangellage-Anzeige (unter 20 %)</th><th class="n">Speicher theoretisch erschöpft (0 %)</th></tr>' + rows + "</table>" +
-      '<p class="meta"><strong>Unterschied:</strong> Unter 20 % wird es kritisch, weil die Entnahmeleistung sinkt und kaum noch Reserve bleibt. „Erschöpft“ heißt, die Speicher wären rechnerisch ganz leer, das ist ein theoretischer Wert ohne Reaktion von Markt, Importen und Politik. Details und Annahmen weiter unten.</p>' + meta(q, ""));
+(an ? '<p style="margin:8px 0 0"><strong>Wetterläufe der letzten ' + an.anzahl + ' Winter:</strong> Füllstand am 1. Februar ' + nf0.format(an.ziel.min) + " bis " + nf0.format(an.ziel.max) + " % (Mitte " + nf0.format(an.ziel.median) + " %), unter 20 % zwischen dem " + dat(an.unter20.frueh) + " und dem " + dat(an.unter20.spaet) + ", am 31. März zwischen " + nf0.format(an.ende.min) + " und " + nf0.format(an.ende.max) + " % (blaue Fläche im Diagramm).</p>" : "") +       '<p class="meta"><strong>Unterschied:</strong> Unter 20 % wird es kritisch, weil die Entnahmeleistung sinkt und kaum noch Reserve bleibt. „Erschöpft“ heißt, die Speicher wären rechnerisch ganz leer, das ist ein theoretischer Wert ohne Reaktion von Markt, Importen und Politik. Details und Annahmen weiter unten.</p>' + meta(q, ""));
   }
   function renderVerstromung(v, w) {
     var nd = noData(v, "Verstromung"); if (nd) return set("cVerstromung", nd);
@@ -297,6 +302,11 @@
       if (lastc && avg != null) add("Füllstand gegenüber den Vorjahren", nf.format(lastc[1]) + " %", "Mittel " + hi.vorjahre[0] + "–" + hi.vorjahre[hi.vorjahre.length - 1] + " zur selben Zeit: " + nf.format(avg) + " %, also " + nf.format(lastc[1] - avg) + " Prozentpunkte.", lastc[1] - avg < -20 ? "bad" : lastc[1] - avg < -8 ? "warn" : "ok", "GIE AGSI+");
     }
     if (eu.laender) { var eud = eu.laender.filter(function (c) { return c.code === "EU"; })[0], ded = eu.laender.filter(function (c) { return c.code === "DE"; })[0]; if (eud && ded) add("Europa", "EU " + nf.format(eud.fuellstand_prozent) + " %", "Deutschland " + nf.format(ded.fuellstand_prozent) + " %, also " + nf.format(ded.fuellstand_prozent - eud.fuellstand_prozent) + " Prozentpunkte zum EU-Schnitt. Niedrige Speicher in Europa verschärfen den Wettbewerb um LNG.", ded.fuellstand_prozent - eud.fuellstand_prozent < -10 ? "warn" : "", "GIE AGSI+"); }
+    var ex = r[21] || {};
+    if (ex.rhein && ex.rhein.pegel_cm != null) add("Rhein-Pegel (Kaub)", nf0.format(ex.rhein.pegel_cm) + " cm, " + esc(ex.rhein.zustand || ""), "Niedrigwasser erschwert Kohle-Transporte und Kühlung und kann Gaskraftwerke stärker auslasten.", ex.rhein.zustand === "low" ? "warn" : "ok", "Pegelonline");
+    if (ex.industrie && ex.industrie.index != null) add("Industrieproduktion", nf.format(ex.industrie.index) + " (" + ex.industrie.monat + ")", "Großverbraucher Industrie, Index 2021 = 100, gegenüber Vorjahr " + (ex.industrie.vorjahr ? nf.format(ex.industrie.index - ex.industrie.vorjahr) + " Punkte" : "–") + ". Nur Anzeige.", "", "Eurostat");
+    var wd = new Date(); var tmr = []; for (var q2 = 0; q2 < 7; q2++) { var dd = new Date(wd.getTime() + q2 * 86400000), gt = dd.getDay(); if (gt === 0 || gt === 6) tmr.push(dd.toLocaleDateString("de-DE", { weekday: "short" })); }
+    add("Wochenenden und Feiertage", tmr.length ? tmr.join(", ") + " in den nächsten 7 Tagen" : "keine Wochenenden in den nächsten 7 Tagen", ((v.faktoren_modell || []).filter(function (m) { return m.name === "Wochentag und Feiertage"; })[0] || { wirkung: "Industrie und Gewerbe verbrauchen am Wochenende weniger." }).wirkung, "", "Modell");
     add("Verbrauch", nf2.format(v.ohne_importe.verbrauch_tag_twh) + " TWh/Tag im Jahresmittel", "Würden die Speicher alles allein liefern, reichten sie rechnerisch " + v.ohne_importe.tage + " Tage. Im Winter liegt der Verbrauch darüber.", "", "Angabe aus einer Gasspeicher-App");
     add("Unsicherheit der Rechnung", "±" + nf0.format(v.rueckrechnung_mittlerer_fehler_pp || 8) + " Prozentpunkte", "Typische Abweichung der Rückrechnung an acht vergangenen Wintern am 1. Februar.", "", "eigene Rückrechnung");
     var rows = rowsData.map(function (q) {
@@ -304,6 +314,26 @@
       return '<div class="fk"><span class="dot" style="background:' + col + '"></span><div><strong>' + esc(q.name) + '</strong><div class="fk-j">' + esc(q.jetzt) + '</div></div><div class="fk-w">' + esc(q.wirkung) + '<div class="meta" style="margin:2px 0 0">' + esc(q.quelle) + "</div></div></div>";
     }).join("");
     set("cFaktoren", rows + '<p class="meta">Punkt: grün unauffällig, orange beachten, rot kritisch (einfache Faustregeln dieser Seite, keine amtliche Bewertung). ' + (bb ? "Alle Werte gelten für Deutschland. Für das Brandenburger Umfeld siehe die Kacheln weiter unten. " : "") + "Alle Parameter fließen in die Vorausschau ein, außer Preis, Netzausfälle und Europa, die nur zur Einordnung dienen.</p>");
+  }
+  function renderModellFaktoren(v, ex) {
+    var nd = noData(v, "Modellfaktoren"); if (nd) return set("cModell", nd);
+    var fm = v.faktoren_modell || [];
+    function pill(st) { var c = st === "eingerechnet" ? "var(--green)" : /nicht|kein/.test(st) ? "var(--muted)" : "var(--orange)"; return '<span style="font-size:12px;font-weight:600;color:#fff;background:' + c + ';padding:2px 8px;border-radius:999px;white-space:nowrap">' + esc(st) + "</span>"; }
+    var rows = fm.map(function (f) { return '<div class="fk"><span class="dot" style="background:' + (f.status === "eingerechnet" ? "var(--green)" : "var(--fill)") + '"></span><div><strong>' + esc(f.name) + '</strong><div class="fk-j">' + pill(f.status) + '</div></div><div class="fk-w">' + esc(f.wirkung) + "</div></div>"; }).join("");
+    var extra = [];
+    if (ex && ex.rhein && ex.rhein.pegel_cm != null) extra.push(["Rhein-Pegel (Kühlwasser, Kohle-Transport)", "nur Anzeige", "Pegel Kaub " + nf0.format(ex.rhein.pegel_cm) + " cm, Zustand „" + esc(ex.rhein.zustand || "–") + "“ (letzte 30 Tage " + nf0.format(ex.rhein.min_30t) + " bis " + nf0.format(ex.rhein.max_30t) + " cm). Niedrigwasser erschwert Kohle-Transporte und Kühlung, was Gaskraftwerke stärker auslasten kann. Der Einfluss ist nicht berechnet, weil der Pegelverlauf nur 30 Tage umfasst."]);
+    if (ex && ex.industrie && ex.industrie.index != null) extra.push(["Industrieproduktion", "nur Anzeige", "Index " + nf.format(ex.industrie.index) + " (" + esc(ex.industrie.monat) + ", 2021 = 100)" + (ex.industrie.vorjahr ? ", Vorjahr " + nf.format(ex.industrie.vorjahr) : "") + ". Die Industrie ist ein Großverbraucher. Ein monatlicher Index hilft nicht für Tagesprognosen und ist deshalb nicht im Modell, er zeigt aber, dass die Produktion zuletzt stabil ist."]);
+    if (ex && ex.nachbarn_wetter && ex.nachbarn_wetter.length) extra.push(["Wetter in den Nachbarländern", "nur Anzeige", ex.nachbarn_wetter.map(function (n) { return esc(n.land) + " " + nf.format(n.temp_naechste_7) + " °C (zuvor " + nf.format(n.temp_letzte_7) + ")"; }).join(", ") + ". Kälte dort erhöht den Gasbedarf der Nachbarn und den Wettbewerb um LNG. Der Einfluss auf Deutschland ist nicht berechnet."]);
+    var nein = [
+      ["Wartung norwegischer Anlagen (Gassco)", "nicht verfügbar", "Die Meldungen stehen nicht bei ENTSOG, eine offene Schnittstelle habe ich nicht gefunden."],
+      ["LNG-Schiffe und Seeverkehr", "nicht verfügbar", "Dafür gibt es keine freie Datenquelle."],
+      ["Stromhandel und -importe", "nicht verfügbar", "Nicht eingebunden, weil ich die passende Datenreihe nicht geprüft habe."],
+      ["Preisunterschied Sommer/Winter", "nicht verfügbar", "Es gibt nur den Preis des nächsten Monats, keine offene Terminkurve."],
+      ["Politik, Streiks, Verdichterausfälle", "nicht abbildbar", "Sie ändern sich durch Beschlüsse und Einzelereignisse, nicht durch Datenreihen."]
+    ];
+    var rows2 = extra.concat(nein).map(function (f) { return '<div class="fk"><span class="dot" style="background:var(--fill)"></span><div><strong>' + esc(f[0]) + '</strong><div class="fk-j">' + pill(f[1]) + '</div></div><div class="fk-w">' + f[2] + "</div></div>"; }).join("");
+    var fehler = v.rueckrechnung_mittlerer_fehler_pp;
+    set("cModell", rows + rows2 + '<p class="hint">Ehrlich eingeordnet: Mit diesen Faktoren erklärt das Modell die tägliche Entnahme besser (' + nf0.format((v.verstromung && v.verstromung.fit_entnahme ? v.verstromung.fit_entnahme.r2_neu : 0) * 100) + " % statt " + nf0.format((v.verstromung && v.verstromung.fit_entnahme ? v.verstromung.fit_entnahme.r2_alt : 0) * 100) + " % der Schwankung). Über mehrere Monate ist es aber nicht genauer: Die mittlere Abweichung am 1. Februar liegt bei " + nf.format(fehler || 0) + " Prozentpunkten (Rückrechnung an acht Wintern, mit denselben Daten wie die Schätzung). Mehr Faktoren bedeuten nicht automatisch eine bessere Prognose. Faktoren mit unplausiblem Vorzeichen habe ich verworfen.</p>" + meta(v, esc(v.quelle || "")));
   }
   function renderEinsp(d) {
     var nd = noData(d, "Einspeicherung"); if (nd) return set("cEinsp", nd);
@@ -554,12 +584,12 @@
   }
 
   function load() {
-    Promise.all(["meta.json", "gas_speicher.json", "gas_lng.json", "gas_pipeline.json", "strom.json", "frequenz.json", "kraftstoff.json", "rohoel.json", "reichweite.json", "gas_historie.json", "wetter.json", "gas_europa.json", "gas_anlagen.json", "gaspreis.json", "lng_tanks.json", "gas_umfeld.json", "gas_vorausschau.json", "gas_umfeld_vorausschau.json", "gas_stoerungen.json", "gas_preisanalyse.json", "prognose_verlauf.json"].map(get)).then(function (r) {
+    Promise.all(["meta.json", "gas_speicher.json", "gas_lng.json", "gas_pipeline.json", "strom.json", "frequenz.json", "kraftstoff.json", "rohoel.json", "reichweite.json", "gas_historie.json", "wetter.json", "gas_europa.json", "gas_anlagen.json", "gaspreis.json", "lng_tanks.json", "gas_umfeld.json", "gas_vorausschau.json", "gas_umfeld_vorausschau.json", "gas_stoerungen.json", "gas_preisanalyse.json", "prognose_verlauf.json", "faktoren_extra.json"].map(get)).then(function (r) {
       document.getElementById("stand").textContent = r[0] && r[0].letzter_lauf ? "Letzter Datenabruf: " + when(r[0].letzter_lauf) : "Noch kein Datenabruf.";
       [function () { renderSpeicherDE(r[1]); }, function () { renderSpeicherBB(r[1]); },
         function () { renderLngEin(r[2]); }, function () { renderPipe(r[3]); },
         function () { renderPreis(r[4]); }, function () { renderMix(r[4]); }, function () { renderFreq(r[5]); }, function () { renderKraft(r[6]); },
-        function () { renderOel(r[7]); }, function () { renderReich(r[8], r[16]); }, function () { renderHist(r[9]); }, function () { renderWetter(r[10]); }, function () { renderEuropa(r[11]); }, function () { renderAnlagen(r[12]); }, function () { renderTtf(r[13], r[19]); }, function () { renderLngTanks(r[14]); }, function () { renderUmfeld(r[15]); }, function () { renderVorausschau(r[16], r[20]); }, function () { renderEinsp(r[16]); }, function () { renderUmfeldVor(r[17], r[15]); }, function () { renderStoerungen(r[18]); }, function () { renderUeberblick(r[16], r[17]); }, function () { renderVerstromung(r[16]); }, function () { state.alle = r; renderFaktoren(r); }, function () { renderVersorgung(r[16], r[17]); }
+        function () { renderOel(r[7]); }, function () { renderReich(r[8], r[16]); }, function () { renderHist(r[9]); }, function () { renderWetter(r[10]); }, function () { renderEuropa(r[11]); }, function () { renderAnlagen(r[12]); }, function () { renderTtf(r[13], r[19]); }, function () { renderLngTanks(r[14]); }, function () { renderUmfeld(r[15]); }, function () { renderVorausschau(r[16], r[20]); }, function () { renderEinsp(r[16]); }, function () { renderUmfeldVor(r[17], r[15]); }, function () { renderStoerungen(r[18]); }, function () { renderUeberblick(r[16], r[17]); }, function () { renderVerstromung(r[16]); }, function () { renderModellFaktoren(r[16], r[21]); }, function () { state.alle = r; renderFaktoren(r); }, function () { renderVersorgung(r[16], r[17]); }
       ].forEach(function (f) { try { f(); } catch (e) { if (window.console) console.error(e); } });
     });
   }

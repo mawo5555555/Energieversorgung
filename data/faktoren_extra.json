@@ -1,0 +1,94 @@
+{
+ "stand": "2026-11-12T12:29:52Z",
+ "rhein": {
+  "pegel_cm": 39.0,
+  "zustand": "low",
+  "min_30t": 5.0,
+  "max_30t": 61.0,
+  "zeit": "2026-11-12T13:15:00+01:00",
+  "quelle": "Pegelonline (WSV), Pegel Kaub"
+ },
+ "industrie": {
+  "monat": "2026-09",
+  "index": 92.2,
+  "vorjahr": 91.4,
+  "verlauf": [
+   [
+    "2025-10",
+    91.8
+   ],
+   [
+    "2025-11",
+    92.7
+   ],
+   [
+    "2025-12",
+    91.8
+   ],
+   [
+    "2026-01",
+    91.4
+   ],
+   [
+    "2026-02",
+    91.5
+   ],
+   [
+    "2026-03",
+    90.7
+   ],
+   [
+    "2026-04",
+    90.7
+   ],
+   [
+    "2026-05",
+    91.5
+   ],
+   [
+    "2026-06",
+    91.7
+   ],
+   [
+    "2026-07",
+    90.1
+   ],
+   [
+    "2026-08",
+    91.0
+   ],
+   [
+    "2026-09",
+    92.2
+   ]
+  ],
+  "quelle": "Eurostat, Produktion im produzierenden Gewerbe (saisonbereinigt, 2021=100)"
+ },
+ "nachbarn_wetter": [
+  {
+   "land": "Frankreich",
+   "temp_naechste_7": 8.3,
+   "temp_letzte_7": 8.7
+  },
+  {
+   "land": "Polen",
+   "temp_naechste_7": 4.5,
+   "temp_letzte_7": 2.7
+  },
+  {
+   "land": "Niederlande",
+   "temp_naechste_7": 6.3,
+   "temp_letzte_7": 6.4
+  },
+  {
+   "land": "Österreich",
+   "temp_naechste_7": 6.5,
+   "temp_letzte_7": 5.0
+  },
+  {
+   "land": "Italien",
+   "temp_naechste_7": 16.7,
+   "temp_letzte_7": 14.5
+  }
+ ]
+}
