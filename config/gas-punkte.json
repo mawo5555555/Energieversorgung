@@ -1,0 +1,18 @@
+{
+  "hinweis": "ENTSOG-Messpunkte (Physical Flow, Richtung Entry = Einspeisung nach Deutschland). Pro Punkt und Tag gilt der höchste gemeldete Wert, weil beide Netzbetreiber dieselbe Menge melden. Näherung für die Anzeige, Punkte bitte bei Bedarf anpassen.",
+  "pipeline": {
+    "Norwegen": ["ITP-00208", "ITP-00209", "ITP-00210"],
+    "Niederlande": ["ITP-10012", "ITP-10010"],
+    "Belgien": ["ITP-00614"],
+    "Dänemark": ["ITP-00135"],
+    "Polen": ["ITP-00096", "ITP-00497"],
+    "Tschechien": ["ITP-00537", "ITP-00538"],
+    "Frankreich": ["ITP-00137"],
+    "Österreich": ["ITP-00019", "ITP-00140"]
+  },
+  "lng": {
+    "Wilhelmshaven": ["LNG-00083"],
+    "Brunsbüttel": ["LNG-00060"],
+    "Stade": ["LNG-00078"]
+  }
+}

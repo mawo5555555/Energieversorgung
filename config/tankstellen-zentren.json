@@ -1,0 +1,14 @@
+{
+  "hinweis": "Suchmittelpunkte für Kraftstoffpreise in Brandenburg (Radius max. 25 km, Tankerkönig).",
+  "radius_km": 25,
+  "zentren": [
+    { "name": "Potsdam", "lat": 52.3906, "lng": 13.0645 },
+    { "name": "Cottbus", "lat": 51.7563, "lng": 14.3329 },
+    { "name": "Frankfurt (Oder)", "lat": 52.3471, "lng": 14.5506 },
+    { "name": "Schwedt/Oder", "lat": 53.0627, "lng": 14.2872 },
+    { "name": "Neuruppin", "lat": 52.9253, "lng": 12.8036 },
+    { "name": "Brandenburg an der Havel", "lat": 52.4125, "lng": 12.5316 },
+    { "name": "Eberswalde", "lat": 52.8350, "lng": 13.8190 },
+    { "name": "Senftenberg", "lat": 51.5256, "lng": 14.0042 }
+  ]
+}
