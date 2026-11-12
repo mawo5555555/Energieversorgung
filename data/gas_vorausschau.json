@@ -3381,11 +3381,6 @@
    "wirkung": "Je +10 €/MWh Börsenstrompreis etwa -1 GWh Gas für Strom. Der Preis wird auf dem Stand der letzten 14 Tage gehalten."
   },
   {
-   "name": "Gaspreis (Preiselastizität)",
-   "status": "geprüft, nicht eingerechnet",
-   "wirkung": "In den Daten seit 2018 ergibt sich ein unplausibler Zusammenhang (höherer Preis, mehr Entnahme: +25 GWh/Tag je +10 €/MWh), das ist eine Scheinkorrelation mit den Krisenjahren. Ein dämpfender Preiseffekt auf den Verbrauch ist plausibel, aber aus diesen Daten nicht belegbar."
-  },
-  {
    "name": "Konjunktur und Heizverhalten",
    "status": "eingerechnet",
    "wirkung": "Jüngere Winter zählen stärker (Gewicht 0,7 je Jahr zurück), damit das sparsamere Verhalten nach 2022 stärker durchschlägt."
@@ -3425,6 +3420,37 @@
     "fehl_tage": 34,
     "fehl_erster": "2027-02-24",
     "fehl_spitze_gwh": 746
+   }
+  },
+  {
+   "fall": "Kältewelle in den Nachbarländern, 14 Tage im Januar (weniger Importe)",
+   "gwh_tag": 111,
+   "schwach": false,
+   "normal": {
+    "fuellstand_ziel_tag": 19.7,
+    "fuellstand_ende": 1.6,
+    "erreicht": {
+     "30": "2027-01-14",
+     "20": "2027-02-01",
+     "10": "2027-02-24"
+    },
+    "fehl_twh": 2.31,
+    "fehl_tage": 12,
+    "fehl_erster": "2027-03-05",
+    "fehl_spitze_gwh": 291
+   },
+   "kalt": {
+    "fuellstand_ziel_tag": 16.3,
+    "fuellstand_ende": 0.7,
+    "erreicht": {
+     "30": "2027-01-10",
+     "20": "2027-01-25",
+     "10": "2027-02-12"
+    },
+    "fehl_twh": 15.45,
+    "fehl_tage": 34,
+    "fehl_erster": "2027-02-24",
+    "fehl_spitze_gwh": 747
    }
   },
   {
@@ -3666,7 +3692,7 @@
   "verbrauch_tag_twh": 2.48,
   "tage": 58
  },
- "stand": "2026-11-12T12:29:52Z",
- "modell_version": 3,
+ "stand": "2026-11-12T12:44:25Z",
+ "modell_version": 4,
  "quelle": "GIE AGSI+ (Speicherdaten seit 2018), Open-Meteo (Temperaturen), eigene Berechnung"
 }
