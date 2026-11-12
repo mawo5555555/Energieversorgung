@@ -219,6 +219,88 @@ def gas_speicher():
     return out
 
 
+# ---------- Gasspeicher Europa und einzelne Länder (AGSI+) ----------
+EUROPA = [("EU", "continent=eu", "Europäische Union"), ("DE", "country=DE", "Deutschland"), ("NL", "country=NL", "Niederlande"),
+          ("AT", "country=AT", "Österreich"), ("FR", "country=FR", "Frankreich"), ("IT", "country=IT", "Italien"),
+          ("PL", "country=PL", "Polen"), ("CZ", "country=CZ", "Tschechien"), ("HU", "country=HU", "Ungarn"), ("ES", "country=ES", "Spanien")]
+
+
+def agsi_letzte(query, h, tage=10):
+    von = (NOW - timedelta(days=tage)).strftime("%Y-%m-%d")
+    d = get_json(f"https://agsi.gie.eu/api?{query}&from={von}&size=30", h, 60).get("data", [])
+    d = [r for r in d if r.get("full") not in (None, "", "-")]
+    d.sort(key=lambda r: r["gasDayStart"])
+    return d
+
+
+def gas_europa():
+    key = os.environ.get("GIE_API_KEY", "").strip()
+    if not key:
+        return {"stand": stamp(), "hinweis": "Noch kein GIE-Schlüssel hinterlegt."}
+    h = {"x-key": key}
+    laender, fehler = [], []
+    for code, q, name in EUROPA:
+        try:
+            d = agsi_letzte(q, h)
+            if not d:
+                fehler.append(code)
+                continue
+            l = d[-1]
+            laender.append({"code": code, "name": name, "gastag": l["gasDayStart"], "fuellstand_prozent": fl(l["full"]),
+                            "gas_twh": fl(l["gasInStorage"]), "kapazitaet_twh": fl(l["workingGasVolume"]),
+                            "einspeicherung_gwh": fl(l["injection"]), "ausspeicherung_gwh": fl(l["withdrawal"])})
+        except Exception as e:  # noqa: BLE001
+            fehler.append(f"{code}: {str(e)[:60]}")
+    if not laender:
+        raise ValueError("keine Länderdaten: " + "; ".join(fehler))
+    return {"stand": stamp(), "quelle": "GIE AGSI+ (agsi.gie.eu)", "laender": laender, "ohne_daten": fehler}
+
+
+# ---------- Große Speicher in Deutschland einzeln (AGSI+) ----------
+AUSSCHLUSS = ("VGS", "Zone", "Hub", "historical", "decommissioned", "aggregated", "GPL", "INNEXPOOL", "VSP", "Pool")
+
+
+def gas_anlagen():
+    key = os.environ.get("GIE_API_KEY", "").strip()
+    if not key:
+        return {"stand": stamp(), "hinweis": "Noch kein GIE-Schlüssel hinterlegt."}
+    old = read("gas_anlagen.json", {})
+    try:
+        alt = datetime.strptime(old["stand"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+        if NOW - alt < timedelta(hours=6) and old.get("anlagen") and not old.get("fehler"):
+            return None  # viele Einzelabrufe, deshalb nur alle paar Stunden
+    except (KeyError, ValueError):
+        pass
+    with open(os.path.join(DATA, "agsi_anlagen.json"), encoding="utf-8") as f:
+        firmen = json.load(f)["roh"]
+    kand, gesehen = [], set()
+    for c in firmen:
+        if c.get("country") != "DE":
+            continue
+        for f in c.get("facilities", []):
+            ende = f.get("operational_end_date")
+            if (ende and ende < NOW.strftime("%Y-%m-%d")) or f["eic"] in gesehen or any(w in f["name"] for w in AUSSCHLUSS):
+                continue
+            gesehen.add(f["eic"])
+            kand.append((c["name"], c["eic"], f["eic"], f["name"]))
+    h = {"x-key": key}
+    out, fehler = [], 0
+    for firma, ceic, feic, name in kand:
+        try:
+            d = agsi_letzte(f"country=DE&company={ceic}&facility={feic}", h)
+            if d and fl(d[-1]["workingGasVolume"]) > 0:
+                l = d[-1]
+                out.append({"name": name.replace("UGS ", ""), "firma": firma.strip(), "gastag": l["gasDayStart"], "fuellstand_prozent": fl(l["full"]),
+                            "gas_twh": fl(l["gasInStorage"]), "kapazitaet_twh": fl(l["workingGasVolume"]),
+                            "einspeicherung_gwh": fl(l["injection"]), "ausspeicherung_gwh": fl(l["withdrawal"])})
+        except Exception:  # noqa: BLE001
+            fehler += 1
+    if not out:
+        raise ValueError("keine Anlagendaten")
+    out.sort(key=lambda a: a["kapazitaet_twh"], reverse=True)
+    return {"stand": stamp(), "quelle": "GIE AGSI+ (agsi.gie.eu)", "anlagen": out, "ohne_daten": fehler}
+
+
 # ---------- Kraftstoffpreise (Tankerkönig, Brandenburg) ----------
 def kraftstoff():
     key = os.environ.get("TANKERKOENIG_API_KEY", "").strip()
@@ -406,6 +488,7 @@ def main():
         ("frequenz.json", frequenz), ("strom.json", strom), ("gas_pipeline.json", gas_pipeline),
         ("gas_lng.json", gas_lng), ("gas_speicher.json", gas_speicher), ("kraftstoff.json", kraftstoff), ("rohoel.json", rohoel),
         ("wetter.json", wetter), ("gas_historie.json", gas_historie), ("reichweite.json", reichweite),
+        ("gas_europa.json", gas_europa), ("gas_anlagen.json", gas_anlagen),
     ]
     for name, fn in jobs:
         if nur and name.split(".")[0] not in nur:

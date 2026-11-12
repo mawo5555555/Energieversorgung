@@ -88,6 +88,27 @@
     set("cReichBB", errNote(d) + ((d.brandenburg || []).length ? d.brandenburg.map(function (r) { return "<h3>" + esc(r.name) + "</h3>" + reichBlock(r); }).join("") : hint("Keine Brandenburger Speicherdaten.")) + ann + meta(d, ""));
   }
 
+  function renderEuropa(d) {
+    var nd = noData(d, "Europa"); if (nd) return set("cEuropa", nd);
+    if (!d.laender) return set("cEuropa", errNote(d) + hint(d.hinweis || "Keine Daten."));
+    var l = d.laender.slice().sort(function (a, b) { return b.fuellstand_prozent - a.fuellstand_prozent; });
+    var h = errNote(d) + l.map(function (c) {
+      var de = c.code === "DE", col = c.fuellstand_prozent < 30 ? "var(--red)" : c.fuellstand_prozent < 60 ? "var(--orange)" : "var(--green)";
+      return '<div class="row"><span style="' + (de ? "font-weight:700" : "") + '">' + esc(c.name) + '</span><div class="bar"><span style="width:' + Math.min(100, c.fuellstand_prozent) + "%;background:" + col + '"></span></div><span class="val" style="' + (de ? "font-weight:700;color:var(--label)" : "") + '">' + nf.format(c.fuellstand_prozent) + " %</span></div>";
+    }).join("");
+    set("cEuropa", h + '<p class="meta">Füllstand in % des nutzbaren Speichervolumens, letzter gemeldeter Gastag' + (l[0] ? " " + esc(l[0].gastag) : "") + (d.ohne_daten && d.ohne_daten.length ? ". Ohne Daten: " + esc(d.ohne_daten.join(", ")) : "") + "</p>" + meta(d, esc(d.quelle || "")));
+  }
+  function renderAnlagen(d) {
+    var nd = noData(d, "Anlagen"); if (nd) return set("cAnlagen", nd);
+    if (!d.anlagen) return set("cAnlagen", errNote(d) + hint(d.hinweis || "Keine Daten."));
+    var rows = d.anlagen.slice(0, 15).map(function (a) {
+      var col = a.fuellstand_prozent < 30 ? "var(--red)" : a.fuellstand_prozent < 60 ? "var(--orange)" : "var(--green)";
+      return "<tr><td>" + esc(a.name) + '<div class="meta" style="margin:0">' + esc(a.firma) + '</div></td><td class="n">' + nf2.format(a.kapazitaet_twh) + '</td><td style="width:28%"><div class="bar" style="height:8px;background:var(--fill);border-radius:4px;overflow:hidden"><span style="display:block;height:100%;width:' + Math.min(100, a.fuellstand_prozent) + "%;background:" + col + '"></span></div></td><td class="n"><strong>' + nf.format(a.fuellstand_prozent) + " %</strong></td></tr>";
+    }).join("");
+    set("cAnlagen", errNote(d) + '<table><tr><th>Speicher</th><th class="n">Volumen TWh</th><th></th><th class="n">Füllstand</th></tr>' + rows + "</table>" +
+      '<p class="meta">Die 15 größten von ' + d.anlagen.length + " Anlagen mit Daten, sortiert nach nutzbarem Speichervolumen.</p>" + meta(d, esc(d.quelle || "")));
+  }
+
   var MONATE = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"], MSTART = [1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335];
   function renderHist(d) {
     var nd = noData(d, "Jahresvergleich"); if (nd) return set("cHist", nd);
@@ -195,12 +216,12 @@
   }
 
   function load() {
-    Promise.all(["meta.json", "gas_speicher.json", "gas_lng.json", "gas_pipeline.json", "strom.json", "frequenz.json", "kraftstoff.json", "rohoel.json", "reichweite.json", "gas_historie.json", "wetter.json"].map(get)).then(function (r) {
+    Promise.all(["meta.json", "gas_speicher.json", "gas_lng.json", "gas_pipeline.json", "strom.json", "frequenz.json", "kraftstoff.json", "rohoel.json", "reichweite.json", "gas_historie.json", "wetter.json", "gas_europa.json", "gas_anlagen.json"].map(get)).then(function (r) {
       document.getElementById("stand").textContent = r[0] && r[0].letzter_lauf ? "Letzter Datenabruf: " + when(r[0].letzter_lauf) : "Noch kein Datenabruf.";
       [function () { renderSpeicherDE(r[1]); }, function () { renderSpeicherBB(r[1]); },
         function () { renderGruppen("cLng", r[2], "terminals", "LNG"); }, function () { renderGruppen("cPipe", r[3], "gruppen", "Pipelines"); },
         function () { renderPreis(r[4]); }, function () { renderMix(r[4]); }, function () { renderFreq(r[5]); }, function () { renderKraft(r[6]); },
-        function () { renderOel(r[7]); }, function () { renderReich(r[8]); }, function () { renderHist(r[9]); }, function () { renderWetter(r[10]); }
+        function () { renderOel(r[7]); }, function () { renderReich(r[8]); }, function () { renderHist(r[9]); }, function () { renderWetter(r[10]); }, function () { renderEuropa(r[11]); }, function () { renderAnlagen(r[12]); }
       ].forEach(function (f) { try { f(); } catch (e) { if (window.console) console.error(e); } });
     });
   }

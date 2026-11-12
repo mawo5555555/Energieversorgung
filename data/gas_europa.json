@@ -1,0 +1,107 @@
+{
+ "stand": "2026-11-12T07:20:12Z",
+ "quelle": "GIE AGSI+ (agsi.gie.eu)",
+ "laender": [
+  {
+   "code": "EU",
+   "name": "Europäische Union",
+   "gastag": "2026-11-10",
+   "fuellstand_prozent": 71.61,
+   "gas_twh": 810.9276,
+   "kapazitaet_twh": 1132.3616,
+   "einspeicherung_gwh": 269.55,
+   "ausspeicherung_gwh": 4666.3
+  },
+  {
+   "code": "DE",
+   "name": "Deutschland",
+   "gastag": "2026-11-10",
+   "fuellstand_prozent": 58.05,
+   "gas_twh": 143.591,
+   "kapazitaet_twh": 247.3563,
+   "einspeicherung_gwh": 53.15,
+   "ausspeicherung_gwh": 1157.3
+  },
+  {
+   "code": "NL",
+   "name": "Niederlande",
+   "gastag": "2026-11-10",
+   "fuellstand_prozent": 62.65,
+   "gas_twh": 90.2467,
+   "kapazitaet_twh": 144.0428,
+   "einspeicherung_gwh": 17.03,
+   "ausspeicherung_gwh": 637.2
+  },
+  {
+   "code": "AT",
+   "name": "Österreich",
+   "gastag": "2026-11-10",
+   "fuellstand_prozent": 63.69,
+   "gas_twh": 63.8633,
+   "kapazitaet_twh": 100.2789,
+   "einspeicherung_gwh": 0.0,
+   "ausspeicherung_gwh": 307.2
+  },
+  {
+   "code": "FR",
+   "name": "Frankreich",
+   "gastag": "2026-11-10",
+   "fuellstand_prozent": 79.58,
+   "gas_twh": 98.5834,
+   "kapazitaet_twh": 123.8779,
+   "einspeicherung_gwh": 83.67,
+   "ausspeicherung_gwh": 881.9
+  },
+  {
+   "code": "IT",
+   "name": "Italien",
+   "gastag": "2026-11-10",
+   "fuellstand_prozent": 88.24,
+   "gas_twh": 179.4965,
+   "kapazitaet_twh": 203.4249,
+   "einspeicherung_gwh": 0.17,
+   "ausspeicherung_gwh": 703.0
+  },
+  {
+   "code": "PL",
+   "name": "Polen",
+   "gastag": "2026-11-10",
+   "fuellstand_prozent": 96.66,
+   "gas_twh": 35.6181,
+   "kapazitaet_twh": 36.8491,
+   "einspeicherung_gwh": 0.0,
+   "ausspeicherung_gwh": 159.0
+  },
+  {
+   "code": "CZ",
+   "name": "Tschechien",
+   "gastag": "2026-11-10",
+   "fuellstand_prozent": 72.83,
+   "gas_twh": 32.9971,
+   "kapazitaet_twh": 45.3059,
+   "einspeicherung_gwh": 17.43,
+   "ausspeicherung_gwh": 224.3
+  },
+  {
+   "code": "HU",
+   "name": "Ungarn",
+   "gastag": "2026-11-10",
+   "fuellstand_prozent": 75.56,
+   "gas_twh": 51.4396,
+   "kapazitaet_twh": 68.0767,
+   "einspeicherung_gwh": 5.33,
+   "ausspeicherung_gwh": 191.7
+  },
+  {
+   "code": "ES",
+   "name": "Spanien",
+   "gastag": "2026-11-10",
+   "fuellstand_prozent": 80.48,
+   "gas_twh": 28.8373,
+   "kapazitaet_twh": 35.8318,
+   "einspeicherung_gwh": 0.0,
+   "ausspeicherung_gwh": 38.1
+  }
+ ],
+ "ohne_daten": []
+}
