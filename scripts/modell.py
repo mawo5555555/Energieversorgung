@@ -100,15 +100,19 @@ def winter_abweichungen(temp):
     return alle, min(mittel.values()) - alle, max(mittel.values()) - alle, mittel
 
 
-def simuliere(start, stock, kap, i_tag, tmap, bis, fit, cap, basis=15.0):
-    """Tagesweise Simulation. tmap(datum) -> Temperatur. Gibt Verlauf und Kennzahlen zurück."""
+def simuliere(start, stock, kap, i_tag, tmap, bis, fit, cap, basis=15.0, extra=0.0):
+    """Tagesweise Simulation. tmap(datum) -> Temperatur. extra = zusätzlicher Entnahmebedarf je Tag (GWh), z. B. bei Importausfall.
+
+    Fehlmenge = Bedarf, den die Speicher nicht liefern können (wegen Leistungsgrenze oder weil sie leer sind).
+    """
     verlauf, ungedeckt, engpass = [], 0.0, 0
     erreicht = {}
     erster_engpass = None
+    fehl_summe, fehl_tage, fehl_erster, fehl_spitze = 0.0, 0, None, 0.0
     d = start
     while d <= bis:
         f = stock / kap * 100
-        bedarf = max(0.0, fit["a"] + fit["b"] * hdd(tmap(d), basis))
+        bedarf = max(0.0, fit["a"] + fit["b"] * hdd(tmap(d), basis)) + extra
         c = cap(f)
         w = min(bedarf, c)
         if bedarf > c + 1e-9:
@@ -117,7 +121,16 @@ def simuliere(start, stock, kap, i_tag, tmap, bis, fit, cap, basis=15.0):
                 erster_engpass = d2s(d)
             ungedeckt += (bedarf - c) / 1000.0
         zu = i_tag if f < 99.5 else 0.0
-        stock = min(kap, max(0.0, stock + (zu - w) / 1000.0))
+        verfuegbar = stock * 1000.0 + zu
+        w_eff = min(w, verfuegbar)
+        fehl = bedarf - w_eff
+        if fehl > 1.0:
+            fehl_summe += fehl / 1000.0
+            fehl_tage += 1
+            fehl_spitze = max(fehl_spitze, fehl)
+            if fehl_erster is None:
+                fehl_erster = d2s(d)
+        stock = min(kap, max(0.0, stock + (zu - w_eff) / 1000.0))
         f2 = stock / kap * 100
         verlauf.append([d2s(d), round(f2, 1)])
         for marke in (30, 20, 10):
@@ -126,7 +139,8 @@ def simuliere(start, stock, kap, i_tag, tmap, bis, fit, cap, basis=15.0):
         if "leer" not in erreicht and stock <= 0.001:
             erreicht["leer"] = d2s(d)
         d += timedelta(days=1)
-    return {"verlauf": verlauf, "erreicht": erreicht, "engpass_tage": engpass, "ungedeckt_twh": round(ungedeckt, 2), "erster_engpass": erster_engpass}
+    return {"verlauf": verlauf, "erreicht": erreicht, "engpass_tage": engpass, "ungedeckt_twh": round(ungedeckt, 2), "erster_engpass": erster_engpass,
+            "fehl_twh": round(fehl_summe, 2), "fehl_tage": fehl_tage, "fehl_erster": fehl_erster, "fehl_spitze_gwh": round(fehl_spitze)}
 
 
 def wert_am(verlauf, tag):
@@ -318,7 +332,8 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None):
             ziel_tag = cfg["ziel"]["datum"]
             szen[name][var] = {"verlauf": sim["verlauf"][::2], "fuellstand_ziel_tag": wert_am(sim["verlauf"], ziel_tag),
                                "fuellstand_ende": sim["verlauf"][-1][1], "erreicht": sim["erreicht"],
-                               "engpass_tage": sim["engpass_tage"], "ungedeckt_twh": sim["ungedeckt_twh"]}
+                               "engpass_tage": sim["engpass_tage"], "ungedeckt_twh": sim["ungedeckt_twh"],
+                               "fehl_twh": sim["fehl_twh"], "fehl_tage": sim["fehl_tage"], "fehl_erster": sim["fehl_erster"], "fehl_spitze_gwh": sim["fehl_spitze_gwh"]}
     # Vorjahre tatsächlich
     vor = []
     for y in range(2018, heute.year):
@@ -333,6 +348,24 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None):
             vorjahr_verlauf.append([d2s(date(d.year + 1, d.month, d.day)), round(hist[d2s(d)]["full"], 1)])
     rr = rueckrechnung(hist, temp, fit, cap_fn("konstant", hoch, tief), basis)
     fehler = [abs(o["fehler_1_feb"]) for o in rr]
+    # Empfindlichkeit: Was, wenn Importe teilweise wegfallen (zusätzlicher Entnahmebedarf je Tag)?
+    pn = (import_ref or {}).get("pipeline_netto") or 0
+    lg = (import_ref or {}).get("lng") or 0
+    nor = (import_ref or {}).get("norwegen") or 0
+    ges = pn + lg
+    faelle = [("Importe 10 % niedriger", 0.10 * ges), ("Importe 20 % niedriger", 0.20 * ges)]
+    if lg:
+        faelle.append(("LNG fällt ganz aus", lg))
+    if nor:
+        faelle.append(("Norwegen fällt ganz aus", nor))
+    empf = []
+    for text, extra in faelle:
+        eintrag = {"fall": text, "gwh_tag": round(extra)}
+        for name in ("normal", "kalt"):
+            sim = simuliere(start_sim, r0["twh"], r0["kap"], i_tag, tmaps[name], bis, fit, cap_fn("faellt", hoch, tief), basis, extra)
+            eintrag[name] = {"fuellstand_ziel_tag": wert_am(sim["verlauf"], ziel_tag), "fuellstand_ende": sim["verlauf"][-1][1], "erreicht": sim["erreicht"],
+                             "fehl_twh": sim["fehl_twh"], "fehl_tage": sim["fehl_tage"], "fehl_erster": sim["fehl_erster"], "fehl_spitze_gwh": sim["fehl_spitze_gwh"]}
+        empf.append(eintrag)
     # Wie viel mehr Einspeicherung wäre nötig?
     start_sim = start_tag + timedelta(days=1)
     laenge = (bis - start_sim).days + 1
@@ -367,7 +400,7 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None):
         "szenarien": szen,
         "vorjahre": vor, "vorjahr_verlauf": vorjahr_verlauf,
         "rueckrechnung": rr, "rueckrechnung_mittlerer_fehler_pp": round(sum(fehler) / len(fehler), 1) if fehler else None,
-        "ziel": cfg["ziel"], "einspeicherung": einsp,
+        "ziel": cfg["ziel"], "einspeicherung": einsp, "importausfall": empf, "importe_ref": {"pipeline_netto": pn, "lng": lg, "norwegen": nor},
         "ohne_importe": {"jahresverbrauch_twh": cfg["jahresverbrauch_twh"], "quelle": cfg.get("jahresverbrauch_quelle"), "verbrauch_tag_twh": round(verbrauch_tag, 2),
                          "tage": round(r0["twh"] / verbrauch_tag)},
     }

@@ -399,6 +399,41 @@ def gas_umfeld():
     return out
 
 
+# ---------- Netzausfälle und Wartung (ENTSOG Urgent Market Messages) ----------
+def gas_stoerungen():
+    rows = get_json("https://transparency.entsog.eu/api/v1/urgentmarketmessages?limit=-1&balancingZoneKey=DE", timeout=120).get("urgentmarketmessages", [])
+    heute = NOW.date()
+    horizont = heute + timedelta(days=180)
+    out = []
+    for r in rows:
+        if r.get("isLatestVersion") is False or str(r.get("eventStatus", "")).lower() in ("withdrawn", "cancelled"):
+            continue
+        try:
+            von = datetime.fromisoformat(r["eventStart"]).date()
+            bis = datetime.fromisoformat(r["eventStop"]).date() if r.get("eventStop") else None
+        except (KeyError, TypeError, ValueError):
+            continue
+        if (bis and bis < heute) or von > horizont:
+            continue
+        try:
+            nicht = float(r.get("unavailableCapacity")) / 1e6
+        except (TypeError, ValueError):
+            nicht = None
+        try:
+            tech = float(r.get("technicalCapacity")) / 1e6
+        except (TypeError, ValueError):
+            tech = None
+        out.append({"betreiber": r.get("marketParticipantName"), "anlage": r.get("affectedAssetName"), "art": r.get("unavailabilityType"), "ereignis": r.get("eventType"),
+                    "von": von.isoformat(), "bis": bis.isoformat() if bis else None, "nicht_verfuegbar_gwh": round(nicht, 1) if nicht is not None else None,
+                    "technisch_gwh": round(tech, 1) if tech is not None else None, "richtung": r.get("direction"), "grund": r.get("unavailabilityReason"),
+                    "hinweis": (r.get("remarks") or "")[:200], "aktiv_jetzt": von <= heute})
+    out.sort(key=lambda x: (x["nicht_verfuegbar_gwh"] or 0), reverse=True)
+    geplant = [x for x in out if str(x["art"]).lower().startswith("planned")]
+    ungeplant = [x for x in out if str(x["art"]).lower().startswith("unplanned")]
+    return {"stand": stamp(), "quelle": "ENTSOG Transparency Platform, Urgent Market Messages (Deutschland)", "anzahl": len(out), "geplant": len(geplant), "ungeplant": len(ungeplant),
+            "summe_nicht_verfuegbar_gwh": round(sum(x["nicht_verfuegbar_gwh"] or 0 for x in out), 1), "meldungen": out[:30]}
+
+
 # ---------- Kraftstoffpreise (Tankerkönig, Brandenburg) ----------
 def kraftstoff():
     key = os.environ.get("TANKERKOENIG_API_KEY", "").strip()
@@ -652,6 +687,36 @@ def temp_historie():
     return tage
 
 
+def preisanalyse(hist):
+    """Zusammenhang zwischen TTF-Preis und Einspeicherung im Sommer (Apr-Okt) je Jahr, und wo der Preis jetzt im Verhältnis zur Historie steht."""
+    p1 = int(datetime(2018, 1, 1, tzinfo=timezone.utc).timestamp())
+    d = get_json(f"https://query1.finance.yahoo.com/v8/finance/chart/TTF%3DF?period1={p1}&period2={int(NOW.timestamp())}&interval=1d", {"User-Agent": "Mozilla/5.0"}, 60)
+    res = d["chart"]["result"][0]
+    preise = {datetime.fromtimestamp(t, timezone.utc).strftime("%Y-%m-%d"): c for t, c in zip(res.get("timestamp") or [], res["indicators"]["quote"][0].get("close") or []) if c is not None}
+    if len(preise) < 500:
+        raise ValueError(f"zu wenig Preisdaten ({len(preise)})")
+    jahre = []
+    for y in range(2018, NOW.year + 1):
+        sp = [v for t, v in preise.items() if t.startswith(str(y)) and 4 <= int(t[5:7]) <= 10]
+        ei = [h["i"] for t, h in hist.items() if t.startswith(str(y)) and 4 <= int(t[5:7]) <= 10]
+        if len(sp) > 100 and len(ei) > 100:
+            jahre.append({"jahr": y, "ttf_mittel": round(sum(sp) / len(sp), 1), "einspeicherung_mittel_gwh": round(sum(ei) / len(ei)), "tage": len(ei)})
+    n = len(jahre)
+    r = None
+    if n >= 4:
+        xs, ys = [j["ttf_mittel"] for j in jahre], [j["einspeicherung_mittel_gwh"] for j in jahre]
+        mx, my = sum(xs) / n, sum(ys) / n
+        sx = sum((x - mx) ** 2 for x in xs) ** 0.5
+        sy = sum((y - my) ** 2 for y in ys) ** 0.5
+        r = round(sum((x - mx) * (y - my) for x, y in zip(xs, ys)) / (sx * sy), 2) if sx and sy else None
+    alle = sorted(preise.values())
+    aktuell = preise[max(preise)]
+    perz = round(sum(1 for v in alle if v <= aktuell) / len(alle) * 100)
+    vor30 = [v for t, v in sorted(preise.items())][-31]
+    return {"stand": stamp(), "quelle": "Yahoo Finance (TTF) und GIE AGSI+", "jahre": jahre, "korrelation": r, "anzahl_jahre": n, "ttf_aktuell": round(aktuell, 1),
+            "perzentil_seit_2018": perz, "aenderung_30_tage_prozent": round((aktuell - vor30) / vor30 * 100, 1), "ttf_median_seit_2018": round(alle[len(alle) // 2], 1)}
+
+
 def gas_vorausschau():
     key = os.environ.get("GIE_API_KEY", "").strip()
     if not key:
@@ -659,7 +724,7 @@ def gas_vorausschau():
     old = read("gas_vorausschau.json", {})
     try:
         alt = datetime.strptime(old["stand"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
-        if NOW - alt < timedelta(hours=5) and old.get("szenarien") and old.get("einspeicherung") and read("gas_umfeld_vorausschau.json", {}).get("anlagen") and not old.get("fehler"):
+        if NOW - alt < timedelta(hours=5) and old.get("szenarien") and old.get("einspeicherung") and old.get("importausfall") and read("gas_umfeld_vorausschau.json", {}).get("anlagen") and not old.get("fehler"):
             return None  # aufwendig (Historie seit 2018), deshalb nur alle paar Stunden
     except (KeyError, ValueError):
         pass
@@ -669,8 +734,26 @@ def gas_vorausschau():
     pipe, lng = read("gas_pipeline.json", {}), read("gas_lng.json", {})
     cfg = read_cfg("modell.json")
     res, ctx = modell.vorausschau(hist, temp, read("wetter.json", {}), cfg, max(hist),
-                                  {"pipeline_netto": pipe.get("summe_netto"), "lng": lng.get("summe")})
+                                  {"pipeline_netto": pipe.get("summe_netto"), "lng": lng.get("summe"),
+                                   "norwegen": next((g["netto"] for g in pipe.get("gruppen", []) if g.get("name") == "Norwegen"), None)})
     res["stand"] = stamp()
+    # Verlauf der Prognose festhalten, damit sichtbar wird, wie sie sich mit dem tatsächlichen Verlauf ändert
+    try:
+        pv = read("prognose_verlauf.json", {"eintraege": []}).get("eintraege", [])
+        tag = max(hist)
+        sz = res["szenarien"]
+        eintrag = {"tag": tag, "fuellstand": res["ausgangslage"]["fuellstand_prozent"], "mild_feb": sz["mild"]["konstant"]["fuellstand_ziel_tag"],
+                   "normal_feb": sz["normal"]["konstant"]["fuellstand_ziel_tag"], "kalt_feb": sz["kalt"]["konstant"]["fuellstand_ziel_tag"],
+                   "normal_ende": sz["normal"]["konstant"]["fuellstand_ende"], "normal_unter30": sz["normal"]["konstant"]["erreicht"].get(30), "stand": stamp()}
+        pv = [e for e in pv if e.get("tag") != tag] + [eintrag]
+        write("prognose_verlauf.json", {"eintraege": sorted(pv, key=lambda e: e["tag"])[-120:]})
+    except Exception as e:  # noqa: BLE001
+        print("FEHL prognose_verlauf", e, file=sys.stderr)
+    # Gaspreis (TTF) und Einspeicherung seit 2018
+    try:
+        write("gas_preisanalyse.json", preisanalyse(hist))
+    except Exception as e:  # noqa: BLE001
+        write("gas_preisanalyse.json", {"stand": stamp(), "fehler": f"{type(e).__name__}: {e}"[:300]})
     # Speicher im Umfeld Brandenburgs: je Anlage eigene Historie und eigene Vorausschau
     try:
         fac = []
@@ -769,7 +852,7 @@ def main():
         ("gas_lng.json", gas_lng), ("gas_speicher.json", gas_speicher), ("kraftstoff.json", kraftstoff), ("rohoel.json", rohoel),
         ("wetter.json", wetter), ("gas_historie.json", gas_historie), ("reichweite.json", reichweite),
         ("gas_europa.json", gas_europa), ("gas_anlagen.json", gas_anlagen),
-        ("gaspreis.json", gaspreis), ("lng_tanks.json", lng_tanks), ("gas_umfeld.json", gas_umfeld), ("gas_vorausschau.json", gas_vorausschau),
+        ("gaspreis.json", gaspreis), ("lng_tanks.json", lng_tanks), ("gas_umfeld.json", gas_umfeld), ("gas_stoerungen.json", gas_stoerungen), ("gas_vorausschau.json", gas_vorausschau),
     ]
     for name, fn in jobs:
         if nur and name.split(".")[0] not in nur:

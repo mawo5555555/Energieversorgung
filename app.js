@@ -133,12 +133,18 @@
       '<p class="meta">Die 15 größten von ' + d.anlagen.length + " Anlagen mit Daten, sortiert nach nutzbarem Speichervolumen.</p>" + meta(d, esc(d.quelle || "")));
   }
 
-  function renderTtf(d) {
+  function renderTtf(d, an) {
     var nd = noData(d, "Erdgaspreis"); if (nd) return set("cTtf", nd);
     if (d.preis == null) return set("cTtf", errNote(d) || hint("Kein Erdgaspreis verfügbar."));
-    var up = d.aenderung_prozent >= 0;
+    var up = d.aenderung_prozent >= 0, extra = "";
+    if (an && !an.fehler && an.jahre) {
+      var r = an.korrelation, txt = r == null ? "nicht berechenbar" : Math.abs(r) < 0.3 ? "kein klarer Zusammenhang" : (r < 0 ? "höhere Preise gingen mit weniger Einspeicherung einher" : "höhere Preise gingen mit mehr Einspeicherung einher");
+      extra = '<h3 style="margin-top:12px">Preis und Einspeicherung</h3><p style="margin:0">Der Preis liegt bei ' + nf.format(an.ttf_aktuell) + " €/MWh, das ist höher als an " + an.perzentil_seit_2018 + " % der Tage seit 2018 (Median " + nf.format(an.ttf_median_seit_2018) + " €/MWh), in 30 Tagen " + (an.aenderung_30_tage_prozent >= 0 ? "+" : "") + nf.format(an.aenderung_30_tage_prozent) + " %.</p>" +
+        '<table style="margin-top:6px"><tr><th>Sommer (Apr–Okt)</th><th class="n">Ø TTF €/MWh</th><th class="n">Ø Einspeicherung GWh/Tag</th></tr>' + an.jahre.map(function (y) { return "<tr><td>" + y.jahr + '</td><td class="n">' + nf0.format(y.ttf_mittel) + '</td><td class="n">' + nf0.format(y.einspeicherung_mittel_gwh) + "</td></tr>"; }).join("") + "</table>" +
+        '<p class="meta">Zusammenhang über ' + an.anzahl_jahre + " Jahre: Korrelation " + (r == null ? "–" : nf2.format(r)) + " (" + txt + "). Bei so wenigen Jahren ist das nur ein Hinweis. Politische Vorgaben, Terminal-Kapazitäten und die Lage nach 2022 spielen mit hinein.</p>";
+    }
     set("cTtf", errNote(d) + '<div class="big">' + nf2.format(d.preis) + ' <span class="unit">€/MWh</span></div><p style="margin:4px 0;color:var(--' + (up ? "bad" : "ok") + ')">' + (up ? "▲ " : "▼ ") + nf2.format(Math.abs(d.aenderung_prozent)) + " % zum Vortag</p>" +
-      spark((d.verlauf || []).map(function (p) { return [0, p[1]]; }), { label: "TTF, 60 Tage" }) + '<p class="meta">Niederländischer Großhandelspreis (TTF), Leitpreis für Erdgas in Europa. Kursdatum ' + esc(d.datum) + ", verzögert</p>" + meta(d, esc(d.quelle || "")));
+      spark((d.verlauf || []).map(function (p) { return [0, p[1]]; }), { label: "TTF, 60 Tage" }) + '<p class="meta">Niederländischer Großhandelspreis (TTF), Leitpreis für Erdgas in Europa. Kursdatum ' + esc(d.datum) + ", verzögert</p>" + extra + meta(d, esc(d.quelle || "")));
   }
   function renderLngTanks(d) {
     var nd = noData(d, "LNG-Tanks"); if (nd) return set("cLngTanks", nd);
@@ -153,8 +159,13 @@
       '<p class="meta">Tankinhalt und Ausspeisung der LNG-Terminals, letzter gemeldeter Gastag' + (de && de.gastag ? " " + esc(de.gastag) : "") + ". Einen Prozent-Füllstand melden die Terminals nicht.</p>" + meta(d, esc(d.quelle || "")));
   }
 
-  function renderVorausschau(d) {
+  function renderVorausschau(d, pv) {
     var nd = noData(d, "Vorausschau"); if (nd) return set("cVorausschau", nd);
+    var pvx = "";
+    if (pv && pv.eintraege) {
+      var es = pv.eintraege.slice(-8).reverse();
+      pvx = '<h3 style="margin-top:14px">Wie sich die Prognose verändert hat</h3>' + (es.length < 2 ? '<p class="meta" style="margin-top:0">Die Prognose wird ab jetzt täglich festgehalten, hier erscheint dann der Verlauf.</p>' : '<table><tr><th>Stand</th><th class="n">Füllstand</th><th class="n">1.2. normal</th><th class="n">1.2. kalt</th><th class="n">31.3. normal</th></tr>' + es.map(function (e) { return "<tr><td>" + new Date(e.tag + "T12:00:00").toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" }) + '</td><td class="n">' + nf.format(e.fuellstand) + ' %</td><td class="n">' + nf0.format(e.normal_feb) + ' %</td><td class="n">' + nf0.format(e.kalt_feb) + ' %</td><td class="n">' + nf0.format(e.normal_ende) + " %</td></tr>"; }).join("") + "</table>") + '<p class="meta">Die Berechnung nutzt täglich den neuesten Speicherstand und die neueste Wettervorhersage und passt sich dadurch an.</p>';
+    }
     if (!d.szenarien) return set("cVorausschau", errNote(d) + hint(d.hinweis || "Keine Daten."));
     var W = 340, H = 170, L = 28, T0 = 8, B = 22, pw = W - L - 8, ph = H - T0 - B;
     var t0 = new Date("2026-11-10T12:00:00").getTime(), t1 = new Date(d.ziel.datum.slice(0, 4) === "2027" ? "2027-03-31T12:00:00" : "2027-03-31T12:00:00").getTime();
@@ -186,7 +197,7 @@
       '<h3 style="margin-top:14px">Wie gut ist das Modell?</h3><p class="meta" style="margin-top:0">Entnahme ≈ ' + nf0.format(m.a_gwh) + " + " + nf0.format(m.b_gwh_je_grad) + " GWh je Grad unter " + m.heizgrenze_c + " °C (aus " + m.tage + " Wintertagen seit 2018, Bestimmtheit " + nf2.format(m.r2) + "). Höchste beobachtete Entnahme " + nf0.format(m.leistung_hoch_gwh) + " GWh/Tag, bei 10 bis 20 % Füllstand nur " + (m.leistung_tief_gwh != null ? nf0.format(m.leistung_tief_gwh) : "–") + " GWh/Tag.</p>" +
       '<table><tr><th>Rückrechnung ab 12.11.</th><th class="n">tatsächlich 1.2.</th><th class="n">Modell</th><th class="n">Abweichung</th></tr>' + rr + "</table>" +
       '<p class="meta">Mittlere Abweichung ' + (d.rueckrechnung_mittlerer_fehler_pp != null ? nf.format(d.rueckrechnung_mittlerer_fehler_pp) : "–") + " Prozentpunkte mit den echten Temperaturen der jeweiligen Winter. Die Rückrechnung nutzt dieselben Daten wie die Schätzung und ist deshalb zu optimistisch, und sie prüft nicht die Unsicherheit der Wettervorhersage.</p>" +
-      '<p class="hint">Das ist ein Rechenbeispiel, keine Prognose der Versorgungssicherheit. Annahmen: Einspeicherung bleibt wie im Mittel der letzten 7 Tage; Importe und Verbrauch reagieren nicht auf niedrige Füllstände. Wie stark die Ausspeicherleistung bei niedrigem Füllstand sinkt, lässt sich aus den Daten nicht sicher bestimmen: Die gemeldete technische Leistung bleibt über alle Füllstände gleich, beobachtet wurden unter 20 % Füllstand nur wenige Tage. Die gestrichelte Variante ist deshalb eine Annahme. Die Szenarien Mild und Kalt entsprechen dem wärmsten und kältesten Winterdurchschnitt seit 2018. Einzelne Kältewellen können stärker wirken als ein kalter Durchschnitt.</p>' + meta(d, esc(d.quelle || "")));
+      (pvx ? pvx : "") + '<p class="hint">Das ist ein Rechenbeispiel, keine Prognose der Versorgungssicherheit. Annahmen: Einspeicherung bleibt wie im Mittel der letzten 7 Tage; Importe und Verbrauch reagieren nicht auf niedrige Füllstände. Wie stark die Ausspeicherleistung bei niedrigem Füllstand sinkt, lässt sich aus den Daten nicht sicher bestimmen: Die gemeldete technische Leistung bleibt über alle Füllstände gleich, beobachtet wurden unter 20 % Füllstand nur wenige Tage. Die gestrichelte Variante ist deshalb eine Annahme. Die Szenarien Mild und Kalt entsprechen dem wärmsten und kältesten Winterdurchschnitt seit 2018. Einzelne Kältewellen können stärker wirken als ein kalter Durchschnitt.</p>' + meta(d, esc(d.quelle || "")));
   }
 
   function renderEinsp(d) {
@@ -259,6 +270,53 @@
       '<p class="hint">Das ist die Sicht der Speicher. Der Gasbedarf und die Netzlage in Brandenburg selbst habe ich nicht als offene Daten gefunden, die Versorgung läuft über das Verbundnetz, auch aus Speichern in den Nachbarländern und über Pipelines. „Kritisch“ heißt hier nur: niedriger Füllstand oder Entnahmebedarf über der Höchstleistung, nicht dass die Versorgung vor Ort ausfällt. Die Unsicherheit ist größer als bei der Deutschland-Rechnung, weil einzelne Speicher stärker schwanken. Wo ein Speicher nie so niedrige Füllstände hatte, ist die Leistung bei niedrigem Füllstand angenommen (siehe Hinweis am Speicher).</p>' + meta(v, esc(v.quelle || "")));
   }
 
+  function renderStoerungen(d) {
+    var nd = noData(d, "Störungen"); if (nd) return set("cStoerungen", nd);
+    if (!d.meldungen) return set("cStoerungen", errNote(d) + hint("Keine Daten."));
+    function dat(s) { return s ? new Date(s + "T12:00:00").toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "2-digit" }) : "offen"; }
+    var rows = d.meldungen.slice(0, 12).map(function (m) {
+      return "<tr><td>" + esc(m.anlage || m.ereignis || "–") + '<div class="meta" style="margin:0">' + esc(m.betreiber || "") + (m.richtung ? " · " + esc(m.richtung) : "") + '</div></td><td>' + esc(m.art || "–") + '</td><td class="n">' + dat(m.von) + " – " + dat(m.bis) + '</td><td class="n">' + (m.nicht_verfuegbar_gwh == null ? "–" : nf0.format(m.nicht_verfuegbar_gwh)) + (m.technisch_gwh ? " von " + nf0.format(m.technisch_gwh) : "") + "</td></tr>";
+    }).join("");
+    set("cStoerungen", errNote(d) + '<div class="big">' + d.anzahl + ' <span class="unit">Meldungen (' + d.geplant + " geplant, " + d.ungeplant + ' ungeplant)</span></div><p class="meta" style="margin-top:4px">Einschränkungen der Transportkapazität im deutschen Gasnetz in den nächsten 180 Tagen, zusammen ' + nf0.format(d.summe_nicht_verfuegbar_gwh) + " GWh/Tag.</p>" +
+      '<table><tr><th>Anlage</th><th>Art</th><th class="n">Zeitraum</th><th class="n">nicht verfügbar GWh/Tag</th></tr>' + rows + "</table>" +
+      '<p class="hint">Das sind eingeschränkte Transportkapazitäten, keine ausgefallenen Gasmengen. Viele Meldungen sind langfristige Kapazitätsbeschränkungen oder laufen bis weit in die Zukunft. Ob sich eine Einschränkung auf die Gasflüsse auswirkt, zeigen die Meldungen nicht. Probleme im Schiffsverkehr zu LNG-Terminals und Wartungen im Ausland (z. B. Norwegen) sind hier nicht erfasst, dazu habe ich keine offene Datenquelle gefunden.</p>' + meta(d, esc(d.quelle || "")));
+  }
+  function renderVersorgung(v, u) {
+    var nd = noData(v, "Versorgung"); if (nd) return set("cVersorgung", nd);
+    if (!v.szenarien) return set("cVersorgung", errNote(v) + hint(v.hinweis || "Keine Daten."));
+    function dat(s) { return s ? new Date(s + "T12:00:00").toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" }) : "–"; }
+    var n = v.szenarien, nk = n.normal.konstant, nf_ = n.normal.faellt, kk = n.kalt.faellt;
+    var ok = nk.fehl_twh === 0 && nf_.fehl_twh === 0;
+    var kopf = ok ? "Im normalen Winter ja" : "Im normalen Winter nicht ganz";
+    var namen = { mild: "Milder Winter", normal: "Normaler Winter", kalt: "Kalter Winter" }, farben = { mild: "var(--green)", normal: "var(--blue)", kalt: "var(--red)" };
+    var rows = ["mild", "normal", "kalt"].map(function (k) {
+      var a = n[k].konstant, b = n[k].faellt;
+      function z(x) { return x.fehl_twh > 0 ? "<strong>" + nf.format(x.fehl_twh) + " TWh</strong><div class=\"meta\" style=\"margin:0\">ab " + dat(x.fehl_erster) + ", Spitze " + nf0.format(x.fehl_spitze_gwh) + " GWh/Tag</div>" : "keine"; }
+      return '<tr><td><span style="color:' + farben[k] + '">■</span> ' + namen[k] + '</td><td class="n">' + z(a) + '</td><td class="n">' + z(b) + "</td></tr>";
+    }).join("");
+    var sens = (v.importausfall || []).map(function (e) {
+      function z(x) { return x.fehl_twh > 0 ? nf.format(x.fehl_twh) + " TWh ab " + dat(x.fehl_erster) : "keine Fehlmenge"; }
+      return "<tr><td>" + esc(e.fall) + '<div class="meta" style="margin:0">' + nf0.format(e.gwh_tag) + ' GWh/Tag weniger</div></td><td class="n">' + nf0.format(e.normal.fuellstand_ziel_tag) + ' %<div class="meta" style="margin:0">' + z(e.normal) + '</div></td><td class="n">' + nf0.format(e.kalt.fuellstand_ziel_tag) + ' %<div class="meta" style="margin:0">' + z(e.kalt) + "</div></td></tr>";
+    }).join("");
+    var reg = "";
+    if (u && u.anlagen) {
+      var l = u.anlagen.filter(function (a) { return a.szenarien.kalt.faellt.erster_engpass; }).map(function (a) { return esc(a.name) + " ab " + dat(a.szenarien.kalt.faellt.erster_engpass); });
+      reg = '<li><strong>Brandenburger Umfeld:</strong> ' + (l.length ? "Im kalten Winter mit sinkender Leistung wird die Ausspeicherleistung bei " + l.join(", ") + " knapp. " : "Im kalten Winter kein Leistungsengpass bei den fünf Speichern. ") + "Im normalen Winter fällt der Füllstand dort " + (u.gesamt && u.gesamt.normal.konstant.erreicht["30"] ? "ab " + dat(u.gesamt.normal.konstant.erreicht["30"]) + " unter 30 %." : "nicht unter 30 %.") + "</li>";
+    }
+    var ziel = v.ziel;
+    set("cVersorgung", errNote(v) + '<div class="big">' + kopf + "</div>" +
+      '<p style="margin:6px 0 0">Reichen Speicher und die heutigen Importe, um den Bedarf zu decken? ' + (ok ? "Nach dieser Rechnung entsteht im normalen Winter keine Fehlmenge, das Gas wird aber knapp, wenn der Füllstand sinkt." : "Nach dieser Rechnung fehlen im normalen Winter " + nf.format(Math.max(nk.fehl_twh, nf_.fehl_twh)) + " TWh.") + " Unter Fehlmenge ist Gas gemeint, das die Speicher wegen Leistungsgrenze oder Leere nicht mehr liefern könnten und das aus zusätzlichen Importen oder Einsparungen kommen müsste.</p>" +
+      '<table style="margin-top:10px"><tr><th>Szenario</th><th class="n">Fehlmenge (Leistung bleibt)</th><th class="n">Fehlmenge (Leistung sinkt, Annahme)</th></tr>' + rows + "</table>" +
+      '<h3 style="margin-top:14px">Was, wenn Importe wegfallen?</h3><table><tr><th>Fall</th><th class="n">Normaler Winter: Füllstand 1. Feb.</th><th class="n">Kalter Winter: Füllstand 1. Feb.</th></tr>' + sens + "</table>" +
+      '<p class="meta">Rechnung mit Leistungsabfall (Annahme). Der Ausfall gilt gleichmäßig bis 31. März. Zusätzlicher Bedarf wird aus den Speichern gedeckt, bis diese leer sind.</p>' +
+      '<h3 style="margin-top:14px">Ab wann könnte es zu Einsparungen kommen?</h3><ul class="plain">' +
+      "<li>Einen <strong>festen Füllstand</strong>, ab dem Einsparungen angeordnet werden, gibt es nicht. Entscheidend ist die Lage im Gesamtsystem.</li>" +
+      "<li>Als Orientierung gilt die Füllstandsvorgabe der Bundesnetzagentur: <strong>" + ziel.prozent + " % am 1. Februar 2027</strong>. Fällt der Füllstand deutlich darunter, steigt das Risiko. Im normalen Winter rechnet diese Seite mit " + nf0.format(nk.fuellstand_ziel_tag) + " % (Spanne etwa ±" + nf0.format(v.rueckrechnung_mittlerer_fehler_pp || 8) + " Prozentpunkte).</li>" +
+      "<li>Rechnerisch tritt die erste <strong>Fehlmenge</strong> im kalten Winter " + (kk.fehl_erster ? "ab etwa " + dat(kk.fehl_erster) + " (Spitze " + nf0.format(kk.fehl_spitze_gwh) + " GWh/Tag)" : "bis 31. März nicht") + " auf, im normalen Winter " + ((nf_.fehl_erster || nk.fehl_erster) ? "ab etwa " + dat(nf_.fehl_erster || nk.fehl_erster) : "nicht") + ".</li>" +
+      reg +
+      "<li>Nach dem Notfallplan Gas ruft das Wirtschaftsministerium die Stufen aus (Frühwarn-, Alarm-, Notfallstufe). In der Notfallstufe kann die Bundesnetzagentur als Bundeslastverteiler den Gasverbrauch lenken, geschützte Kunden wie Haushalte und Krankenhäuser werden bevorzugt. Laut Bundesnetzagentur galt zuletzt die Frühwarnstufe, bitte dort den aktuellen Stand prüfen.</li></ul>" +
+      '<p class="hint">Das ist ein Rechenmodell, keine Warnung und keine Prognose der Behörden. Importe, Verbrauch und Politik reagieren in der Realität auf niedrige Füllstände, das ist hier nicht abgebildet. Regionale Schwellen für Einsparungen gibt es nicht, Brandenburg wird über das Verbundnetz versorgt.</p>' + meta(v, esc(v.quelle || "")));
+  }
   function renderUmfeld(d) {
     var nd = noData(d, "Umfeld"); if (nd) return set("cUmfeld", nd);
     if (!d.anlagen) return set("cUmfeld", errNote(d) + hint(d.hinweis || "Keine Daten."));
@@ -389,12 +447,12 @@
   }
 
   function load() {
-    Promise.all(["meta.json", "gas_speicher.json", "gas_lng.json", "gas_pipeline.json", "strom.json", "frequenz.json", "kraftstoff.json", "rohoel.json", "reichweite.json", "gas_historie.json", "wetter.json", "gas_europa.json", "gas_anlagen.json", "gaspreis.json", "lng_tanks.json", "gas_umfeld.json", "gas_vorausschau.json", "gas_umfeld_vorausschau.json"].map(get)).then(function (r) {
+    Promise.all(["meta.json", "gas_speicher.json", "gas_lng.json", "gas_pipeline.json", "strom.json", "frequenz.json", "kraftstoff.json", "rohoel.json", "reichweite.json", "gas_historie.json", "wetter.json", "gas_europa.json", "gas_anlagen.json", "gaspreis.json", "lng_tanks.json", "gas_umfeld.json", "gas_vorausschau.json", "gas_umfeld_vorausschau.json", "gas_stoerungen.json", "gas_preisanalyse.json", "prognose_verlauf.json"].map(get)).then(function (r) {
       document.getElementById("stand").textContent = r[0] && r[0].letzter_lauf ? "Letzter Datenabruf: " + when(r[0].letzter_lauf) : "Noch kein Datenabruf.";
       [function () { renderSpeicherDE(r[1]); }, function () { renderSpeicherBB(r[1]); },
         function () { renderLngEin(r[2]); }, function () { renderPipe(r[3]); },
         function () { renderPreis(r[4]); }, function () { renderMix(r[4]); }, function () { renderFreq(r[5]); }, function () { renderKraft(r[6]); },
-        function () { renderOel(r[7]); }, function () { renderReich(r[8], r[16]); }, function () { renderHist(r[9]); }, function () { renderWetter(r[10]); }, function () { renderEuropa(r[11]); }, function () { renderAnlagen(r[12]); }, function () { renderTtf(r[13]); }, function () { renderLngTanks(r[14]); }, function () { renderUmfeld(r[15]); }, function () { renderVorausschau(r[16]); }, function () { renderEinsp(r[16]); }, function () { renderUmfeldVor(r[17], r[15]); }
+        function () { renderOel(r[7]); }, function () { renderReich(r[8], r[16]); }, function () { renderHist(r[9]); }, function () { renderWetter(r[10]); }, function () { renderEuropa(r[11]); }, function () { renderAnlagen(r[12]); }, function () { renderTtf(r[13], r[19]); }, function () { renderLngTanks(r[14]); }, function () { renderUmfeld(r[15]); }, function () { renderVorausschau(r[16], r[20]); }, function () { renderEinsp(r[16]); }, function () { renderUmfeldVor(r[17], r[15]); }, function () { renderStoerungen(r[18]); }, function () { renderVersorgung(r[16], r[17]); }
       ].forEach(function (f) { try { f(); } catch (e) { if (window.console) console.error(e); } });
     });
   }
