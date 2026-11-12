@@ -402,6 +402,14 @@
     h += '<p class="hint">Einordnung: Die Bundesnetzagentur sieht die Versorgungslage derzeit als stabil. Diese Kachel beschreibt Möglichkeiten und frühere Erfahrungen, sie ist keine Prognose, dass solche Maßnahmen nötig werden, und keine Rechtsberatung.</p>';
     set("cMassnahmen", h + '<p class="meta">Stand der Zusammenstellung: 12.11.2026 · Quellen siehe oben.</p>');
   }
+  function renderPruefung(m) {
+    if (!m || !m.geprueft) return set("cPruefung", '<p style="margin:0">' + esc((m && m.hinweis) || "Noch keine Prüfung.") + '</p><p class="meta">Die Prüfung vergleicht die Prognose der Woche mit dem tatsächlichen Füllstand und passt das Modell an, wenn die Abweichung es nahelegt.</p>');
+    var gp = m.gegenprobe || {}, h = '<p style="margin:0">Geprüft am <strong>' + new Date(m.geprueft + "T12:00:00").toLocaleDateString("de-DE", { day: "numeric", month: "long", year: "numeric" }) + "</strong>. " + esc(m.kurz || "") + "</p>";
+    if (gp.bis7 != null || gp.bis3 != null) h += '<p class="meta" style="margin-top:6px">Abweichung der früheren Vorhersagen vom tatsächlichen Füllstand: ' + (gp.bis3 != null ? "bis 3 Tage " + nf.format(gp.bis3) + " Prozentpunkte" : "") + (gp.bis7 != null ? ", bis 7 Tage " + nf.format(gp.bis7) : "") + (gp.bis14 != null ? ", bis 14 Tage " + nf.format(gp.bis14) : "") + (m.richtung ? ". Tendenz: " + esc(m.richtung) : "") + ".</p>";
+    if (m.aenderungen && m.aenderungen.length) h += '<h3 style="margin-top:10px">Was angepasst wurde</h3><ul class="plain">' + m.aenderungen.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>";
+    if (m.technik) h += '<p class="meta">' + esc(m.technik) + "</p>";
+    set("cPruefung", h + (m.naechste ? '<p class="meta">Nächste Prüfung: ' + esc(m.naechste) + "</p>" : ""));
+  }
   function renderEinsp(d) {
     var nd = noData(d, "Einspeicherung"); if (nd) return set("cEinsp", nd);
     var e = d.einspeicherung;
@@ -651,12 +659,12 @@
   }
 
   function load() {
-    Promise.all(["meta.json", "gas_speicher.json", "gas_lng.json", "gas_pipeline.json", "strom.json", "frequenz.json", "kraftstoff.json", "rohoel.json", "reichweite.json", "gas_historie.json", "wetter.json", "gas_europa.json", "gas_anlagen.json", "gaspreis.json", "lng_tanks.json", "gas_umfeld.json", "gas_vorausschau.json", "gas_umfeld_vorausschau.json", "gas_stoerungen.json", "gas_preisanalyse.json", "prognose_verlauf.json", "faktoren_extra.json", "auslandseinfluss.json", "massnahmen.json"].map(get)).then(function (r) {
+    Promise.all(["meta.json", "gas_speicher.json", "gas_lng.json", "gas_pipeline.json", "strom.json", "frequenz.json", "kraftstoff.json", "rohoel.json", "reichweite.json", "gas_historie.json", "wetter.json", "gas_europa.json", "gas_anlagen.json", "gaspreis.json", "lng_tanks.json", "gas_umfeld.json", "gas_vorausschau.json", "gas_umfeld_vorausschau.json", "gas_stoerungen.json", "gas_preisanalyse.json", "prognose_verlauf.json", "faktoren_extra.json", "auslandseinfluss.json", "massnahmen.json", "modellpruefung.json"].map(get)).then(function (r) {
       document.getElementById("stand").textContent = r[0] && r[0].letzter_lauf ? "Letzter Datenabruf: " + when(r[0].letzter_lauf) : "Noch kein Datenabruf.";
       [function () { renderSpeicherDE(r[1]); }, function () { renderSpeicherBB(r[1]); },
         function () { renderLngEin(r[2]); }, function () { renderPipe(r[3]); },
         function () { renderPreis(r[4]); }, function () { renderMix(r[4]); }, function () { renderFreq(r[5]); }, function () { renderKraft(r[6]); },
-        function () { renderOel(r[7]); }, function () { renderReich(r[8], r[16]); }, function () { renderHist(r[9]); }, function () { renderWetter(r[10]); }, function () { renderEuropa(r[11]); }, function () { renderAnlagen(r[12]); }, function () { renderTtf(r[13], r[19]); }, function () { renderLngTanks(r[14]); }, function () { renderUmfeld(r[15]); }, function () { renderVorausschau(r[16], r[20]); }, function () { renderEinsp(r[16]); }, function () { renderUmfeldVor(r[17], r[15]); }, function () { renderStoerungen(r[18]); }, function () { renderUeberblick(r[16], r[17]); }, function () { renderVerstromung(r[16]); }, function () { renderModellFaktoren(r[16], r[21]); }, function () { renderAusland(r[16], r[3], r[22], r[21]); }, function () { renderMassnahmen(r[23], r[16]); }, function () { state.alle = r; renderFaktoren(r); }, function () { renderVersorgung(r[16], r[17]); }
+        function () { renderOel(r[7]); }, function () { renderReich(r[8], r[16]); }, function () { renderHist(r[9]); }, function () { renderWetter(r[10]); }, function () { renderEuropa(r[11]); }, function () { renderAnlagen(r[12]); }, function () { renderTtf(r[13], r[19]); }, function () { renderLngTanks(r[14]); }, function () { renderUmfeld(r[15]); }, function () { renderVorausschau(r[16], r[20]); }, function () { renderEinsp(r[16]); }, function () { renderUmfeldVor(r[17], r[15]); }, function () { renderStoerungen(r[18]); }, function () { renderUeberblick(r[16], r[17]); }, function () { renderVerstromung(r[16]); }, function () { renderModellFaktoren(r[16], r[21]); }, function () { renderAusland(r[16], r[3], r[22], r[21]); }, function () { renderMassnahmen(r[23], r[16]); }, function () { renderPruefung(r[24]); }, function () { state.alle = r; renderFaktoren(r); }, function () { renderVersorgung(r[16], r[17]); }
       ].forEach(function (f) { try { f(); } catch (e) { if (window.console) console.error(e); } });
     });
   }
