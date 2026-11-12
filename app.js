@@ -75,6 +75,12 @@
       '<p class="meta" style="margin-top:6px">' + (fuell ? "Im Mittel der letzten 7 Tage wird mehr eingespeichert als entnommen (netto +" + nf0.format(-r.netto_7t_gwh) + " GWh/Tag)." :
       "bis der Speicher leer wäre. Bei gleichbleibender Entnahme: " + (r.tage_aktuell != null ? "ca. " + nf0.format(r.tage_aktuell) + " Tage" : "–") + ", mit Wettervorhersage: " + (r.tage_wetter != null ? "ca. " + nf0.format(r.tage_wetter) + " Tage" : "nicht berechenbar") + ".") + "</p>" +
       '<p class="meta">Mittel der letzten 7 Tage: Ausspeicherung ' + nf0.format(r.ausspeicherung_7t_gwh) + " GWh/Tag, Einspeicherung " + nf0.format(r.einspeicherung_7t_gwh) + " GWh/Tag.</p>";
+    if (r.ziel) {
+      var z = r.ziel, dd = z.marke_ca_datum ? new Date(z.marke_ca_datum + "T12:00:00").toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" }) : null;
+      h += '<p style="margin:10px 0 0"><strong>Füllstandsvorgabe ' + z.prozent + ' % zum 1. Februar 2027</strong> (noch ' + z.tage_bis_stichtag + " Tage): " +
+        (z.tage_bis_marke === 0 ? "bereits unterschritten." : z.tage_bis_marke != null ? "Bei gleichbleibender Entnahme wäre die " + z.prozent + "-%-Marke etwa am " + dd + " erreicht" + (z.tage_bis_marke < z.tage_bis_stichtag ? ", also vor dem Stichtag." : ", also nach dem Stichtag.") : "Speicher füllen sich derzeit.") + "</p>" +
+        '<p class="meta">Im Winter ist die Entnahme meist höher als im Mittel der letzten 7 Tage, die Marke würde dann früher erreicht.</p>';
+    }
     if (r.projektion && r.projektion.length > 1) h += spark(r.projektion.map(function (p) { return [0, p[1]]; }), { label: "Voraussichtlicher Füllstand, 14 Tage", min: 0, max: 100 }) +
       '<p class="meta">Voraussichtlicher Füllstand in %, nächste ' + r.projektion.length + " Tage (bis " + esc(r.projektion[r.projektion.length - 1][0]) + "): " + nf.format(r.projektion[r.projektion.length - 1][1]) + " %</p>";
     return h;

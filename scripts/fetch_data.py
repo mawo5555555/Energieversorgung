@@ -473,7 +473,7 @@ def lng_tanks():
     d = letzte("country=DE")
     if d:
         de_roh = alsi_zeile(d[-1], "Deutschland gesamt")
-        de_roh["verlauf"] = [[r["gasDayStart"], zahl(r["full"])] for r in d]
+        de_roh["verlauf"] = [[r["gasDayStart"], alsi_zeile(r, "")["fuellstand_prozent"]] for r in d]
     for c in firmen:
         if c.get("country") != "DE":
             continue
@@ -606,7 +606,7 @@ def projektion(stock, kap, w7, i7, temps, idx):
     return pro
 
 
-def reichweite_fuer(name, fluss, stock, kap, temps, tage, idx):
+def reichweite_fuer(name, fluss, stock, kap, temps, tage, idx, ziel=None):
     if not fluss or not kap:
         return None
     letzte = fluss[-7:]
@@ -628,6 +628,17 @@ def reichweite_fuer(name, fluss, stock, kap, temps, tage, idx):
             if fall > 0.01:
                 leer = len(pro) + round(pro[-1] / fall)
     out["tage_wetter"] = leer
+    if ziel:
+        rest = stock - ziel["prozent"] / 100 * kap
+        heute = NOW.date()
+        stichtag = datetime.strptime(ziel["datum"], "%Y-%m-%d").date()
+        out["ziel"] = {"prozent": ziel["prozent"], "datum": ziel["datum"], "tage_bis_stichtag": (stichtag - heute).days}
+        if rest <= 0:
+            out["ziel"]["tage_bis_marke"] = 0
+        elif netto7 > 0.01:
+            tage_m = round(rest * 1000 / netto7)
+            out["ziel"]["tage_bis_marke"] = tage_m
+            out["ziel"]["marke_ca_datum"] = (heute + timedelta(days=tage_m)).isoformat()
     return out
 
 
@@ -639,7 +650,9 @@ def reichweite():
     de = sp["deutschland"]
     out = {"stand": stamp(), "annahmen": ("Reine Schätzung nur für die Gasspeicher, ohne Importe, LNG und Verbrauchsänderungen. Grundlage: mittlere Ein- und Ausspeicherung der letzten 7 Tage. "
                                            "Mit Wetter: Die Ausspeicherung folgt dem Heizbedarf (Heizgradtage, Basis 15 °C) der Temperaturvorhersage."),
-           "deutschland": reichweite_fuer("Deutschland", de.get("fluss"), de["gas_twh"], de["kapazitaet_twh"], we.get("deutschland"), tage, idx),
+           "deutschland": reichweite_fuer("Deutschland", de.get("fluss"), de["gas_twh"], de["kapazitaet_twh"], we.get("deutschland"), tage, idx,
+                                         {"prozent": 30, "datum": "2027-02-01"}),
+           "ziel_quelle": "Bundesnetzagentur, Seite „Aktuelle Lage der Gasversorgung“ (Füllstandsvorgabe 30 % zum 1. Februar 2027)",
            "brandenburg": [r for r in (reichweite_fuer(b["name"], b.get("fluss"), b["gas_twh"], b["kapazitaet_twh"], we.get("brandenburg"), tage, idx)
                                        for b in sp.get("brandenburg", [])) if r]}
     return out
