@@ -1,5 +1,5 @@
 {
- "stand": "2026-11-12T07:38:37Z",
+ "stand": "2026-11-12T07:50:45Z",
  "einheit": "GWh/Tag",
  "tag": "2026-11-10",
  "neuester_tag_in_daten": "2026-11-12",
@@ -18,9 +18,9 @@
   },
   {
    "name": "Belgien",
-   "einspeisung": 281.0,
+   "einspeisung": 275.5,
    "ausfuhr": 265.9,
-   "netto": 15.1
+   "netto": 9.6
   },
   {
    "name": "Tschechien",
@@ -53,8 +53,8 @@
    "netto": 0.0
   }
  ],
- "summe_einspeisung": 1911.0,
- "summe_netto": 894.7,
+ "summe_einspeisung": 1905.5,
+ "summe_netto": 889.2,
  "verlauf": [
   [
    "2026-11-01",
@@ -94,7 +94,7 @@
   ],
   [
    "2026-11-10",
-   894.8
+   889.3
   ]
  ],
  "ohne_daten": [],

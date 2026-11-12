@@ -2268,12 +2268,131 @@
   "datum": "2027-02-01",
   "quelle": "Bundesnetzagentur, Seite Aktuelle Lage der Gasversorgung (Füllstandsvorgabe zum 1. Februar 2027)"
  },
+ "einspeicherung": {
+  "jetzt_gwh": 62,
+  "mindest_ende_prozent": 10.0,
+  "szenarien": {
+   "mild": {
+    "nicht_leer": {
+     "noetig_gwh": 29,
+     "zusatz_gwh": 0,
+     "faktor": 0.5
+    },
+    "vorgabe_1_feb": {
+     "noetig_gwh": 116,
+     "zusatz_gwh": 54,
+     "faktor": 1.9
+    }
+   },
+   "normal": {
+    "nicht_leer": {
+     "noetig_gwh": 173,
+     "zusatz_gwh": 111,
+     "faktor": 2.8
+    },
+    "vorgabe_1_feb": {
+     "noetig_gwh": 248,
+     "zusatz_gwh": 186,
+     "faktor": 4.0
+    }
+   },
+   "kalt": {
+    "nicht_leer": {
+     "noetig_gwh": 276,
+     "zusatz_gwh": 214,
+     "faktor": 4.5
+    },
+    "vorgabe_1_feb": {
+     "noetig_gwh": 342,
+     "zusatz_gwh": 280,
+     "faktor": 5.5
+    }
+   }
+  },
+  "historie": {
+   "winter": [
+    {
+     "winter": "2018/19",
+     "temp_c": 4.1,
+     "entnahme_gwh": 665,
+     "einspeicherung_gwh": 136,
+     "start": 88.1,
+     "ende": 54.0
+    },
+    {
+     "winter": "2019/20",
+     "temp_c": 5.0,
+     "entnahme_gwh": 545,
+     "einspeicherung_gwh": 71,
+     "start": 99.5,
+     "ende": 71.8
+    },
+    {
+     "winter": "2020/21",
+     "temp_c": 3.4,
+     "entnahme_gwh": 1271,
+     "einspeicherung_gwh": 100,
+     "start": 93.4,
+     "ende": 26.1
+    },
+    {
+     "winter": "2021/22",
+     "temp_c": 4.1,
+     "entnahme_gwh": 1079,
+     "einspeicherung_gwh": 298,
+     "start": 70.4,
+     "ende": 26.6
+    },
+    {
+     "winter": "2022/23",
+     "temp_c": 4.2,
+     "entnahme_gwh": 809,
+     "einspeicherung_gwh": 189,
+     "start": 99.9,
+     "ende": 64.1
+    },
+    {
+     "winter": "2023/24",
+     "temp_c": 5.2,
+     "entnahme_gwh": 759,
+     "einspeicherung_gwh": 125,
+     "start": 100.2,
+     "ende": 62.8
+    },
+    {
+     "winter": "2024/25",
+     "temp_c": 3.9,
+     "entnahme_gwh": 1285,
+     "einspeicherung_gwh": 61,
+     "start": 96.2,
+     "ende": 28.7
+    },
+    {
+     "winter": "2025/26",
+     "temp_c": 3.5,
+     "entnahme_gwh": 1073,
+     "einspeicherung_gwh": 120,
+     "start": 74.7,
+     "ende": 22.2
+    }
+   ],
+   "tagesmax_winter_gwh": 1293,
+   "tages_p95_winter_gwh": 540,
+   "hoechster_durchschnitt_winter_gwh": 298,
+   "hoechster_durchschnitt_beliebig_gwh": 1121,
+   "hoechster_durchschnitt_von": "2022-04-17",
+   "hoechster_durchschnitt_bis": "2022-09-04",
+   "laenge_tage": 141
+  },
+  "einspeicherleistung_gemeldet_gwh": 4294,
+  "importe_gwh": 1200
+ },
  "ohne_importe": {
   "jahresverbrauch_twh": 904,
   "quelle": "Angabe aus einer Gasspeicher-App (Durchschnitt, ohne Importe gerechnet)",
   "verbrauch_tag_twh": 2.48,
   "tage": 58
  },
- "stand": "2026-11-12T07:38:37Z",
+ "stand": "2026-11-12T07:50:45Z",
  "quelle": "GIE AGSI+ (Speicherdaten seit 2018), Open-Meteo (Temperaturen), eigene Berechnung"
 }
