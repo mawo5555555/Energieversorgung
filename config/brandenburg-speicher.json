@@ -1,4 +1,6 @@
 {
-  "hinweis": "EIC-Codes der Gasspeicher in Brandenburg (aus der AGSI+-Anlagenliste). Bleibt leer, bis der GIE-Schlüssel vorliegt und die Anlagen geprüft sind.",
-  "speicher": []
+  "hinweis": "Gasspeicher in Brandenburg laut GIE-AGSI+-Anlagenliste. Derzeit nur UGS Rüdersdorf H (EWE). Kraak liegt in Mecklenburg-Vorpommern, Peckensen in Sachsen-Anhalt, der Berliner Speicher ist seit 2017 stillgelegt.",
+  "speicher": [
+    { "eic": "21W000000000048W", "company": "21X0000000011756", "name": "UGS Rüdersdorf H (EWE)" }
+  ]
 }

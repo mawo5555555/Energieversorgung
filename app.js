@@ -38,6 +38,12 @@
         (i[1] == null ? "–" : nf.format(i[1]) + (unit ? " " + unit : "")) + "</span></div>";
     }).join("");
   }
+  function gauge(pct, small, label) {
+    var r = 44, c = 2 * Math.PI * r, f = Math.max(0, Math.min(100, pct)) / 100 * c;
+    var col = pct < 30 ? "var(--red)" : pct < 60 ? "var(--orange)" : "var(--green)";
+    return '<svg viewBox="0 0 100 100" role="img" aria-label="' + esc(label || "Füllstand") + '"><circle class="track" cx="50" cy="50" r="' + r + '" fill="none" stroke-width="10"/>' +
+      '<circle class="arc" cx="50" cy="50" r="' + r + '" fill="none" stroke-width="10" stroke-linecap="round" style="stroke:' + col + '" stroke-dasharray="' + f.toFixed(1) + " " + c.toFixed(1) + '"/></svg>';
+  }
   function lastVal(series) { for (var i = series.length - 1; i >= 0; i--) if (series[i][1] != null) return series[i]; return null; }
 
   function renderSpeicher(d) {
@@ -45,14 +51,17 @@
     var h = errNote(d), de = d.deutschland;
     if (!de) h += hint(d.hinweis || "Keine Speicherdaten.");
     else {
-      h += '<div class="grid"><div><div class="big">' + nf.format(de.fuellstand_prozent) + ' <span class="unit">% Deutschland</span></div>' +
-        '<div class="row" style="grid-template-columns:1fr"><div class="bar"><span style="width:' + Math.min(100, de.fuellstand_prozent) + '%"></span></div></div>' +
-        '<p class="meta">' + nf.format(de.gas_twh) + " von " + nf.format(de.kapazitaet_twh) + " TWh · Einspeicherung " + nf0.format(de.einspeicherung_gwh) + " GWh/Tag · Ausspeicherung " + nf0.format(de.ausspeicherung_gwh) + " GWh/Tag · Gastag " + esc(de.gastag) + "</p></div>" +
-        "<div>" + spark(de.verlauf.map(function (p) { return [0, p[1]]; }), { label: "Füllstand Deutschland, 30 Tage", minSpan: 5 }) + '<p class="meta">Füllstand der letzten 30 Tage</p></div></div>';
+      h += '<div class="gauge"><div style="position:relative">' + gauge(de.fuellstand_prozent, false, "Füllstand Deutschland") + "</div><div><div class=\"big\">" + nf.format(de.fuellstand_prozent) + ' <span class="unit">%</span></div>' +
+        '<div class="num">Deutschland gesamt</div><p class="meta" style="margin-top:4px">' + nf.format(de.gas_twh) + " von " + nf.format(de.kapazitaet_twh) + " TWh</p></div></div>" +
+        '<p class="meta">Einspeicherung ' + nf0.format(de.einspeicherung_gwh) + " GWh/Tag · Ausspeicherung " + nf0.format(de.ausspeicherung_gwh) + " GWh/Tag · Gastag " + esc(de.gastag) + "</p>" +
+        spark(de.verlauf.map(function (p) { return [0, p[1]]; }), { label: "Füllstand Deutschland, 30 Tage", minSpan: 5 }) + '<p class="meta">Füllstand der letzten 30 Tage</p>';
     }
     h += "<h3 style=\"margin-top:14px\">Speicher in Brandenburg</h3>";
     if (!d.brandenburg || !d.brandenburg.length) h += hint("Die Brandenburger Speicheranlagen sind noch nicht festgelegt (config/brandenburg-speicher.json).");
-    else h += bars(d.brandenburg.map(function (s) { return [s.name, s.fuellstand_prozent]; }), "%", 100);
+    else h += d.brandenburg.map(function (s) {
+      return '<div class="gauge gauge-small" style="margin:6px 0">' + gauge(s.fuellstand_prozent, true, s.name) + '<div><strong>' + esc(s.name) + '</strong><div class="num">' + nf.format(s.fuellstand_prozent) + ' % gefüllt</div>' +
+        '<p class="meta" style="margin-top:2px">' + nf2.format(s.gas_twh) + " von " + nf2.format(s.kapazitaet_twh) + " TWh · Gastag " + esc(s.gastag) + "</p></div></div>";
+    }).join("");
     set("cSpeicher", h + meta(d, esc(d.quelle || "")));
   }
 

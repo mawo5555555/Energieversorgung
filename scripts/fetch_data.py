@@ -196,12 +196,16 @@ def gas_speicher():
         },
         "brandenburg": [],
     }
-    # Anlagenliste (EIC-Codes) für die Brandenburger Speicher aus config/brandenburg-speicher.json
-    for eic in read_cfg("brandenburg-speicher.json").get("speicher", []):
-        d = get_json(f"https://agsi.gie.eu/api?country=DE&facility={eic}&from={von}&size=60", h).get("data", [])
+    # Brandenburger Speicher aus config/brandenburg-speicher.json
+    for a in read_cfg("brandenburg-speicher.json").get("speicher", []):
+        url = f"https://agsi.gie.eu/api?country=DE&company={a['company']}&facility={a['eic']}&from={von}&size=60"
+        d = get_json(url, h).get("data", [])
         d.sort(key=lambda r: r["gasDayStart"])
         if d:
-            out["brandenburg"].append({"eic": eic, "name": d[-1].get("name") or eic, "fuellstand_prozent": float(d[-1]["full"]),
+            l = d[-1]
+            out["brandenburg"].append({"eic": a["eic"], "name": a.get("name") or a["eic"], "gastag": l["gasDayStart"],
+                                       "fuellstand_prozent": float(l["full"]), "gas_twh": float(l["gasInStorage"]),
+                                       "kapazitaet_twh": float(l["workingGasVolume"]),
                                        "verlauf": [[r["gasDayStart"], float(r["full"])] for r in d]})
     return out
 
