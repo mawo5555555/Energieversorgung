@@ -357,6 +357,29 @@
     h += '<p class="hint">Es gibt keine Regel, dass Nachbarländer bei Knappheit weniger liefern. Der Markt regelt das über den Preis, bei einer echten Notlage greifen EU-Solidaritätsmechanismen. Das lässt sich aus offenen Daten nicht vorhersagen. Hier ist nur abgebildet, wie viel Gas bei Kälte im Ausland rechnerisch nicht in deutschen Speichern ankäme.</p>';
     set("cAusland", errNote(v) + h + meta(an || v, "ENTSOG, Open-Meteo, eigene Berechnung"));
   }
+  function renderMassnahmen(m, v) {
+    if (!m) return set("cMassnahmen", hint("Keine Daten."));
+    function tag(b) { var c = /^belegt/.test(b) ? "var(--green)" : /nicht/.test(b) ? "var(--muted)" : "var(--orange)"; return '<span style="font-size:12px;font-weight:600;color:#fff;background:' + c + ';padding:2px 8px;border-radius:999px;white-space:nowrap">' + esc(b) + "</span>"; }
+    function qs(q) { return (q || []).map(function (x) { return '<a href="' + esc(x.u) + '" rel="noopener">' + esc(x.t) + "</a>"; }).join(" · "); }
+    var h = '<p class="meta" style="margin-top:0">' + esc(m.hinweis) + "</p><h3>Die drei Stufen des Notfallplans Gas</h3>" + (m.stufen || []).map(function (s, i) {
+      return '<div class="fk"><span class="dot" style="background:' + ["var(--green)", "var(--orange)", "var(--red)"][i] + '"></span><div><strong>' + esc(s.name) + '</strong><div class="fk-j">' + tag(s.beleg) + '</div></div><div class="fk-w">' + esc(s.text) + "</div></div>";
+    }).join("");
+    h += '<h3 style="margin-top:14px">Mechanismen: was ist möglich und was wurde schon genutzt?</h3>' + (m.mechanismen || []).map(function (x) {
+      return '<div class="fk"><span class="dot" style="background:var(--fill)"></span><div><strong>' + esc(x.titel) + '</strong><div class="fk-j">' + tag(x.beleg) + '</div></div><div class="fk-w">' + esc(x.text) + (x.quellen && x.quellen.length ? '<div class="meta" style="margin:4px 0 0">Quellen: ' + qs(x.quellen) + "</div>" : "") + "</div></div>";
+    }).join("");
+    h += '<h3 style="margin-top:14px">Was Sparen 2022/23 gebracht hat</h3><ul class="plain">' + (m.erfahrung || []).map(function (e) { return "<li><strong>" + esc(e.wert) + "</strong> " + esc(e.text) + ' <span class="meta">(<a href="' + esc(e.quelle.u) + '" rel="noopener">' + esc(e.quelle.t) + "</a>)</span></li>"; }).join("") + "</ul>";
+    if (v && v.sparen) {
+      var nm = v.szenarien.normal.konstant, kk = v.szenarien.kalt.faellt, rows = v.sparen.map(function (e) {
+        function z(x) { return nf0.format(x.fuellstand_ziel_tag) + " % (31. März " + nf0.format(x.fuellstand_ende) + " %)" + (x.fehl_twh > 0 ? ", Fehlmenge " + nf.format(x.fehl_twh) + " TWh" : ""); }
+        return "<tr><td>" + esc(e.fall) + '<div class="meta" style="margin:0">' + nf0.format(e.gwh_tag) + ' GWh/Tag weniger</div></td><td class="n">' + z(e.normal) + '</td><td class="n">' + z(e.kalt) + "</td></tr>";
+      }).join("");
+      var spitze = kk.fehl_spitze_gwh, e22 = v.sparen[v.sparen.length - 1];
+      h += '<h3 style="margin-top:14px">Was würde Sparen für die Speicher bedeuten? (Rechnung)</h3><table><tr><th>Sparen ab sofort bis 31. März</th><th class="n">Normaler Winter: Füllstand 1. Feb.</th><th class="n">Kalter Winter: Füllstand 1. Feb.</th></tr><tr><td>ohne Sparen</td><td class="n">' + nf0.format(nm.fuellstand_ziel_tag) + " % (31. März " + nf0.format(nm.fuellstand_ende) + ' %)</td><td class="n">' + nf0.format(kk.fuellstand_ziel_tag) + " % (31. März " + nf0.format(kk.fuellstand_ende) + " %)" + (kk.fehl_twh > 0 ? ", Fehlmenge " + nf.format(kk.fehl_twh) + " TWh" : "") + "</td></tr>" + rows + "</table>" +
+        '<p class="meta">Das Jahresmittel des Verbrauchs (' + nf0.format(v.ohne_importe.jahresverbrauch_twh) + " TWh, Angabe aus einer Gasspeicher-App) dient als Bezug. Sparen wie 2022 wären rund " + nf0.format(e22.gwh_tag) + " GWh/Tag" + (spitze ? ", die Spitzen-Fehlmenge im kalten Winter liegt bei " + nf0.format(spitze) + " GWh/Tag" : "") + ". Im Winter liegt der Verbrauch über dem Jahresmittel, 2022 kam das Sparen zudem aus hohen Preisen und Appellen, ob dasselbe Niveau heute erreichbar wäre, ist offen.</p>";
+    }
+    h += '<p class="hint">Einordnung: Die Bundesnetzagentur sieht die Versorgungslage derzeit als stabil. Diese Kachel beschreibt Möglichkeiten und frühere Erfahrungen, sie ist keine Prognose, dass solche Maßnahmen nötig werden, und keine Rechtsberatung.</p>';
+    set("cMassnahmen", h + meta(m, "Bundesnetzagentur, EUR-Lex, weitere Quellen oben"));
+  }
   function renderEinsp(d) {
     var nd = noData(d, "Einspeicherung"); if (nd) return set("cEinsp", nd);
     var e = d.einspeicherung;
@@ -606,12 +629,12 @@
   }
 
   function load() {
-    Promise.all(["meta.json", "gas_speicher.json", "gas_lng.json", "gas_pipeline.json", "strom.json", "frequenz.json", "kraftstoff.json", "rohoel.json", "reichweite.json", "gas_historie.json", "wetter.json", "gas_europa.json", "gas_anlagen.json", "gaspreis.json", "lng_tanks.json", "gas_umfeld.json", "gas_vorausschau.json", "gas_umfeld_vorausschau.json", "gas_stoerungen.json", "gas_preisanalyse.json", "prognose_verlauf.json", "faktoren_extra.json", "auslandseinfluss.json"].map(get)).then(function (r) {
+    Promise.all(["meta.json", "gas_speicher.json", "gas_lng.json", "gas_pipeline.json", "strom.json", "frequenz.json", "kraftstoff.json", "rohoel.json", "reichweite.json", "gas_historie.json", "wetter.json", "gas_europa.json", "gas_anlagen.json", "gaspreis.json", "lng_tanks.json", "gas_umfeld.json", "gas_vorausschau.json", "gas_umfeld_vorausschau.json", "gas_stoerungen.json", "gas_preisanalyse.json", "prognose_verlauf.json", "faktoren_extra.json", "auslandseinfluss.json", "massnahmen.json"].map(get)).then(function (r) {
       document.getElementById("stand").textContent = r[0] && r[0].letzter_lauf ? "Letzter Datenabruf: " + when(r[0].letzter_lauf) : "Noch kein Datenabruf.";
       [function () { renderSpeicherDE(r[1]); }, function () { renderSpeicherBB(r[1]); },
         function () { renderLngEin(r[2]); }, function () { renderPipe(r[3]); },
         function () { renderPreis(r[4]); }, function () { renderMix(r[4]); }, function () { renderFreq(r[5]); }, function () { renderKraft(r[6]); },
-        function () { renderOel(r[7]); }, function () { renderReich(r[8], r[16]); }, function () { renderHist(r[9]); }, function () { renderWetter(r[10]); }, function () { renderEuropa(r[11]); }, function () { renderAnlagen(r[12]); }, function () { renderTtf(r[13], r[19]); }, function () { renderLngTanks(r[14]); }, function () { renderUmfeld(r[15]); }, function () { renderVorausschau(r[16], r[20]); }, function () { renderEinsp(r[16]); }, function () { renderUmfeldVor(r[17], r[15]); }, function () { renderStoerungen(r[18]); }, function () { renderUeberblick(r[16], r[17]); }, function () { renderVerstromung(r[16]); }, function () { renderModellFaktoren(r[16], r[21]); }, function () { renderAusland(r[16], r[3], r[22], r[21]); }, function () { state.alle = r; renderFaktoren(r); }, function () { renderVersorgung(r[16], r[17]); }
+        function () { renderOel(r[7]); }, function () { renderReich(r[8], r[16]); }, function () { renderHist(r[9]); }, function () { renderWetter(r[10]); }, function () { renderEuropa(r[11]); }, function () { renderAnlagen(r[12]); }, function () { renderTtf(r[13], r[19]); }, function () { renderLngTanks(r[14]); }, function () { renderUmfeld(r[15]); }, function () { renderVorausschau(r[16], r[20]); }, function () { renderEinsp(r[16]); }, function () { renderUmfeldVor(r[17], r[15]); }, function () { renderStoerungen(r[18]); }, function () { renderUeberblick(r[16], r[17]); }, function () { renderVerstromung(r[16]); }, function () { renderModellFaktoren(r[16], r[21]); }, function () { renderAusland(r[16], r[3], r[22], r[21]); }, function () { renderMassnahmen(r[23], r[16]); }, function () { state.alle = r; renderFaktoren(r); }, function () { renderVersorgung(r[16], r[17]); }
       ].forEach(function (f) { try { f(); } catch (e) { if (window.console) console.error(e); } });
     });
   }

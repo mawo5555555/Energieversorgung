@@ -311,7 +311,7 @@ def simuliere(start, stock, kap, i_tag, tmap, bis, fit, cap, basis=15.0, extra=0
     d = start
     while d <= bis:
         f = stock / kap * 100
-        bedarf = max(0.0, fit["a"] + fit["b"] * hdd(tmap(d), basis) + (extra_fn(d) if extra_fn else 0.0)) + extra
+        bedarf = max(0.0, max(0.0, fit["a"] + fit["b"] * hdd(tmap(d), basis) + (extra_fn(d) if extra_fn else 0.0)) + extra)
         c = cap(f)
         w = min(bedarf, c)
         if bedarf > c + 1e-9:
@@ -716,6 +716,16 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None, strom=None)
             eintrag_f[name] = {"fuellstand_ziel_tag": wert_am(sim["verlauf"], ziel_tag), "fuellstand_ende": sim["verlauf"][-1][1], "erreicht": sim["erreicht"],
                                "fehl_twh": sim["fehl_twh"], "fehl_tage": sim["fehl_tage"], "fehl_erster": sim["fehl_erster"], "fehl_spitze_gwh": sim["fehl_spitze_gwh"]}
         empf.append(eintrag_f)
+    # Was bringt Sparen? Verbrauch um x % unter dem Jahresmittel (negativer Zusatzbedarf), bis Winterende
+    verbrauch_gwh = cfg["jahresverbrauch_twh"] / 365.0 * 1000.0
+    sparen = []
+    for text, anteil in (("5 % weniger Verbrauch", 0.05), ("10 % weniger Verbrauch", 0.10), ("17,6 % weniger Verbrauch (so viel wie 2022)", 0.176)):
+        e_ = {"fall": text, "anteil": anteil, "gwh_tag": round(verbrauch_gwh * anteil)}
+        for name in ("normal", "kalt"):
+            sim = simuliere(start_sim, r0["twh"], r0["kap"], i_tag, tmaps[name], bis, fit, cap_fn("faellt", hoch, tief), basis, -verbrauch_gwh * anteil, extra_fn_fuer(tmaps[name]) if extra_fn_fuer else None)
+            e_[name] = {"fuellstand_ziel_tag": wert_am(sim["verlauf"], ziel_tag), "fuellstand_ende": sim["verlauf"][-1][1], "erreicht": sim["erreicht"],
+                        "fehl_twh": sim["fehl_twh"], "fehl_tage": sim["fehl_tage"], "fehl_erster": sim["fehl_erster"], "fehl_spitze_gwh": sim["fehl_spitze_gwh"]}
+        sparen.append(e_)
     if (import_ref or {}).get("kaelte_ausland_gwh"):
         xk = float(import_ref["kaelte_ausland_gwh"])
         eintrag_k = {"fall": "Kältewelle in den Nachbarländern, 14 Tage im Januar (weniger Importe)", "gwh_tag": round(xk), "schwach": not import_ref.get("kaelte_ausland_beleg", False)}
@@ -841,7 +851,7 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None, strom=None)
         "szenarien": szen,
         "vorjahre": vor, "vorjahr_verlauf": vorjahr_verlauf,
         "rueckrechnung": rr, "rueckrechnung_mittlerer_fehler_pp": round(sum(fehler) / len(fehler), 1) if fehler else None,
-        "ziel": cfg["ziel"], "einspeicherung": einsp, "analog": analog, "faktoren_modell": fakt, "importausfall": empf, "verstromung": verstr, "importe_ref": {"pipeline_netto": pn, "lng": lg, "norwegen": nor},
+        "ziel": cfg["ziel"], "einspeicherung": einsp, "analog": analog, "faktoren_modell": fakt, "importausfall": empf, "sparen": sparen, "verstromung": verstr, "importe_ref": {"pipeline_netto": pn, "lng": lg, "norwegen": nor},
         "ohne_importe": {"jahresverbrauch_twh": cfg["jahresverbrauch_twh"], "quelle": cfg.get("jahresverbrauch_quelle"), "verbrauch_tag_twh": round(verbrauch_tag, 2),
                          "tage": round(r0["twh"] / verbrauch_tag)},
     }

@@ -1,0 +1,130 @@
+{
+ "stand": "2026-11-12",
+ "hinweis": "Zusammenfassung aus den Quellen, die ich gefunden und gelesen habe. Rechtliche Einzelheiten bitte in den Quellen oder bei der Bundesnetzagentur prüfen. Das ist keine Rechtsberatung.",
+ "stufen": [
+  {
+   "name": "Frühwarnstufe",
+   "text": "Beobachtung der Lage, ein Krisenteam arbeitet. Die Marktteilnehmer sorgen selbst für Versorgung. Laut Bundesnetzagentur gilt sie seit dem 1. Juli 2025, bitte dort den aktuellen Stand prüfen.",
+   "beleg": "belegt"
+  },
+  {
+   "name": "Alarmstufe",
+   "text": "Die Marktakteure sollen die Lage zunächst selbst beherrschen, es sind marktbasierte Maßnahmen vorgesehen. Sie wurde am 23. Juni 2022 ausgerufen und später wieder aufgehoben.",
+   "beleg": "belegt"
+  },
+  {
+   "name": "Notfallstufe",
+   "text": "Greifen die Maßnahmen der beiden ersten Stufen nicht, kann die Bundesregierung per Verordnung eingreifen. Erst hier sind verordnete Abschaltungen oder vergleichbare Markteingriffe möglich, auch nicht-marktbasierte, vor allem um geschützte Kunden zu versorgen. Die Bundesnetzagentur ist dann als Bundeslastverteiler zuständig. Die Notfallstufe wurde in der Krise 2022/23 nicht ausgerufen.",
+   "beleg": "belegt"
+  }
+ ],
+ "mechanismen": [
+  {
+   "titel": "Geschützte Kunden",
+   "text": "Nach § 53a EnWG gehören dazu unter anderem direkt belieferte Haushaltskunden und Letztverbraucher mit geringem Jahresverbrauch (unter 10.000 kWh) sowie soziale Dienste wie Krankenhäuser. Die Bundesnetzagentur nannte 2022 auch Gewerbebetriebe bis 1,5 Mio. kWh im Jahr als geschützt, zum Beispiel Bäckereien oder Supermärkte. Absolut ist der Schutz nicht.",
+   "beleg": "belegt",
+   "quellen": [
+    {
+     "t": "Bundesnetzagentur: Hintergrund Gasversorgung",
+     "u": "https://www.bundesnetzagentur.de/DE/Fachthemen/ElektrizitaetundGas/Versorgungssicherheit/Gas/Hintergrund/start.html"
+    },
+    {
+     "t": "Tagesspiegel Background: Abschalt-Hierarchie",
+     "u": "https://background.tagesspiegel.de/energie-und-klima/briefing/netzagentur-sortiert-abschalt-hierarchie-fuer-gas"
+    }
+   ]
+  },
+  {
+   "titel": "Industrie und einzelne Großverbraucher abschalten",
+   "text": "Industriekunden gehören überwiegend nicht zu den geschützten Kunden. In der Notfallstufe entscheidet die Bundesnetzagentur als Bundeslastverteiler, wer wie viel Gas bekommt. Für Großverbraucher wollte sie sechs Kriterien anlegen (Einzelheiten in den Quellen). Eine feste Reihenfolge gibt es nicht: Der Präsident räumte ein, dass sich die Kriterien nicht eindeutig ordnen lassen, Ziel sei der geringste Schaden. Die Debatte, ob zuerst Haushalte oder Industrie abgeschaltet werden, nannte er eine „Phantomdebatte“, geschützte Kunden werden zuletzt eingeschränkt.",
+   "beleg": "belegt (Stand 2022)",
+   "quellen": [
+    {
+     "t": "Industriemagazin: erstmals Abschalt-Kriterien",
+     "u": "https://industriemagazin.at/energie/gasmangellage-deutschland-definiert-erstmals-kriterien-fuer-die-industrie/"
+    },
+    {
+     "t": "ZfK: Müller, es geht nur noch um das Abwägen von Übeln",
+     "u": "https://www.zfk.de/politik/deutschland/bnetza-praesident-mueller-geht-nur-noch-um-das-abwaegen-von-uebeln"
+    },
+    {
+     "t": "Bundesnetzagentur: Rolle als Bundeslastverteiler",
+     "u": "https://bundesnetzagentur.de/SharedDocs/Downloads/DE/Sachgebiete/Energie/Unternehmen_Institutionen/Gasversorgung/RolleBNetzA.pdf"
+    }
+   ]
+  },
+  {
+   "titel": "Abschalt-Auktion für die Industrie",
+   "text": "Vorgeschlagen war ein Modell, bei dem Industrieunternehmen Gebote für ihre Abschaltung abgeben. Wer am wenigsten verlangt, wird zuerst abgeschaltet. Der Bundesnetzagentur-Präsident hielt Auktionen als marktwirtschaftliches Instrument vor einer Gasnotlage für denkbar, damit die Industrie mehr Anreiz zum Sparen hat. Ob ein solches Verfahren heute gilt, habe ich nicht geprüft.",
+   "beleg": "Vorschlag, Stand nicht geprüft",
+   "quellen": [
+    {
+     "t": "FES-Bewertung 2022",
+     "u": "https://library.fes.de/pdf-files/a-p-b/19491.pdf"
+    },
+    {
+     "t": "ZfK: Müller",
+     "u": "https://www.zfk.de/politik/deutschland/bnetza-praesident-mueller-geht-nur-noch-um-das-abwaegen-von-uebeln"
+    }
+   ]
+  },
+  {
+   "titel": "Verpflichtende Sparvorgaben (Energiesicherungsmaßnahmenverordnung 2022)",
+   "text": "Die Verordnung galt ab dem 1. September 2022, zeitlich befristet. Sie senkte Mindesttemperaturen in Arbeitsräumen um 1 °C, begrenzte Büroräume in öffentlichen Gebäuden auf 19 °C, verbot das Heizen von Gemeinschaftsflächen ohne Aufenthalt und untersagte beleuchtete Werbeanlagen zwischen 22 und 6 Uhr. Das Enddatum nennen die Quellen unterschiedlich (28. Februar oder 15. April 2023). Die Verordnung ist inzwischen außer Kraft.",
+   "beleg": "belegt",
+   "quellen": [
+    {
+     "t": "EnSikuMaV im Wortlaut (buzer.de)",
+     "u": "https://www.buzer.de/6_EnSikuMaV.htm"
+    },
+    {
+     "t": "DGUV zu den Temperaturvorgaben",
+     "u": "https://publikationen.dguv.de/widgets/pdf/download/article/4609"
+    }
+   ]
+  },
+  {
+   "titel": "EU: freiwillige Senkung um 15 Prozent",
+   "text": "Die EU-Verordnung 2022/1369 sah vom August 2022 bis März 2023 eine freiwillige Senkung der Gasnachfrage um 15 % vor. EU-weit lag die Senkung von August 2022 bis Januar 2023 laut EUR-Lex über 15 %. Bei einem „Unionsalarm“ des Rates wäre sie verbindlich geworden. Die Regelung wurde bis 31. März 2024 verlängert, danach folgte eine Empfehlung des Rates.",
+   "beleg": "belegt",
+   "quellen": [
+    {
+     "t": "EUR-Lex: koordinierte Maßnahmen zur Senkung der Gasnachfrage",
+     "u": "https://eur-lex.europa.eu/DE/legal-content/summary/coordinated-demand-reduction-measures-for-gas.html"
+    }
+   ]
+  },
+  {
+   "titel": "Weitere Hebel (aus meinem Wissen, nicht geprüft)",
+   "text": "Mehr LNG-Einspeisung über zusätzliche Terminals, Brennstoffwechsel in der Industrie, Kohlekraftwerke aus der Reserve statt Gaskraftwerke, die Gaspreisbremse 2022/23 und Notkäufe durch den Marktgebietsverantwortlichen. Dazu habe ich in dieser Recherche keine Quelle gelesen, bitte nicht ohne Prüfung weitergeben.",
+   "beleg": "nicht geprüft",
+   "quellen": []
+  }
+ ],
+ "erfahrung": [
+  {
+   "wert": "−17,6 %",
+   "text": "Gasverbrauch in Deutschland im Jahr 2022 gegenüber 2021, auf 847.470 GWh. 41,4 % entfielen auf Haushalte und Gewerbe, 58,6 % auf die Industrie.",
+   "quelle": {
+    "t": "Bundesnetzagentur: Rückblick 2023",
+    "u": "https://bundesnetzagentur.de/gasversorgung-rueckblick2023"
+   }
+  },
+  {
+   "wert": "−23 %",
+   "text": "Verbrauch von Haushalten, Industrie und Kraftwerken im zweiten Halbjahr 2022 gegenüber dem Vorjahreszeitraum (Hertie School). Kleinverbraucher sparten im September 2022 rund 28 %.",
+   "quelle": {
+    "t": "Clean Energy Wire",
+    "u": "https://www.cleanenergywire.org/news/german-households-industry-and-power-plants-reduced-gas-use-quarter-second-half-2022"
+   }
+  },
+  {
+   "wert": "−12 %",
+   "text": "In der kältesten Woche (30. Januar bis 5. Februar 2023) lag der Verbrauch temperaturbereinigt nur noch 12 % unter dem Durchschnitt der Vorjahre, die Bundesnetzagentur stufte das als kritisch ein. Es kam nicht zur Gasmangellage, geholfen haben der milde Winter und das Sparen.",
+   "quelle": {
+    "t": "S&P Global",
+    "u": "https://www.spglobal.com/commodityinsights/en/market-insights/latest-news/natural-gas/020923-german-gas-consumption-remains-in-critical-range-in-week-5-regulator"
+   }
+  }
+ ]
+}
