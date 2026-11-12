@@ -247,5 +247,5 @@
  ],
  "quelle": "Yahoo Finance (TTF Erdgas-Future, Euro je MWh, verzögert)",
  "fehler": "ValueError: keine Kursdaten (TTF=F): {\"chart\": {\"result\": [{\"meta\": {\"currency\": \"EUR\", \"symbol\": \"TTF=F\", \"exchangeName\": \"NYM\", \"fullExchangeName\": \"NY Mercantile\", \"instrumentType\": \"FUTURE\", \"firstTradeDate\": 1508731200, \"regularMarketTime\": 1794423085, \"hasPrePostMarketDa",
- "fehler_stand": "2026-11-12T07:34:36Z"
+ "fehler_stand": "2026-11-12T07:38:37Z"
 }
