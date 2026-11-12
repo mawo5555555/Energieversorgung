@@ -362,7 +362,8 @@ def gas_umfeld():
     try:
         best = entsog_tage(["ITP-00096", "ITP-00497"], 10)
         for pk, nm in (("ITP-00096", "Mallnow (Polen–Deutschland, Brandenburg)"), ("ITP-00497", "GCP Gaz-System/ONTRAS (Polen–Deutschland)")):
-            tg = sorted({t for (p_, _, t) in best if p_ == pk})[-7:]
+            gestern = (NOW - timedelta(days=1)).strftime("%Y-%m-%d")
+            tg = sorted({t for (p_, _, t) in best if p_ == pk and t <= gestern})[-7:]
             grenz.append({"name": nm, "tage": [[t, round(best.get((pk, "entry", t), 0) / 1e6, 1), round(best.get((pk, "exit", t), 0) / 1e6, 1)] for t in tg]})
     except Exception:  # noqa: BLE001
         grenz = []
