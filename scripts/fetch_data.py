@@ -103,7 +103,7 @@ def strom():
     for fid, name in ERZEUGUNG.items():
         s = smard_series(fid, "DE", "quarterhour")
         if s:
-            mix[name] = round(s[-1][1])
+            mix[name] = round(s[-1][1] * 4)  # SMARD liefert MWh je Viertelstunde, mal 4 ergibt MW
             stand = max(stand or 0, s[-1][0])
     last = smard_series(410, "DE", "quarterhour")
     preis = smard_series(4169, "DE-LU", "hour")
@@ -111,7 +111,7 @@ def strom():
         "stand": stamp(),
         "daten_stand_ms": stand,
         "erzeugung_mw": mix,
-        "verbrauch_mw": round(last[-1][1]) if last else None,
+        "verbrauch_mw": round(last[-1][1] * 4) if last else None,
         "preis_eur_mwh": preis[-1][1] if preis else None,
         "preis_verlauf": [[t // 1000, v] for t, v in preis[-48:]],
         "quelle": "Bundesnetzagentur | SMARD.de",
@@ -598,7 +598,7 @@ POTSDAM = (52.39, 13.06)
 def wetter():
     old = read("wetter.json", {})
     try:
-        if old.get("stand") and not old.get("fehler") and (NOW - datetime.strptime(old["stand"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)) < timedelta(hours=3):
+        if old.get("stand") and not old.get("fehler") and old.get("wind_versucht") and (NOW - datetime.strptime(old["stand"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)) < timedelta(hours=3):
             return None  # frisch genug, Abrufe schonen
     except ValueError:
         pass
@@ -614,8 +614,33 @@ def wetter():
     for i in range(len(tage)):
         w = [x["daily"]["temperature_2m_mean"][i] for x in d[1:] if x["daily"]["temperature_2m_mean"][i] is not None]
         de.append(round(sum(w) / len(w), 1) if w else None)
-    return {"stand": stamp(), "tage": tage, "heute_index": 7, "brandenburg": bb, "deutschland": de,
-            "quelle": "Open-Meteo.com (CC BY 4.0), Brandenburg = Potsdam, Deutschland = Mittel aus 6 Großstädten"}
+    out = {"stand": stamp(), "tage": tage, "heute_index": 7, "brandenburg": bb, "deutschland": de,
+           "quelle": "Open-Meteo.com (CC BY 4.0), Brandenburg = Potsdam, Deutschland = Mittel aus 6 Großstädten"}
+    out["wind_versucht"] = True
+    # Wind und Sonne (für Gaskraftwerke), getrennt abgesichert
+    try:
+        var = (read("wind_historie.json", {}) or {}).get("variable") or WIND_VARIANTEN[0]
+        for v_ in ([var] + [x for x in WIND_VARIANTEN if x != var]):
+            try:
+                q2 = urllib.parse.urlencode({"latitude": ",".join(str(o[0]) for o in STAEDTE_DE), "longitude": ",".join(str(o[1]) for o in STAEDTE_DE),
+                                             "daily": f"{v_},shortwave_radiation_sum", "past_days": 7, "forecast_days": 14, "timezone": "Europe/Berlin"})
+                w = get_json("https://api.open-meteo.com/v1/forecast?" + q2, timeout=60)
+                if isinstance(w, dict):
+                    w = [w]
+                n = len(w[0]["daily"]["time"])
+                wl, sl = [], []
+                for i in range(n):
+                    a1 = [x["daily"][v_][i] for x in w if x["daily"][v_][i] is not None]
+                    a2 = [x["daily"]["shortwave_radiation_sum"][i] for x in w if x["daily"]["shortwave_radiation_sum"][i] is not None]
+                    wl.append(round(sum(a1) / len(a1), 2) if a1 else None)
+                    sl.append(round(sum(a2) / len(a2), 2) if a2 else None)
+                out["wind"], out["strahlung"], out["wind_variable"] = wl, sl, v_
+                break
+            except Exception:  # noqa: BLE001
+                continue
+    except Exception as e:  # noqa: BLE001
+        out["wind_fehler"] = f"{type(e).__name__}: {e}"[:150]
+    return out
 
 
 # ---------- Füllstand im Jahresvergleich (AGSI+, Deutschland) ----------
@@ -695,6 +720,64 @@ def temp_historie():
     return tage
 
 
+# ---------- Verstromung: Erdgas-Stromerzeugung (SMARD) und Wind/Sonne (Open-Meteo) ----------
+WIND_VARIANTEN = ("wind_speed_10m_mean", "wind_speed_10m_max")
+
+
+def smard_erdgas_tage():
+    """Tägliche Stromerzeugung aus Erdgas in Deutschland (MWh), seit 2018, wächst nur um neue Tage."""
+    alt = read("erdgasstrom_historie.json", {"tage": {}})
+    tage = alt.get("tage", {})
+    idx = get_json(f"{SMARD}/4071/DE/index_day.json")["timestamps"]
+    for ts in idx:
+        jahr = datetime.fromtimestamp(ts / 1000 + 43200, timezone.utc).year
+        if jahr < 2018:
+            continue
+        have = sum(1 for k in tage if k.startswith(str(jahr)))
+        if jahr < NOW.year and have >= 360:
+            continue
+        rows = get_json(f"{SMARD}/4071/DE/4071_DE_day_{ts}.json", timeout=90).get("series", [])
+        for t, v in rows:
+            if v is not None:
+                tage[datetime.fromtimestamp(t / 1000 + 43200, timezone.utc).strftime("%Y-%m-%d")] = round(v)
+    write("erdgasstrom_historie.json", {"stand": stamp(), "einheit": "MWh pro Tag", "quelle": "Bundesnetzagentur | SMARD.de, CC BY 4.0", "tage": tage})
+    return tage
+
+
+def wind_historie():
+    """Tagesmittel Windgeschwindigkeit (m/s) und Strahlungssumme (MJ/m²), Mittel aus 6 Großstädten, wächst nur um neue Tage."""
+    alt = read("wind_historie.json", {"tage": {}})
+    tage, variable = alt.get("tage", {}), alt.get("variable")
+    bis = (NOW - timedelta(days=7)).date()
+    start = (datetime.strptime(max(tage), "%Y-%m-%d").date() + timedelta(days=1)) if tage else datetime(2018, 1, 1).date()
+    while start <= bis:
+        ende = min(bis, start + timedelta(days=730))
+        d = None
+        for var in ([variable] if variable else WIND_VARIANTEN):
+            q = urllib.parse.urlencode({"latitude": ",".join(str(o[0]) for o in STAEDTE_DE), "longitude": ",".join(str(o[1]) for o in STAEDTE_DE),
+                                        "start_date": start.isoformat(), "end_date": ende.isoformat(), "daily": f"{var},shortwave_radiation_sum", "timezone": "Europe/Berlin"})
+            try:
+                d = get_json("https://archive-api.open-meteo.com/v1/archive?" + q, timeout=120)
+                variable = var
+                break
+            except Exception as e:  # noqa: BLE001
+                d = None
+                letzter = f"{type(e).__name__}: {e}"[:150]
+        if d is None:
+            raise ValueError("Windverlauf nicht abrufbar: " + letzter)
+        if isinstance(d, dict):
+            d = [d]
+        zeit = d[0]["daily"]["time"]
+        for i, t in enumerate(zeit):
+            w = [x["daily"][variable][i] for x in d if x["daily"].get(variable, [None] * (i + 1))[i] is not None]
+            s = [x["daily"]["shortwave_radiation_sum"][i] for x in d if x["daily"]["shortwave_radiation_sum"][i] is not None]
+            if w and s:
+                tage[t] = [round(sum(w) / len(w), 2), round(sum(s) / len(s), 2)]
+        start = ende + timedelta(days=1)
+    write("wind_historie.json", {"stand": stamp(), "variable": variable, "quelle": "Open-Meteo Archiv (CC BY 4.0), Mittel aus 6 Großstädten", "tage": tage})
+    return tage, variable
+
+
 def preisanalyse(hist):
     """Zusammenhang zwischen TTF-Preis und Einspeicherung im Sommer (Apr-Okt) je Jahr, und wo der Preis jetzt im Verhältnis zur Historie steht."""
     preise = {}
@@ -756,7 +839,7 @@ def gas_vorausschau():
     old = read("gas_vorausschau.json", {})
     try:
         alt = datetime.strptime(old["stand"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
-        if NOW - alt < timedelta(hours=5) and old.get("szenarien") and old.get("einspeicherung") and old.get("importausfall") and read("gas_preisanalyse.json", {}).get("jahre") and read("gas_umfeld_vorausschau.json", {}).get("anlagen") and not old.get("fehler"):
+        if NOW - alt < timedelta(hours=5) and old.get("szenarien") and old.get("einspeicherung") and old.get("importausfall") and "abweichung_letzte_tage_gwh" in (old.get("verstromung") or {}) and read("gas_preisanalyse.json", {}).get("jahre") and read("gas_umfeld_vorausschau.json", {}).get("anlagen") and not old.get("fehler"):
             return None  # aufwendig (Historie seit 2018), deshalb nur alle paar Stunden
     except (KeyError, ValueError):
         pass
@@ -765,9 +848,16 @@ def gas_vorausschau():
     temp = temp_historie()
     pipe, lng = read("gas_pipeline.json", {}), read("gas_lng.json", {})
     cfg = read_cfg("modell.json")
+    strom_daten = {"eta": cfg.get("wirkungsgrad_gaskraftwerke", 0.5)}
+    try:
+        strom_daten["gas_mwh"] = smard_erdgas_tage()
+        wtage, _var = wind_historie()
+        strom_daten["wind"] = wtage
+    except Exception as e:  # noqa: BLE001
+        strom_daten["fehler"] = f"{type(e).__name__}: {e}"[:200]
     res, ctx = modell.vorausschau(hist, temp, read("wetter.json", {}), cfg, max(hist),
                                   {"pipeline_netto": pipe.get("summe_netto"), "lng": lng.get("summe"),
-                                   "norwegen": next((g["netto"] for g in pipe.get("gruppen", []) if g.get("name") == "Norwegen"), None)})
+                                   "norwegen": next((g["netto"] for g in pipe.get("gruppen", []) if g.get("name") == "Norwegen"), None)}, strom_daten)
     res["stand"] = stamp()
     # Verlauf der Prognose festhalten, damit sichtbar wird, wie sie sich mit dem tatsächlichen Verlauf ändert
     try:

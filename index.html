@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Energie">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="stylesheet" href="style.css?v=21">
+<link rel="stylesheet" href="style.css?v=23">
 </head>
 <body>
 <header>
@@ -26,6 +26,7 @@
 <nav class="tabbar" aria-label="Bereiche">
   <div class="tabs">
     <a href="#ueberblick"><span>👁️</span>Überblick</a>
+    <a href="#faktoren"><span>🧭</span>Faktoren</a>
     <a href="#gas"><span>🔥</span>Gas</a>
     <a href="#cReichBB" data-scope="bb"><span>🔮</span>Vorausschau</a>
     <a href="#cReichDE" data-scope="de"><span>🔮</span>Vorausschau</a>
@@ -42,6 +43,11 @@
     <div class="grid"><article class="card wide full" id="cUeberblick"><div class="body">…</div></article></div>
   </section>
 
+  <section id="faktoren">
+    <h2>Alle Einflussfaktoren auf den Füllstand</h2>
+    <div class="grid"><article class="card wide full" id="cFaktoren"><div class="body">…</div></article></div>
+  </section>
+
   <section id="gas">
     <h2>Gas</h2>
     <div class="grid">
@@ -53,6 +59,7 @@
       <article class="card wide" id="cReichDE" data-scope="de"><h3>Wie lange halten die Gasspeicher? (Vorausschau)</h3><div class="body">…</div></article>
       <article class="card wide full" id="cVorausschau" data-scope="de"><h3>Vorausschau bis Winterende: Szenarien</h3><div class="body">…</div></article>
       <article class="card wide full" id="cVersorgung" data-scope="de"><h3>Kann die Versorgung gedeckt werden? Einsparungen und Gasmangel</h3><div class="body">…</div></article>
+      <article class="card wide full" id="cVerstromung" data-scope="de"><h3>Gaskraftwerke: Wetter, Wind und Verstromung</h3><div class="body">…</div></article>
       <article class="card wide full" id="cStoerungen" data-scope="de"><h3>Netzausfälle und Wartung</h3><div class="body">…</div></article>
       <article class="card wide full" id="cEinsp" data-scope="de"><h3>Einspeicherung: Wie viel mehr wäre nötig?</h3><div class="body">…</div></article>
       <article class="card wide full" id="cHist" data-scope="de"><h3>Füllstand im Jahresvergleich</h3><div class="body">…</div></article>
@@ -113,6 +120,6 @@
     Rohöl und Erdgaspreis: Yahoo Finance (verzögert) · Wetter: <a href="https://open-meteo.com" rel="noopener">Open-Meteo.com</a> (CC BY 4.0).</p>
   <p>Alle Angaben ohne Gewähr, keine Handels- oder Versorgungsempfehlung. Die Daten werden in festen Abständen abgeholt, der Stand steht an jeder Kachel.</p>
 </footer>
-<script src="app.js?v=21"></script>
+<script src="app.js?v=23"></script>
 </body>
 </html>
