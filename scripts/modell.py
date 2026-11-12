@@ -398,6 +398,19 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None, strom=None)
                 for t, w_, r_ in zip(wetter["tage"], wetter["wind"], wetter.get("strahlung") or [None] * len(wetter["tage"])):
                     if w_ is not None and r_ is not None:
                         fcw[t], fcr[t] = w_, r_
+            # Nachführung: Weicht der tatsächliche Gaseinsatz der letzten Tage vom Modell ab, wird die Vorschau darauf angepasst (klingt über 3 Wochen ab)
+            bias_gas = 0.0
+            try:
+                abw = []
+                if wetter and wetter.get("wind"):
+                    for t, tt, w_, r_ in zip(wetter["tage"], wetter["deutschland"], wetter["wind"], wetter.get("strahlung") or []):
+                        if t in strom["gas_mwh"] and tt is not None and w_ is not None and r_ is not None and t < d2s(heute):
+                            abw.append(strom["gas_mwh"][t] / 1000.0 / eta - gas_fuer_strom(fv, tt, w_, r_, basis))
+                abw = abw[-7:]
+                if len(abw) >= 3:
+                    bias_gas = sum(abw) / len(abw)
+            except Exception:  # noqa: BLE001
+                bias_gas = 0.0
             winter_w = sorted(v[0] for t, v in strom["wind"].items() if int(t[5:7]) >= 11 or int(t[5:7]) <= 3)
             winter_r = sorted(v[1] for t, v in strom["wind"].items() if int(t[5:7]) >= 11 or int(t[5:7]) <= 3)
             wp10 = winter_w[int(0.10 * (len(winter_w) - 1))]
@@ -413,7 +426,7 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None, strom=None)
             def extra_fn_fuer(tmap, flaute=False):
                 def fnc(d):
                     w_, r_ = wetter_tag(d)
-                    g_norm = gas_fuer_strom(fv, tmap(d), w_, r_, basis)
+                    g_norm = gas_fuer_strom(fv, tmap(d), w_, r_, basis) + bias_gas * max(0.0, 1.0 - max(0, (d - heute).days) / 21.0)
                     if flaute and date(jahr_f, 1, 11) <= d <= date(jahr_f, 1, 24):
                         g_fl = gas_fuer_strom(fv, tmap(d), min(w_, wp10), min(r_, rp25), basis)
                         # Mehrbedarf der Kraftwerke höchstens 1:1 (physikalische Obergrenze), nicht mit dem größeren statistischen Faktor
@@ -438,14 +451,15 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None, strom=None)
                       "fit_entnahme": {"e": round(fit2["e"], 2), "r2_neu": round(fit2["r2"], 2), "r2_alt": round(fit["r2"], 2)},
                       "winter": {"mittel_gwh_gas": round(sum(gw) / len(gw)), "p95_gwh_gas": round(gw[int(0.95 * (len(gw) - 1))]), "max14_gwh_gas": round(mw14)},
                       "anteil_entnahme_prozent": round(anteil) if anteil is not None else None, "wind_p10_ms": round(wp10, 1)}
-            if strom.get("aktuell_mw"):
-                verstr["aktuell"] = {"gas_mw": strom["aktuell_mw"], "gas_gwh_tag": round(strom["aktuell_mw"] * 24 / 1000.0 / eta)}
+            letzter_tag = max(strom["gas_mwh"])
+            verstr["aktuell"] = {"tag": letzter_tag, "gas_mw": round(strom["gas_mwh"][letzter_tag] / 24.0), "gas_gwh_tag": round(strom["gas_mwh"][letzter_tag] / 1000.0 / eta)}
+            verstr["abweichung_letzte_tage_gwh"] = round(bias_gas)
             vor = []
             for k in range(0, 14):
                 dd = heute + timedelta(days=k)
                 w_, r_ = wetter_tag(dd)
                 tm_ = fcw.get(d2s(dd))
-                vor.append([d2s(dd), round(w_, 1), round(gas_fuer_strom(fv, (wetter["deutschland"][wetter["tage"].index(d2s(dd))] if wetter and d2s(dd) in wetter.get("tage", []) else 5.0), w_, r_, basis))])
+                vor.append([d2s(dd), round(w_, 1), round(gas_fuer_strom(fv, (wetter["deutschland"][wetter["tage"].index(d2s(dd))] if wetter and d2s(dd) in wetter.get("tage", []) else 5.0), w_, r_, basis) + bias_gas * max(0.0, 1.0 - k / 21.0))])
             verstr["vorschau"] = vor
             if aktiv:
                 fit = {"a": fit2["a"], "b": fit2["b"], "r2": fit2["r2"], "n": fit2["n"]}

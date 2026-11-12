@@ -103,7 +103,7 @@ def strom():
     for fid, name in ERZEUGUNG.items():
         s = smard_series(fid, "DE", "quarterhour")
         if s:
-            mix[name] = round(s[-1][1])
+            mix[name] = round(s[-1][1] * 4)  # SMARD liefert MWh je Viertelstunde, mal 4 ergibt MW
             stand = max(stand or 0, s[-1][0])
     last = smard_series(410, "DE", "quarterhour")
     preis = smard_series(4169, "DE-LU", "hour")
@@ -111,7 +111,7 @@ def strom():
         "stand": stamp(),
         "daten_stand_ms": stand,
         "erzeugung_mw": mix,
-        "verbrauch_mw": round(last[-1][1]) if last else None,
+        "verbrauch_mw": round(last[-1][1] * 4) if last else None,
         "preis_eur_mwh": preis[-1][1] if preis else None,
         "preis_verlauf": [[t // 1000, v] for t, v in preis[-48:]],
         "quelle": "Bundesnetzagentur | SMARD.de",
@@ -839,7 +839,7 @@ def gas_vorausschau():
     old = read("gas_vorausschau.json", {})
     try:
         alt = datetime.strptime(old["stand"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
-        if NOW - alt < timedelta(hours=5) and old.get("szenarien") and old.get("einspeicherung") and old.get("importausfall") and "verstromung" in old and read("gas_preisanalyse.json", {}).get("jahre") and read("gas_umfeld_vorausschau.json", {}).get("anlagen") and not old.get("fehler"):
+        if NOW - alt < timedelta(hours=5) and old.get("szenarien") and old.get("einspeicherung") and old.get("importausfall") and "abweichung_letzte_tage_gwh" in (old.get("verstromung") or {}) and read("gas_preisanalyse.json", {}).get("jahre") and read("gas_umfeld_vorausschau.json", {}).get("anlagen") and not old.get("fehler"):
             return None  # aufwendig (Historie seit 2018), deshalb nur alle paar Stunden
     except (KeyError, ValueError):
         pass
@@ -848,7 +848,7 @@ def gas_vorausschau():
     temp = temp_historie()
     pipe, lng = read("gas_pipeline.json", {}), read("gas_lng.json", {})
     cfg = read_cfg("modell.json")
-    strom_daten = {"eta": cfg.get("wirkungsgrad_gaskraftwerke", 0.5), "aktuell_mw": (read("strom.json", {}).get("erzeugung_mw") or {}).get("Erdgas")}
+    strom_daten = {"eta": cfg.get("wirkungsgrad_gaskraftwerke", 0.5)}
     try:
         strom_daten["gas_mwh"] = smard_erdgas_tage()
         wtage, _var = wind_historie()
