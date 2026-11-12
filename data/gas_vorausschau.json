@@ -2394,5 +2394,7 @@
   "tage": 58
  },
  "stand": "2026-11-12T07:54:31Z",
- "quelle": "GIE AGSI+ (Speicherdaten seit 2018), Open-Meteo (Temperaturen), eigene Berechnung"
+ "quelle": "GIE AGSI+ (Speicherdaten seit 2018), Open-Meteo (Temperaturen), eigene Berechnung",
+ "fehler": "UnboundLocalError: cannot access local variable 'start_sim' where it is not associated with a value",
+ "fehler_stand": "2026-11-12T09:12:14Z"
 }
