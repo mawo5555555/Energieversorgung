@@ -586,6 +586,89 @@ def gas_historie():
             "jahre": {str(y): sorted([t, v] for t, v in jahre[y].items()) for y in [*vorjahre, heute] if y in jahre}, "band": band}
 
 
+# ---------- Modell-Grundlagen: Historie der Speicher und Temperaturen ----------
+def agsi_de_historie(key, ab_jahr=2018):
+    rows, page = [], 1
+    while page <= 30:
+        d = get_json(f"https://agsi.gie.eu/api?country=DE&from={ab_jahr}-01-01&size=300&page={page}", {"x-key": key}, 90)
+        rows += d.get("data", [])
+        if page >= int(d.get("last_page", 1) or 1):
+            break
+        page += 1
+    out = {}
+    for r in rows:
+        try:
+            out[r["gasDayStart"]] = {"full": float(r["full"]), "w": fl(r["withdrawal"]), "i": fl(r["injection"]), "wcap": fl(r.get("withdrawalCapacity")),
+                                     "icap": fl(r.get("injectionCapacity")), "twh": fl(r["gasInStorage"]), "kap": fl(r["workingGasVolume"])}
+        except (KeyError, ValueError, TypeError):
+            continue
+    return out
+
+
+def temp_historie():
+    """Tagesmitteltemperatur Deutschland (Mittel aus 6 Großstädten), wächst bei jedem Lauf nur um die neuen Tage."""
+    old = read("temp_historie.json", {"tage": {}})
+    tage = old.get("tage", {})
+    bis = (NOW - timedelta(days=7)).date()
+    start = (datetime.strptime(max(tage), "%Y-%m-%d").date() + timedelta(days=1)) if tage else datetime(2018, 1, 1).date()
+    while start <= bis:
+        ende = min(bis, start + timedelta(days=730))
+        q = urllib.parse.urlencode({"latitude": ",".join(str(o[0]) for o in STAEDTE_DE), "longitude": ",".join(str(o[1]) for o in STAEDTE_DE),
+                                    "start_date": start.isoformat(), "end_date": ende.isoformat(), "daily": "temperature_2m_mean", "timezone": "Europe/Berlin"})
+        d = get_json("https://archive-api.open-meteo.com/v1/archive?" + q, timeout=120)
+        if isinstance(d, dict):
+            d = [d]
+        zeit = d[0]["daily"]["time"]
+        for i, t in enumerate(zeit):
+            w = [x["daily"]["temperature_2m_mean"][i] for x in d if x["daily"]["temperature_2m_mean"][i] is not None]
+            if w:
+                tage[t] = round(sum(w) / len(w), 2)
+        start = ende + timedelta(days=1)
+    write("temp_historie.json", {"stand": stamp(), "quelle": "Open-Meteo Archiv (CC BY 4.0), Mittel aus 6 Großstädten", "tage": tage})
+    return tage
+
+
+def modell_diagnose():
+    key = os.environ.get("GIE_API_KEY", "").strip()
+    if not key:
+        return {"stand": stamp(), "hinweis": "Kein GIE-Schlüssel."}
+    hist = agsi_de_historie(key)
+    temp = temp_historie()
+    tage = sorted(hist)
+    # Zusammenhang Entnahme ~ Heizgradtage (Heizperiode, Füllstand 35-95 %)
+    xs, ys = [], []
+    for t in tage:
+        m = int(t[5:7])
+        if (m >= 11 or m <= 3) and 35 <= hist[t]["full"] <= 95 and t in temp:
+            xs.append(max(0.0, 15.0 - temp[t]))
+            ys.append(hist[t]["w"])
+    n = len(xs)
+    mx, my = sum(xs) / n, sum(ys) / n
+    sxx = sum((x - mx) ** 2 for x in xs)
+    b = sum((x - mx) * (y - my) for x, y in zip(xs, ys)) / sxx
+    a = my - b * mx
+    ss_res = sum((y - (a + b * x)) ** 2 for x, y in zip(xs, ys))
+    ss_tot = sum((y - my) ** 2 for y in ys)
+    # Bins nach Füllstand: gemeldete Leistung und beobachtete Entnahmen (Okt-Mär)
+    bins = []
+    for lo in range(0, 100, 10):
+        w, wc = [], []
+        for t in tage:
+            m = int(t[5:7])
+            f = hist[t]["full"]
+            if lo <= f < lo + 10 and (m >= 10 or m <= 3):
+                w.append(hist[t]["w"])
+                if hist[t]["wcap"] > 0:
+                    wc.append(hist[t]["wcap"])
+        w.sort(); wc.sort()
+        q = lambda v, p: round(v[min(len(v) - 1, int(p * len(v)))], 1) if v else None
+        bins.append({"von": lo, "bis": lo + 10, "tage": len(w), "entnahme_median": q(w, .5), "entnahme_p95": q(w, .95), "entnahme_max": round(max(w), 1) if w else None,
+                     "gemeldete_leistung_median": q(wc, .5), "gemeldete_leistung_min": round(min(wc), 1) if wc else None})
+    return {"stand": stamp(), "tage_historie": len(tage), "erster_tag": tage[0], "letzter_tag": tage[-1], "temp_tage": len(temp),
+            "fit": {"a": round(a, 1), "b": round(b, 1), "r2": round(1 - ss_res / ss_tot, 3), "n": n}, "bins": bins,
+            "beispiel_leistung": [[t, hist[t]["full"], hist[t]["w"], hist[t]["wcap"]] for t in tage[::90]]}
+
+
 # ---------- Reichweite der Gasspeicher (Schätzung) ----------
 def hdd(t):
     return max(0.0, 15.0 - t) if t is not None else None  # Heizgradtage, Basis 15 °C
@@ -665,7 +748,7 @@ def main():
         ("gas_lng.json", gas_lng), ("gas_speicher.json", gas_speicher), ("kraftstoff.json", kraftstoff), ("rohoel.json", rohoel),
         ("wetter.json", wetter), ("gas_historie.json", gas_historie), ("reichweite.json", reichweite),
         ("gas_europa.json", gas_europa), ("gas_anlagen.json", gas_anlagen),
-        ("gaspreis.json", gaspreis), ("lng_tanks.json", lng_tanks), ("gas_umfeld.json", gas_umfeld),
+        ("gaspreis.json", gaspreis), ("lng_tanks.json", lng_tanks), ("gas_umfeld.json", gas_umfeld), ("modell_diagnose.json", modell_diagnose),
     ]
     for name, fn in jobs:
         if nur and name.split(".")[0] not in nur:
