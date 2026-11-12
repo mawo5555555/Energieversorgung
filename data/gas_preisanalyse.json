@@ -1,4 +1,4 @@
 {
- "stand": "2026-11-12T12:50:25Z",
+ "stand": "2026-11-12T13:03:16Z",
  "fehler": "ValueError: zu wenig Preisdaten (1): range=10y&interval=1d: 1 Zeitpunkte; range=max&interval=1wk: 1 Zeitpunkte; period1=1514764800&period2=1: 0 Zeitpunkte; period1=1546300800&period2=1: 0 Zeitpunkte; period1=1577836800&period2=1: 0 Zeitpunkte; period1=1609459200&period2=1: 0 Zeitpunkte; period1=1640"
 }
