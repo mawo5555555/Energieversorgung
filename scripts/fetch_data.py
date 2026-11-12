@@ -127,44 +127,59 @@ def entsog_tage(punkte, tage=14):
         "from": von, "to": bis, "pointKey": ",".join(punkte), "limit": -1,
     })
     rows = get_json("https://transparency.entsog.eu/api/v1/operationaldatas?" + q, timeout=120).get("operationaldatas", [])
-    best = {}  # (Punkt, Tag) -> höchster Wert der Betreiber, nur Richtung entry
+    best = {}  # (Punkt, Richtung, Tag) -> höchster Wert der Betreiber
     for r in rows:
-        if r.get("directionKey") != "entry":
-            continue
         try:
             v = float(str(r.get("value")).replace(",", "."))
         except (TypeError, ValueError):
             continue
-        k = (r["pointKey"], r["periodFrom"][:10])
+        k = (r["pointKey"], r.get("directionKey"), r["periodFrom"][:10])
         best[k] = max(best.get(k, 0), v)
     return best
 
 
-def gruppen_summe(gruppen):
+def summe_gruppe(best, pts, richtung, tag):
+    w = [best[(p, richtung, tag)] for p in pts if (p, richtung, tag) in best]
+    return sum(w) / 1e6 if w else None  # kWh/d -> GWh/d
+
+
+def gruppen_auswertung(gruppen, mit_ausfuhr):
+    """Wählt den neuesten Tag, für den alle (zuletzt gemeldeten) Gruppen Daten haben, damit die Summe nicht Tage mischt."""
     alle = sorted({p for pts in gruppen.values() for p in pts})
     best = entsog_tage(alle)
-    tage = sorted({t for (_, t) in best})
-    out = {}
-    for name, pts in gruppen.items():
-        reihe = []
-        for t in tage:
-            werte = [best[(p, t)] for p in pts if (p, t) in best]
-            reihe.append([t, round(sum(werte) / 1e6, 1) if werte else None])  # kWh/d -> GWh/d
-        out[name] = reihe
-    return tage, out
+    tage = sorted({t for (_, _, t) in best})
+    ein = {g: {t: summe_gruppe(best, pts, "entry", t) for t in tage} for g, pts in gruppen.items()}
+    aus = {g: {t: summe_gruppe(best, pts, "exit", t) for t in tage} for g, pts in gruppen.items()}
+    letzte = tage[-7:]
+    aktiv = [g for g in gruppen if any(ein[g][t] is not None for t in letzte)]
+    vollstaendig = [t for t in tage if all(ein[g][t] is not None for g in aktiv)]
+    if not vollstaendig:
+        raise ValueError("kein Tag mit vollständigen Meldungen")
+    tag = vollstaendig[-1]
+    out, verlauf = [], []
+    for g in gruppen:
+        e, a = ein[g].get(tag), aus[g].get(tag)
+        out.append({"name": g, "einspeisung": round(e, 1) if e is not None else None,
+                    "ausfuhr": round(a or 0.0, 1) if (mit_ausfuhr and e is not None) else None,
+                    "netto": (round(e - ((a or 0) if mit_ausfuhr else 0), 1) or 0.0) if e is not None else None})
+    for t in vollstaendig[-10:]:
+        verlauf.append([t, round(sum(ein[g][t] - ((aus[g][t] or 0) if mit_ausfuhr else 0) for g in aktiv), 1)])
+    return tag, out, verlauf, [g for g in gruppen if g not in aktiv], tage[-1]
 
 
 def gas_pipeline():
     cfg = read_cfg("gas-punkte.json")
-    tage, out = gruppen_summe(cfg["pipeline"])
-    return {"stand": stamp(), "einheit": "GWh/Tag", "tage": tage, "gruppen": out,
-            "quelle": "ENTSOG Transparency Platform", "hinweis": cfg["hinweis"]}
+    tag, gr, verlauf, leer, neuester = gruppen_auswertung(cfg["pipeline"], True)
+    return {"stand": stamp(), "einheit": "GWh/Tag", "tag": tag, "neuester_tag_in_daten": neuester, "gruppen": gr,
+            "summe_einspeisung": round(sum(g["einspeisung"] or 0 for g in gr), 1), "summe_netto": round(sum(g["netto"] or 0 for g in gr), 1),
+            "verlauf": verlauf, "ohne_daten": leer, "quelle": "ENTSOG Transparency Platform", "hinweis": cfg["hinweis"]}
 
 
 def gas_lng():
     cfg = read_cfg("gas-punkte.json")
-    tage, out = gruppen_summe(cfg["lng"])
-    return {"stand": stamp(), "einheit": "GWh/Tag", "tage": tage, "terminals": out,
+    tag, gr, verlauf, leer, neuester = gruppen_auswertung(cfg["lng"], False)
+    return {"stand": stamp(), "einheit": "GWh/Tag", "tag": tag, "neuester_tag_in_daten": neuester, "terminals": gr,
+            "summe": round(sum(g["einspeisung"] or 0 for g in gr), 1), "verlauf": verlauf, "ohne_daten": leer,
             "quelle": "ENTSOG Transparency Platform (Einspeisung ins Netz)"}
 
 
@@ -335,7 +350,7 @@ def yahoo_reihe(symbol, quelle, nachkomma=2):
     res = d["chart"]["result"][0]
     rows = [(datetime.fromtimestamp(t, timezone.utc).strftime("%Y-%m-%d"), c) for t, c in zip(res["timestamp"], res["indicators"]["quote"][0]["close"]) if c is not None]
     if len(rows) < 2:
-        raise ValueError("keine Kursdaten")
+        raise ValueError(f"keine Kursdaten ({symbol}): {json.dumps(d)[:240]}")
     c, p = rows[-1][1], rows[-2][1]
     return {"stand": stamp(), "datum": rows[-1][0], "preis": round(c, nachkomma), "aenderung_prozent": round((c - p) / p * 100, 2),
             "verlauf": [[d_, round(v, nachkomma)] for d_, v in rows[-60:]], "quelle": quelle}
@@ -395,7 +410,8 @@ def lng_tanks():
             except Exception:  # noqa: BLE001
                 pass
     if not terminals and not de_roh:
-        raise ValueError("keine LNG-Daten")
+        roh = get_json(f"https://alsi.gie.eu/api?country=DE&from={von}&size=3", h, 60)
+        raise ValueError("keine LNG-Daten, Antwort: " + json.dumps(roh)[:300] + " | Firmen: " + str(len(firmen)))
     return {"stand": stamp(), "quelle": "GIE ALSI (alsi.gie.eu)", "deutschland": de_roh, "terminals": terminals}
 
 

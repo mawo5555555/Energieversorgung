@@ -177,19 +177,24 @@
     if (state.wetter) renderWetter(state.wetter);
   }
 
-  function renderGruppen(id, d, key, titelLeer) {
-    var nd = noData(d, titelLeer); if (nd) return set(id, nd);
-    var g = d[key] || {}, items = [], tag = null, summe = 0, any = false;
-    Object.keys(g).forEach(function (n) {
-      var lv = lastVal(g[n]); items.push([n, lv ? lv[1] : null, lv ? lv[0] : null]);
-      if (lv) { any = true; summe += lv[1]; if (!tag || lv[0] > tag) tag = lv[0]; }
-    });
-    items.sort(function (a, b) { return (b[1] || 0) - (a[1] || 0); });
-    var h = errNote(d);
-    if (!any) h += hint("Keine Daten gemeldet.");
-    else h += '<div class="big">' + nf0.format(summe) + ' <span class="unit">GWh/Tag gesamt</span></div>' + bars(items, "GWh/d");
-    var leer = items.filter(function (i) { return i[1] == null; }).map(function (i) { return i[0]; });
-    set(id, h + (leer.length ? '<p class="meta">Keine Daten gemeldet: ' + esc(leer.join(", ")) + "</p>" : "") + meta(d, (tag ? "letzter Tag mit Daten " + esc(tag) : "") + " · " + esc(d.quelle || "")));
+  function renderPipe(d) {
+    var nd = noData(d, "Pipelines"); if (nd) return set("cPipe", nd);
+    if (!d.gruppen || !d.gruppen.length || d.gruppen[0].netto === undefined) return set("cPipe", errNote(d) + hint("Die Pipeline-Daten werden gerade neu berechnet."));
+    var g = d.gruppen.slice().sort(function (a, b) { return (b.einspeisung || 0) - (a.einspeisung || 0); });
+    var rows = g.map(function (x) {
+      return "<tr><td>" + esc(x.name) + '</td><td class="n">' + (x.einspeisung == null ? "–" : nf0.format(x.einspeisung)) + '</td><td class="n">' + (x.ausfuhr == null ? "–" : nf0.format(x.ausfuhr)) + '</td><td class="n"><strong>' + (x.netto == null ? "–" : nf0.format(x.netto)) + "</strong></td></tr>";
+    }).join("");
+    set("cPipe", errNote(d) + '<div class="big">' + nf0.format(d.summe_netto) + ' <span class="unit">GWh/Tag netto</span></div><p class="meta" style="margin-top:4px">Einspeisung nach Deutschland insgesamt ' + nf0.format(d.summe_einspeisung) + " GWh/Tag, davon läuft ein Teil wieder hinaus.</p>" +
+      spark((d.verlauf || []).map(function (p) { return [0, p[1]]; }), { label: "Netto-Importe, 10 Tage", minSpan: 100 }) +
+      '<table><tr><th>Herkunft</th><th class="n">Einspeisung</th><th class="n">Ausfuhr</th><th class="n">Netto</th></tr>' + rows + "</table>" +
+      '<p class="meta">Angaben in GWh pro Tag für den ' + esc(d.tag) + " (neuester Tag, für den alle Länder gemeldet haben). Netto = Einspeisung minus Ausfuhr an denselben Punkten. Wo beides fast gleich hoch ist (z. B. Niederlande, Belgien, Tschechien), fließt das Gas vermutlich überwiegend durch Deutschland hindurch.</p>" + meta(d, esc(d.quelle || "")));
+  }
+  function renderLngEin(d) {
+    var nd = noData(d, "LNG"); if (nd) return set("cLng", nd);
+    if (!d.terminals || !d.terminals.length || d.terminals[0].einspeisung === undefined) return set("cLng", errNote(d) + hint("Die LNG-Daten werden gerade neu berechnet."));
+    var items = d.terminals.map(function (t) { return [t.name, t.einspeisung]; }).sort(function (a, b) { return (b[1] || 0) - (a[1] || 0); });
+    set("cLng", errNote(d) + '<div class="big">' + nf0.format(d.summe) + ' <span class="unit">GWh/Tag gesamt</span></div>' + bars(items, "GWh/d") +
+      '<p class="meta">Einspeisung der deutschen LNG-Terminals ins Gasnetz am ' + esc(d.tag) + "</p>" + meta(d, esc(d.quelle || "")));
   }
 
   function renderPreis(d) {
@@ -240,7 +245,7 @@
     Promise.all(["meta.json", "gas_speicher.json", "gas_lng.json", "gas_pipeline.json", "strom.json", "frequenz.json", "kraftstoff.json", "rohoel.json", "reichweite.json", "gas_historie.json", "wetter.json", "gas_europa.json", "gas_anlagen.json", "gaspreis.json", "lng_tanks.json"].map(get)).then(function (r) {
       document.getElementById("stand").textContent = r[0] && r[0].letzter_lauf ? "Letzter Datenabruf: " + when(r[0].letzter_lauf) : "Noch kein Datenabruf.";
       [function () { renderSpeicherDE(r[1]); }, function () { renderSpeicherBB(r[1]); },
-        function () { renderGruppen("cLng", r[2], "terminals", "LNG"); }, function () { renderGruppen("cPipe", r[3], "gruppen", "Pipelines"); },
+        function () { renderLngEin(r[2]); }, function () { renderPipe(r[3]); },
         function () { renderPreis(r[4]); }, function () { renderMix(r[4]); }, function () { renderFreq(r[5]); }, function () { renderKraft(r[6]); },
         function () { renderOel(r[7]); }, function () { renderReich(r[8]); }, function () { renderHist(r[9]); }, function () { renderWetter(r[10]); }, function () { renderEuropa(r[11]); }, function () { renderAnlagen(r[12]); }, function () { renderTtf(r[13]); }, function () { renderLngTanks(r[14]); }
       ].forEach(function (f) { try { f(); } catch (e) { if (window.console) console.error(e); } });

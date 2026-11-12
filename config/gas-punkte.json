@@ -1,18 +1,45 @@
 {
-  "hinweis": "ENTSOG-Messpunkte (Physical Flow, Richtung Entry = Einspeisung nach Deutschland). Pro Punkt und Tag gilt der höchste gemeldete Wert, weil beide Netzbetreiber dieselbe Menge melden. Näherung für die Anzeige, Punkte bitte bei Bedarf anpassen.",
+  "hinweis": "ENTSOG-Messpunkte (Physical Flow). Pro Punkt, Richtung und Tag gilt der höchste gemeldete Wert, weil beide Netzbetreiber dieselbe Menge melden. Es werden virtuelle Handelspunkte (VIP) genutzt, wo es sie gibt, und keine Speicheranbindungen. Netto = Einspeisung nach Deutschland minus Ausfuhr aus Deutschland an denselben Punkten. Norwegen kommt über den Punkt Dornum GASPOOL, die alten Punkte Emden/Dornum EPT melden nichts mehr.",
   "pipeline": {
-    "Norwegen": ["ITP-00208", "ITP-00209", "ITP-00210"],
-    "Niederlande": ["ITP-10012", "ITP-10010"],
-    "Belgien": ["ITP-00614"],
-    "Dänemark": ["ITP-00135"],
-    "Polen": ["ITP-00096", "ITP-00497"],
-    "Tschechien": ["ITP-00537", "ITP-00538"],
-    "Frankreich": ["ITP-00137"],
-    "Österreich": ["ITP-00019", "ITP-00140"]
+    "Norwegen": [
+      "ITP-00525"
+    ],
+    "Niederlande": [
+      "ITP-10012",
+      "ITP-10010"
+    ],
+    "Belgien": [
+      "ITP-00614"
+    ],
+    "Tschechien": [
+      "ITP-00537",
+      "ITP-00538"
+    ],
+    "Österreich": [
+      "ITP-00140",
+      "ITP-00019",
+      "ITP-00007"
+    ],
+    "Polen": [
+      "ITP-00497",
+      "ITP-00096"
+    ],
+    "Dänemark": [
+      "ITP-10011"
+    ],
+    "Frankreich": [
+      "ITP-00137"
+    ]
   },
   "lng": {
-    "Wilhelmshaven": ["LNG-00083"],
-    "Brunsbüttel": ["LNG-00060"],
-    "Stade": ["LNG-00078"]
+    "Wilhelmshaven": [
+      "LNG-00083"
+    ],
+    "Brunsbüttel": [
+      "LNG-00060"
+    ],
+    "Stade": [
+      "LNG-00078"
+    ]
   }
 }
