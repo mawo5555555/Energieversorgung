@@ -698,17 +698,35 @@ def temp_historie():
 def preisanalyse(hist):
     """Zusammenhang zwischen TTF-Preis und Einspeicherung im Sommer (Apr-Okt) je Jahr, und wo der Preis jetzt im Verhältnis zur Historie steht."""
     preise = {}
-    for q in ("range=10y&interval=1d", f"period1={int(datetime(2018, 1, 1, tzinfo=timezone.utc).timestamp())}&period2={int(NOW.timestamp())}&interval=1d", "range=max&interval=1wk"):
+    notiz = []
+
+    def holen(q):
+        d = get_json("https://query1.finance.yahoo.com/v8/finance/chart/TTF%3DF?" + q, {"User-Agent": "Mozilla/5.0"}, 60)
+        res = d["chart"]["result"][0]
+        ts, cl = res.get("timestamp") or [], res["indicators"]["quote"][0].get("close") or []
+        notiz.append(f"{q[:28]}: {len(ts)} Zeitpunkte")
+        return {datetime.fromtimestamp(t, timezone.utc).strftime("%Y-%m-%d"): c for t, c in zip(ts, cl) if c is not None}
+
+    for q in ("range=10y&interval=1d", "range=max&interval=1wk"):
         try:
-            d = get_json("https://query1.finance.yahoo.com/v8/finance/chart/TTF%3DF?" + q, {"User-Agent": "Mozilla/5.0"}, 60)
-            res = d["chart"]["result"][0]
-            preise = {datetime.fromtimestamp(t, timezone.utc).strftime("%Y-%m-%d"): c for t, c in zip(res.get("timestamp") or [], res["indicators"]["quote"][0].get("close") or []) if c is not None}
-        except Exception:  # noqa: BLE001
+            preise = holen(q)
+        except Exception as e:  # noqa: BLE001
+            notiz.append(f"{q[:20]}: {type(e).__name__}")
             preise = {}
         if len(preise) >= 400:
             break
     if len(preise) < 400:
-        raise ValueError(f"zu wenig Preisdaten ({len(preise)})")
+        # Jahr für Jahr abholen, falls große Zeiträume nicht geliefert werden
+        preise = {}
+        for y in range(2018, NOW.year + 1):
+            try:
+                p1 = int(datetime(y, 1, 1, tzinfo=timezone.utc).timestamp())
+                p2 = int(min(datetime(y + 1, 1, 1, tzinfo=timezone.utc).timestamp(), NOW.timestamp()))
+                preise.update(holen(f"period1={p1}&period2={p2}&interval=1d"))
+            except Exception as e:  # noqa: BLE001
+                notiz.append(f"{y}: {type(e).__name__}")
+    if len(preise) < 400:
+        raise ValueError(f"zu wenig Preisdaten ({len(preise)}): " + "; ".join(notiz)[:400])
     jahre = []
     for y in range(2018, NOW.year + 1):
         sp = [v for t, v in preise.items() if t.startswith(str(y)) and 4 <= int(t[5:7]) <= 10]
