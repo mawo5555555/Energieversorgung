@@ -1,6 +1,6 @@
 # Energie Brandenburg
 
-Web-App mit Gasspeichern, LNG- und Pipeline-Importen, Strom, Netzfrequenz, Kraftstoffpreisen, Rohöl und Eckdaten zur Raffinerie Schwedt.
+Web-App mit Gasspeichern, LNG- und Pipeline-Importen, Strom, Netzfrequenz, Kraftstoffpreisen, Rohöl, Wetter und einer Vorausschau zur Gasspeicher-Reichweite.
 
 ## So funktioniert es
 

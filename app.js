@@ -14,7 +14,7 @@
   function get(name) {
     return fetch("data/" + name + "?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
   }
-  function set(id, html) { document.querySelector("#" + id + " .body").innerHTML = html; }
+  function set(id, html) { var el = document.querySelector("#" + id + " .body"); if (el) el.innerHTML = html; }
   function hint(t, bad) { return '<p class="hint' + (bad ? " err" : "") + '">' + esc(t) + "</p>"; }
   function errNote(d) { return d && d.fehler ? hint("Letzter Abruf fehlgeschlagen (" + when(d.fehler_stand) + "): " + String(d.fehler).slice(0, 140), true) : ""; }
   function meta(d, extra) { return '<p class="meta">' + (d && d.stand ? "Stand " + when(d.stand) : "") + (extra ? " · " + extra : "") + "</p>"; }
@@ -194,27 +194,29 @@
       '<p class="meta">Kursdatum ' + esc(d.datum) + ", verzögert</p>" + meta(d, esc(d.quelle || "")));
   }
 
-  function renderSchwedt(d) {
-    if (!d) return set("cSchwedt", hint("Keine Daten."));
-    var h = (d.pruefen ? hint(d.hinweis) : "") + '<ul class="plain">' + (d.eckdaten || []).map(function (e) { return "<li><strong>" + esc(e.label) + ":</strong> " + esc(e.wert) + "</li>"; }).join("") + "</ul>" +
-      '<p class="meta">Für Auslastung und Kraftstoffversorgung gibt es keine offene Live-Schnittstelle. Hilfreiche Quellen:</p><ul class="plain">' +
-      (d.quellen || []).map(function (q) { return '<li><a href="' + esc(q.url) + '" rel="noopener">' + esc(q.titel) + "</a></li>"; }).join("") + "</ul>";
-    set("cSchwedt", h);
-  }
-
   function load() {
-    Promise.all(["meta.json", "gas_speicher.json", "gas_lng.json", "gas_pipeline.json", "strom.json", "frequenz.json", "kraftstoff.json", "rohoel.json", "schwedt.json", "reichweite.json", "gas_historie.json", "wetter.json"].map(get)).then(function (r) {
+    Promise.all(["meta.json", "gas_speicher.json", "gas_lng.json", "gas_pipeline.json", "strom.json", "frequenz.json", "kraftstoff.json", "rohoel.json", "reichweite.json", "gas_historie.json", "wetter.json"].map(get)).then(function (r) {
       document.getElementById("stand").textContent = r[0] && r[0].letzter_lauf ? "Letzter Datenabruf: " + when(r[0].letzter_lauf) : "Noch kein Datenabruf.";
-      renderSpeicherDE(r[1]); renderSpeicherBB(r[1]);
-      renderGruppen("cLng", r[2], "terminals", "LNG");
-      renderGruppen("cPipe", r[3], "gruppen", "Pipelines");
-      renderPreis(r[4]); renderMix(r[4]); renderFreq(r[5]); renderKraft(r[6]); renderOel(r[7]); renderSchwedt(r[8]);
-      renderReich(r[9]); renderHist(r[10]); renderWetter(r[11]);
+      [function () { renderSpeicherDE(r[1]); }, function () { renderSpeicherBB(r[1]); },
+        function () { renderGruppen("cLng", r[2], "terminals", "LNG"); }, function () { renderGruppen("cPipe", r[3], "gruppen", "Pipelines"); },
+        function () { renderPreis(r[4]); }, function () { renderMix(r[4]); }, function () { renderFreq(r[5]); }, function () { renderKraft(r[6]); },
+        function () { renderOel(r[7]); }, function () { renderReich(r[8]); }, function () { renderHist(r[9]); }, function () { renderWetter(r[10]); }
+      ].forEach(function (f) { try { f(); } catch (e) { if (window.console) console.error(e); } });
     });
   }
   document.querySelectorAll(".seg button").forEach(function (b) { b.addEventListener("click", function () { applyScope(b.dataset.scope); }); });
   var sc = "bb"; try { sc = localStorage.getItem("energie.scope") || "bb"; } catch (e) {}
   applyScope(sc === "de" ? "de" : "bb");
+  var links = [].slice.call(document.querySelectorAll(".tabbar a"));
+  function spy() {
+    var y = window.scrollY + 130, cur = null;
+    links.forEach(function (a) {
+      var t = document.querySelector(a.getAttribute("href")); if (!t || t.offsetParent === null) return;
+      if (t.getBoundingClientRect().top + window.scrollY <= y) cur = a;
+    });
+    links.forEach(function (a) { if (a === cur) a.setAttribute("aria-current", "true"); else a.removeAttribute("aria-current"); });
+  }
+  window.addEventListener("scroll", spy, { passive: true });
   load();
   setInterval(load, 60000);
 })();
