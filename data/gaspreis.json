@@ -1,5 +1,5 @@
 {
- "stand": "2026-11-12T07:31:29Z",
+ "stand": "2026-11-12T07:50:45Z",
  "datum": "2026-11-11",
  "preis": 86.65,
  "aenderung_prozent": 2.27,
@@ -245,7 +245,5 @@
    86.65
   ]
  ],
- "quelle": "Yahoo Finance (TTF Erdgas-Future, Euro je MWh, verzögert)",
- "fehler": "ValueError: keine Kursdaten (TTF=F): {\"chart\": {\"result\": [{\"meta\": {\"currency\": \"EUR\", \"symbol\": \"TTF=F\", \"exchangeName\": \"NYM\", \"fullExchangeName\": \"NY Mercantile\", \"instrumentType\": \"FUTURE\", \"firstTradeDate\": 1508731200, \"regularMarketTime\": 1794423085, \"hasPrePostMarketDa",
- "fehler_stand": "2026-11-12T07:38:37Z"
+ "quelle": "Yahoo Finance (TTF Erdgas-Future, Euro je MWh, verzögert)"
 }

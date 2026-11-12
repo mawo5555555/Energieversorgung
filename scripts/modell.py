@@ -156,7 +156,55 @@ def rueckrechnung(hist, temp, fit, cap, basis=15.0):
     return out
 
 
-def vorausschau(hist, temp, wetter, cfg, stand_tag):
+def mindest_einspeicherung(start, stock, kap, tmap, bis, fit, cap, basis, metrik, ziel, i_max=4000.0):
+    """Kleinste konstante Einspeicherung (GWh/Tag), bei der metrik(sim) >= ziel gilt. 0 = schon ohne Mehr erreicht, None = nicht erreichbar."""
+    def ok(i):
+        return metrik(simuliere(start, stock, kap, i, tmap, bis, fit, cap, basis)) >= ziel
+    if ok(0.0):
+        return 0.0
+    if not ok(i_max):
+        return None
+    lo, hi = 0.0, i_max
+    for _ in range(30):
+        mid = (lo + hi) / 2
+        if ok(mid):
+            hi = mid
+        else:
+            lo = mid
+    return hi
+
+
+def einspeicher_historie(hist, temp, laenge):
+    """Winter 12.11.-31.3. je Jahr: Temperatur, mittlere Entnahme und Einspeicherung; dazu Rekorde der Einspeicherung."""
+    winter = []
+    for y in range(2018, 2026):
+        tage = [d2s(date(y, 11, 12) + timedelta(days=k)) for k in range((date(y + 1, 3, 31) - date(y, 11, 12)).days + 1)]
+        tage = [t for t in tage if t in hist]
+        if len(tage) < 120:
+            continue
+        ts = [temp[t] for t in tage if t in temp]
+        winter.append({"winter": f"{y}/{str(y + 1)[2:]}", "temp_c": round(sum(ts) / len(ts), 1) if ts else None,
+                       "entnahme_gwh": round(sum(hist[t]["w"] for t in tage) / len(tage)), "einspeicherung_gwh": round(sum(hist[t]["i"] for t in tage) / len(tage)),
+                       "start": round(hist[tage[0]]["full"], 1), "ende": round(hist[tage[-1]]["full"], 1)})
+    alle = sorted(hist)
+    werte = [hist[t]["i"] for t in alle]
+    pre = [0.0]
+    for v in werte:
+        pre.append(pre[-1] + v)
+    best, best_i = 0.0, 0
+    for i in range(0, len(werte) - laenge + 1):
+        m = (pre[i + laenge] - pre[i]) / laenge
+        if m > best:
+            best, best_i = m, i
+    wtage = [t for t in alle if int(t[5:7]) >= 11 or int(t[5:7]) <= 3]
+    wi = sorted(hist[t]["i"] for t in wtage)
+    return {"winter": winter, "tagesmax_winter_gwh": round(wi[-1]), "tages_p95_winter_gwh": round(wi[int(0.95 * (len(wi) - 1))]),
+            "hoechster_durchschnitt_winter_gwh": max((w["einspeicherung_gwh"] for w in winter), default=None),
+            "hoechster_durchschnitt_beliebig_gwh": round(best), "hoechster_durchschnitt_von": alle[best_i], "hoechster_durchschnitt_bis": alle[best_i + laenge - 1],
+            "laenge_tage": laenge}
+
+
+def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None):
     """Hauptfunktion: Szenarien mild/normal/kalt, je mit konstanter und fallender Ausspeicherleistung."""
     basis = cfg.get("heizgrenze_c", 15)
     fit = fit_entnahme(hist, temp, basis)
@@ -187,7 +235,9 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag):
         return f
 
     szen = {}
+    tmaps = {}
     for name, off in (("mild", off_mild), ("normal", 0.0), ("kalt", off_kalt)):
+        tmaps[name] = tmap_fuer(off)
         szen[name] = {"abweichung_c": round(off, 1)}
         for var in ("konstant", "faellt"):
             sim = simuliere(start_tag + timedelta(days=1), r0["twh"], r0["kap"], i_tag, tmap_fuer(off), bis, fit, cap_fn(var, hoch, tief), basis)
@@ -209,6 +259,30 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag):
             vorjahr_verlauf.append([d2s(date(d.year + 1, d.month, d.day)), round(hist[d2s(d)]["full"], 1)])
     rr = rueckrechnung(hist, temp, fit, cap_fn("konstant", hoch, tief), basis)
     fehler = [abs(o["fehler_1_feb"]) for o in rr]
+    # Wie viel mehr Einspeicherung wäre nötig?
+    start_sim = start_tag + timedelta(days=1)
+    laenge = (bis - start_sim).days + 1
+    ziel_tag = cfg["ziel"]["datum"]
+    ziel_p = float(cfg["ziel"]["prozent"])
+    mind_ende = float(cfg.get("mindest_ende_prozent", 10))
+    ref_netto = (import_ref or {}).get("pipeline_netto"), (import_ref or {}).get("lng")
+    bedarf = {}
+    for name in ("mild", "normal", "kalt"):
+        cf = cap_fn("konstant", hoch, tief)
+        a1 = mindest_einspeicherung(start_sim, r0["twh"], r0["kap"], tmaps[name], bis, fit, cf, basis, lambda x: x["verlauf"][-1][1], mind_ende)
+        a2 = mindest_einspeicherung(start_sim, r0["twh"], r0["kap"], tmaps[name], bis, fit, cf, basis,
+                                    lambda x: wert_am(x["verlauf"], ziel_tag) if wert_am(x["verlauf"], ziel_tag) is not None else 0.0, ziel_p)
+        def paket(x):
+            if x is None:
+                return {"noetig_gwh": None}
+            return {"noetig_gwh": round(x), "zusatz_gwh": round(max(0.0, x - i_tag)), "faktor": round(x / i_tag, 1) if i_tag > 1 else None}
+        bedarf[name] = {"nicht_leer": paket(a1), "vorgabe_1_feb": paket(a2)}
+    his = einspeicher_historie(hist, temp, laenge)
+    quote = None
+    if ref_netto[0] is not None and ref_netto[1] is not None:
+        quote = round(ref_netto[0] + ref_netto[1])
+    einsp = {"jetzt_gwh": round(i_tag), "mindest_ende_prozent": mind_ende, "szenarien": bedarf, "historie": his,
+             "einspeicherleistung_gemeldet_gwh": round(r0.get("icap", 0)) if r0.get("icap") else None, "importe_gwh": quote}
     verbrauch_tag = cfg["jahresverbrauch_twh"] / 365.0
     return {
         "ausgangslage": {"gastag": stand_tag, "fuellstand_prozent": round(r0["full"], 1), "gas_twh": round(r0["twh"], 1), "kapazitaet_twh": round(r0["kap"], 1),
@@ -218,7 +292,7 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag):
         "szenarien": szen,
         "vorjahre": vor, "vorjahr_verlauf": vorjahr_verlauf,
         "rueckrechnung": rr, "rueckrechnung_mittlerer_fehler_pp": round(sum(fehler) / len(fehler), 1) if fehler else None,
-        "ziel": cfg["ziel"],
+        "ziel": cfg["ziel"], "einspeicherung": einsp,
         "ohne_importe": {"jahresverbrauch_twh": cfg["jahresverbrauch_twh"], "quelle": cfg.get("jahresverbrauch_quelle"), "verbrauch_tag_twh": round(verbrauch_tag, 2),
                          "tage": round(r0["twh"] / verbrauch_tag)},
     }

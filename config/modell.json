@@ -4,5 +4,6 @@
   "jahresverbrauch_twh": 904,
   "jahresverbrauch_quelle": "Angabe aus einer Gasspeicher-App (Durchschnitt, ohne Importe gerechnet)",
   "ziel": { "prozent": 30, "datum": "2027-02-01", "quelle": "Bundesnetzagentur, Seite Aktuelle Lage der Gasversorgung (Füllstandsvorgabe zum 1. Februar 2027)" },
+  "mindest_ende_prozent": 10,
   "horizont": "2027-03-31"
 }
