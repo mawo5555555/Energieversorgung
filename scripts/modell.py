@@ -505,6 +505,12 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None, strom=None)
             ttf = strom.get("ttf") if strom.get("ttf") and len(strom["ttf"]) > 500 else None
             fv = fit_strom_voll(strom["gas_mwh"], temp, strom["wind"], kohle, preis, basis, eta)
             fit2 = fit_entnahme_voll(hist, temp, strom["wind"], strom["gas_mwh"], ttf, eta, basis, heute.year)
+            ttf_geprueft = fit2["ttf"]
+            ttf_verworfen = False
+            if ttf is not None and fit2["ttf"] is not None and fit2["ttf"] >= 0:
+                # Ein höherer Preis kann nicht mehr Entnahme verursachen: Scheinzusammenhang (Krisenjahre), Term verwerfen
+                fit2 = fit_entnahme_voll(hist, temp, strom["wind"], strom["gas_mwh"], None, eta, basis, heute.year)
+                ttf_verworfen = True
             wclim = klima({t: v[0] for t, v in strom["wind"].items()}, heute.year - 1)
             rclim = klima({t: v[1] for t, v in strom["wind"].items()}, heute.year - 1)
             fcw, fcr = {}, {}
@@ -590,7 +596,7 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None, strom=None)
                 tt = wetter["deutschland"][wetter["tage"].index(d2s(dd))] if wetter and d2s(dd) in wetter.get("tage", []) else 5.0
                 vor.append([d2s(dd), round(w_, 1), round(gas_strom_voll(fv, tt, w_, r_, kohle_now, preis_now, dd, basis) + bias_gas * max(0.0, 1.0 - k / 21.0))])
             verstr["vorschau"] = vor
-            modell2 = {"fit": fit2, "fv": fv, "kohle_now": kohle_now, "preis_now": preis_now, "ttf_now": ttf_now, "rest_fn": rest_fn, "wetter_tag": wetter_tag, "wclim": wclim, "rclim": rclim,
+            modell2 = {"ttf_geprueft": ttf_geprueft if ttf_verworfen else None, "fit": fit2, "fv": fv, "kohle_now": kohle_now, "preis_now": preis_now, "ttf_now": ttf_now, "rest_fn": rest_fn, "wetter_tag": wetter_tag, "wclim": wclim, "rclim": rclim,
                        "fcw": fcw, "strom": strom}
             if aktiv:
                 fit = {"a": fit2["a"], "b": fit2["b"], "r2": fit2["r2"], "n": fit2["n"]}
@@ -773,11 +779,13 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None, strom=None)
             {"name": "Gaskraftwerke (Kälte, Wind, Sonne)", "status": "eingerechnet", "wirkung": f"Erklärt mit den Kraftwerken {round(f2['r2'] * 100)} % der Schwankung der Entnahme (ohne {round(fit_alt_r2 * 100)} %)."},
         ]
         if fv2["k_kohle"] is not None:
-            fakt.append({"name": "Kohle- und Kernkraft", "status": "eingerechnet", "wirkung": f"Je 10 GWh weniger Kohlestrom am Tag etwa {z(-fv2['k_kohle'] * 10 / eta2)} GWh Gas für Strom. Kohlestrom wird auf dem Stand der letzten 7 Tage gehalten, ein Kraftwerksausfall ist nicht vorhergesagt."})
+            fakt.append({"name": "Kohle- und Kernkraft", "status": "eingerechnet" if abs(fv2["k_kohle"] * 10 / eta2) >= 5 else "geprüft, kaum Einfluss", "wirkung": f"Je 10 GWh weniger Kohlestrom am Tag etwa {z(-fv2['k_kohle'] * 10 / eta2)} GWh Gas für Strom. Kohlestrom wird auf dem Stand der letzten 7 Tage gehalten, ein Kraftwerksausfall ist nicht vorhergesagt."})
         if fv2["k_preis"] is not None:
-            fakt.append({"name": "Strompreis", "status": "eingerechnet", "wirkung": f"Je +10 €/MWh Börsenstrompreis etwa {z(fv2['k_preis'] * 10 / eta2)} GWh Gas für Strom. Der Preis wird auf dem Stand der letzten 14 Tage gehalten."})
+            fakt.append({"name": "Strompreis", "status": "eingerechnet" if abs(fv2["k_preis"] * 10 / eta2) >= 5 else "geprüft, kaum Einfluss", "wirkung": f"Je +10 €/MWh Börsenstrompreis etwa {z(fv2['k_preis'] * 10 / eta2)} GWh Gas für Strom. Der Preis wird auf dem Stand der letzten 14 Tage gehalten."})
         if f2["ttf"] is not None:
             fakt.append({"name": "Gaspreis (Preiselastizität)", "status": "eingerechnet", "wirkung": f"Je +10 €/MWh im 30-Tage-Mittel {z(f2['ttf'] * 10)} GWh/Tag Entnahme. Der Preis wird auf dem heutigen Stand gehalten."})
+        elif modell2.get("ttf_geprueft") is not None:
+            fakt.append({"name": "Gaspreis (Preiselastizität)", "status": "geprüft, nicht eingerechnet", "wirkung": f"In den Daten seit 2018 ergibt sich ein unplausibler Zusammenhang (höherer Preis, mehr Entnahme: {z(modell2['ttf_geprueft'] * 10)} GWh/Tag je +10 €/MWh), das ist eine Scheinkorrelation mit den Krisenjahren. Ein dämpfender Preiseffekt auf den Verbrauch ist plausibel, aber aus diesen Daten nicht belegbar."})
         fakt.append({"name": "Konjunktur und Heizverhalten", "status": "eingerechnet", "wirkung": "Jüngere Winter zählen stärker (Gewicht 0,7 je Jahr zurück), damit das sparsamere Verhalten nach 2022 stärker durchschlägt."})
     if analog and analog.get("winter"):
         fakt.append({"name": "Wetterläufe der Vorjahre", "status": "eingerechnet", "wirkung": f"Die Wetterabläufe von {analog['anzahl']} Wintern seit 2018 werden ab Ende der Vorhersage durchgerechnet. Füllstand am 1. Februar: {round(analog['ziel']['min'])} bis {round(analog['ziel']['max'])} %."})
