@@ -200,6 +200,47 @@
       (pvx ? pvx : "") + '<p class="hint">Das ist ein Rechenbeispiel, keine Prognose der Versorgungssicherheit. Annahmen: Einspeicherung bleibt wie im Mittel der letzten 7 Tage; Importe und Verbrauch reagieren nicht auf niedrige Füllstände. Wie stark die Ausspeicherleistung bei niedrigem Füllstand sinkt, lässt sich aus den Daten nicht sicher bestimmen: Die gemeldete technische Leistung bleibt über alle Füllstände gleich, beobachtet wurden unter 20 % Füllstand nur wenige Tage. Die gestrichelte Variante ist deshalb eine Annahme. Die Szenarien Mild und Kalt entsprechen dem wärmsten und kältesten Winterdurchschnitt seit 2018. Einzelne Kältewellen können stärker wirken als ein kalter Durchschnitt.</p>' + meta(d, esc(d.quelle || "")));
   }
 
+  function leerHochgerechnet(verlauf) {
+    if (!verlauf || verlauf.length < 9) return null;
+    var last = verlauf[verlauf.length - 1], ref = verlauf[verlauf.length - 8];
+    var slope = (ref[1] - last[1]) / 14;
+    if (slope <= 0.01 || last[1] <= 0) return null;
+    var d = new Date(last[0] + "T12:00:00"); d.setDate(d.getDate() + Math.round(last[1] / slope));
+    var s = d.toISOString().slice(0, 10);
+    return s <= "2027-05-31" ? s : null;
+  }
+  function renderUeberblick(v, u) {
+    state.ueber = [v, u];
+    var bb = state.scope === "bb";
+    var q = bb ? u : v, ok = q && (bb ? q.gesamt : q.szenarien);
+    if (!ok) return set("cUeberblick", noData(q, "Überblick") || hint("Noch keine Prognose verfügbar."));
+    var sz = bb ? q.gesamt : q.szenarien, jetzt = bb ? q.gesamt_gas_twh / q.gesamt_kapazitaet_twh * 100 : q.ausgangslage.fuellstand_prozent;
+    var W = 340, H = 140, L = 24, T0 = 8, B = 18, pw = W - L - 8, ph = H - T0 - B, t0 = new Date("2026-11-10T12:00:00").getTime(), t1 = new Date("2027-04-30T12:00:00").getTime();
+    function X(s) { return L + (new Date(s + "T12:00:00").getTime() - t0) / (t1 - t0) * pw; } function Y(x) { return T0 + (100 - x) / 100 * ph; }
+    function dat(s) { return new Date(s + "T12:00:00").toLocaleDateString("de-DE", { day: "numeric", month: "long" }); }
+    var farben = { mild: "var(--green)", normal: "var(--blue)", kalt: "var(--red)" }, namen = { mild: "Mild", normal: "Normal", kalt: "Kalt" };
+    var g = '<rect x="' + L + '" y="' + Y(20) + '" width="' + pw + '" height="' + (Y(0) - Y(20)) + '" fill="var(--red)" opacity="0.10"/>';
+    [0, 20, 50, 100].forEach(function (x) { g += '<line x1="' + L + '" x2="' + (W - 8) + '" y1="' + Y(x) + '" y2="' + Y(x) + '" stroke="' + (x === 20 ? "var(--red)" : "var(--sep)") + '" stroke-width="' + (x === 20 ? 0.9 : 0.6) + '"' + (x === 20 ? ' stroke-dasharray="3 3"' : "") + '/><text x="' + (L - 3) + '" y="' + (Y(x) + 3) + '" text-anchor="end" font-size="8" fill="var(--muted)">' + x + "</text>"; });
+    [["2026-12-01", "Dez"], ["2027-01-01", "Jan"], ["2027-02-01", "Feb"], ["2027-03-01", "Mär"], ["2027-04-01", "Apr"]].forEach(function (m) { g += '<text x="' + (X(m[0]) + 1) + '" y="' + (H - 5) + '" font-size="8" fill="var(--muted)">' + m[1] + "</text>"; });
+    var rows = "", fruehestes = null;
+    ["mild", "normal", "kalt"].forEach(function (k) {
+      var s = sz[k].konstant, vl = s.verlauf, er = s.erreicht || {}, hr = leerHochgerechnet(vl);
+      var pts = vl.map(function (p) { return [p[0], p[1]]; });
+      if (hr && !er.leer) { var lastp = vl[vl.length - 1]; pts = pts.concat([[hr > "2027-04-30" ? "2027-04-30" : hr, hr > "2027-04-30" ? Math.max(0, lastp[1] * (1 - (new Date("2027-04-30") - new Date(lastp[0])) / (new Date(hr) - new Date(lastp[0])))) : 0]]); }
+      g += '<path d="' + pts.map(function (p, i) { return (i ? "L" : "M") + X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1); }).join(" ") + '" fill="none" stroke="' + farben[k] + '" stroke-width="' + (k === "normal" ? 2.2 : 1.4) + '"/>';
+      if (er["20"]) g += '<circle cx="' + X(er["20"]) + '" cy="' + Y(20) + '" r="2.6" fill="' + farben[k] + '"/>';
+      if (er["20"] && (fruehestes == null || er["20"] < fruehestes)) fruehestes = er["20"];
+      var leer = er.leer ? "ca. " + dat(er.leer) : hr ? "theoretisch ca. " + dat(hr) : "nicht absehbar, im Frühjahr sinkt der Verbrauch";
+      rows += '<tr><td><span style="color:' + farben[k] + '">■</span> ' + namen[k] + '</td><td class="n"><strong>' + (er["20"] ? dat(er["20"]) : "nicht bis 31.3.") + '</strong></td><td class="n">' + leer + (er.leer || !hr ? "" : '<div class="meta" style="margin:0">hochgerechnet</div>') + "</td></tr>";
+    });
+    var nm = sz.normal.konstant.erreicht || {}, farbe = nm["20"] ? "bad" : "ok";
+    var kopf = nm["20"] ? "Kritisch ab " + dat(nm["20"]) : "Bis 31. März nicht unter 20 %";
+    set("cUeberblick", '<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap"><div class="big" style="color:var(--' + farbe + ')">' + kopf + '</div></div><p style="margin:4px 0 0">' + (bb ? "Speicher im Umfeld Brandenburgs" : "Gasspeicher Deutschland") + ": heute <strong>" + nf.format(jetzt) + " %</strong> gefüllt. Im normalen Winter fällt der Füllstand " + (nm["20"] ? "ab " + dat(nm["20"]) + " unter 20 %." : "nicht unter 20 %.") + "</p>" +
+      '<svg viewBox="0 0 ' + W + " " + H + '" style="width:100%;height:auto;margin-top:6px" role="img" aria-label="Verlauf der Füllstände bis April">' + g + "</svg>" +
+      '<p class="meta" style="margin-top:0">Roter Bereich: unter 20 % Füllstand (Gasmangellage-Anzeige, eine Annahme, keine amtliche Schwelle). Punkte: Zeitpunkt, an dem 20 % unterschritten werden. Linien nach dem 31. März: Hochrechnung bei gleichbleibendem Tempo.</p>' +
+      '<table><tr><th>Winter</th><th class="n">Gasmangellage-Anzeige (unter 20 %)</th><th class="n">Speicher theoretisch erschöpft (0 %)</th></tr>' + rows + "</table>" +
+      '<p class="meta"><strong>Unterschied:</strong> Unter 20 % wird es kritisch, weil die Entnahmeleistung sinkt und kaum noch Reserve bleibt. „Erschöpft“ heißt, die Speicher wären rechnerisch ganz leer, das ist ein theoretischer Wert ohne Reaktion von Markt, Importen und Politik. Details und Annahmen weiter unten.</p>' + meta(q, ""));
+  }
   function renderEinsp(d) {
     var nd = noData(d, "Einspeicherung"); if (nd) return set("cEinsp", nd);
     var e = d.einspeicherung;
@@ -380,6 +421,7 @@
     document.querySelectorAll(".seg button").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.ansicht === sc ? "true" : "false"); });
     try { localStorage.setItem("energie.ansicht", sc); } catch (e) {}
     if (state.wetter) renderWetter(state.wetter);
+    if (state.ueber) renderUeberblick(state.ueber[0], state.ueber[1]);
   }
 
   function renderPipe(d) {
@@ -452,7 +494,7 @@
       [function () { renderSpeicherDE(r[1]); }, function () { renderSpeicherBB(r[1]); },
         function () { renderLngEin(r[2]); }, function () { renderPipe(r[3]); },
         function () { renderPreis(r[4]); }, function () { renderMix(r[4]); }, function () { renderFreq(r[5]); }, function () { renderKraft(r[6]); },
-        function () { renderOel(r[7]); }, function () { renderReich(r[8], r[16]); }, function () { renderHist(r[9]); }, function () { renderWetter(r[10]); }, function () { renderEuropa(r[11]); }, function () { renderAnlagen(r[12]); }, function () { renderTtf(r[13], r[19]); }, function () { renderLngTanks(r[14]); }, function () { renderUmfeld(r[15]); }, function () { renderVorausschau(r[16], r[20]); }, function () { renderEinsp(r[16]); }, function () { renderUmfeldVor(r[17], r[15]); }, function () { renderStoerungen(r[18]); }, function () { renderVersorgung(r[16], r[17]); }
+        function () { renderOel(r[7]); }, function () { renderReich(r[8], r[16]); }, function () { renderHist(r[9]); }, function () { renderWetter(r[10]); }, function () { renderEuropa(r[11]); }, function () { renderAnlagen(r[12]); }, function () { renderTtf(r[13], r[19]); }, function () { renderLngTanks(r[14]); }, function () { renderUmfeld(r[15]); }, function () { renderVorausschau(r[16], r[20]); }, function () { renderEinsp(r[16]); }, function () { renderUmfeldVor(r[17], r[15]); }, function () { renderStoerungen(r[18]); }, function () { renderUeberblick(r[16], r[17]); }, function () { renderVersorgung(r[16], r[17]); }
       ].forEach(function (f) { try { f(); } catch (e) { if (window.console) console.error(e); } });
     });
   }
