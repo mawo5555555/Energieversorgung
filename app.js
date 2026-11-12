@@ -410,6 +410,40 @@
     if (m.technik) h += '<p class="meta">' + esc(m.technik) + "</p>";
     set("cPruefung", h + (m.naechste ? '<p class="meta">Nächste Prüfung: ' + esc(m.naechste) + "</p>" : ""));
   }
+  function renderPreise(p) {
+    var nd = noData(p, "Verbraucherpreise"); if (nd) return set("cPreise", nd);
+    if (!p.reihe) return set("cPreise", errNote(p) + hint("Keine Daten."));
+    var W = 340, H = 150, L = 28, T0 = 8, B = 16, pw = W - L - 8, ph = H - T0 - B, ms = p.reihe.map(function (r) { return r.m; }), n = ms.length;
+    function X(i) { return L + i / (n - 1) * pw; }
+    function panel(key, farbe, label, unitFmt) {
+      var pts = p.reihe.map(function (r, i) { return r[key] != null ? [i, r[key]] : null; }).filter(Boolean);
+      if (pts.length < 2) return "";
+      var mx = Math.max.apply(null, pts.map(function (q) { return q[1]; })), mn = Math.min(0, Math.min.apply(null, pts.map(function (q) { return q[1]; })));
+      function Y(v) { return T0 + (mx - v) / (mx - mn) * ph; }
+      var d = pts.map(function (q, i) { return (i ? "L" : "M") + X(q[0]).toFixed(1) + " " + Y(q[1]).toFixed(1); }).join(" ");
+      var top = pts.reduce(function (a1, b1) { return b1[1] > a1[1] ? b1 : a1; });
+      var g = '<line x1="' + L + '" x2="' + (W - 8) + '" y1="' + Y(0) + '" y2="' + Y(0) + '" stroke="var(--sep)" stroke-width="0.6"/><text x="' + (L - 3) + '" y="' + (Y(mx) + 3) + '" text-anchor="end" font-size="8" fill="var(--muted)">' + unitFmt(mx) + '</text><text x="' + (L - 3) + '" y="' + (Y(0) + 3) + '" text-anchor="end" font-size="8" fill="var(--muted)">0</text>';
+      [2019, 2021, 2023, 2025].forEach(function (y) { var i = ms.indexOf(y + "-01"); if (i >= 0) g += '<text x="' + X(i) + '" y="' + (H - 3) + '" font-size="8" fill="var(--muted)">' + y + "</text>"; });
+      g += '<path d="' + d + '" fill="none" stroke="' + farbe + '" stroke-width="1.8"/><circle cx="' + X(top[0]) + '" cy="' + Y(top[1]) + '" r="3" fill="' + farbe + '"/><text x="' + Math.min(X(top[0]) + 4, W - 70) + '" y="' + (Y(top[1]) + 3) + '" font-size="8" font-weight="700" fill="' + farbe + '">' + unitFmt(top[1]) + " (" + ms[top[0]] + ")</text>";
+      return '<p class="meta" style="margin:10px 0 0"><strong>' + label + '</strong></p><svg viewBox="0 0 ' + W + " " + H + '" style="width:100%;height:auto" role="img" aria-label="' + label + '">' + g + "</svg>";
+    }
+    var kor = p.korrelation || {}, ko = (kor.nahrung || []).map(function (r) { return "<tr><td>" + r[0] + ' Monate</td><td class="n">' + (r[1] == null ? "–" : nf2.format(r[1])) + '</td><td class="n">' + (((kor.gesamt || []).filter(function (z) { return z[0] === r[0]; })[0] || [])[1] != null ? nf2.format((kor.gesamt.filter(function (z) { return z[0] === r[0]; })[0] || [])[1]) : "–") + "</td></tr>"; }).join("");
+    var an = p.analog || {}, ep = p.episode || {};
+    var h = '<div class="big">' + nf0.format(p.ttf_aktuell) + ' <span class="unit">€/MWh Gaspreis' + (p.ttf_yoy != null ? ", " + (p.ttf_yoy >= 0 ? "+" : "") + nf0.format(p.ttf_yoy) + " % zum Vorjahresmonat" : "") + '</span></div><p class="meta" style="margin-top:4px">Letzte Verbraucherpreis-Werte (Eurostat, Deutschland, ' + esc(p.letzter_monat) + "): Lebensmittel " + nf.format(p.aktuell.nahrung) + " %, Gesamt " + nf.format(p.aktuell.gesamt) + " %, Energie " + nf.format(p.aktuell.energie) + " % Jahresrate. <strong>Die Daten reichen nur bis " + esc(p.letzter_monat) + ", die Wirkung des heutigen Gaspreises ist darin noch nicht zu sehen.</strong></p>";
+    h += panel("ttf", "var(--blue)", "Gaspreis TTF, Monatsmittel (€/MWh)", function (v) { return nf0.format(v); }) + panel("nahrung", "var(--orange)", "Lebensmittelpreise, Jahresrate (%)", function (v) { return nf.format(v) + " %"; });
+    if (ep.ttf_spitze_monat) h += '<p style="margin:10px 0 0"><strong>Die Episode 2022/23:</strong> Der Gaspreis erreichte im ' + esc(ep.ttf_spitze_monat) + " sein Monatsmittel von " + nf0.format(ep.ttf_spitze) + " €/MWh, die Lebensmittelinflation erreichte im " + esc(ep.nahrung_spitze_monat) + " mit " + nf.format(ep.nahrung_spitze) + " % ihren Höhepunkt, " + ep.verzug_monate + " Monate später.</p>";
+    h += '<h3 style="margin-top:12px">Zusammenhang mit Verzögerung</h3><table><tr><th>Gaspreis-Änderung vor …</th><th class="n">Lebensmittelpreise</th><th class="n">Gesamtpreise</th></tr>' + ko + '</table><p class="meta">Korrelation zwischen der Gaspreis-Jahresänderung und der Jahresrate. Gleichzeitig kaum ein Zusammenhang, nach 9 bis 12 Monaten stark. Wegen der Trägheit von Jahresraten und weil es faktisch nur eine große Episode gibt, überschätzt das den Zusammenhang.</p>';
+    if (an.anzahl) {
+      function z(k) { return an["k" + k] ? (an["k" + k].median >= 0 ? "+" : "") + nf.format(an["k" + k].median) + " Prozentpunkte (" + nf.format(an["k" + k].min) + " bis " + (an["k" + k].max >= 0 ? "+" : "") + nf.format(an["k" + k].max) + ")" : "–"; }
+      h += '<h3 style="margin-top:12px">Was passierte nach ähnlichen Gaspreis-Anstiegen?</h3><p style="margin:0">Es gibt in den Daten seit 2018 nur <strong>' + an.anzahl + " Monate</strong> mit einem Gaspreis-Anstieg wie heute (" + an.monate.map(function (m) { return esc(m); }).join(", ") + "). Die Lebensmittelinflation änderte sich danach nach 6 Monaten um " + z(6) + ", nach 9 Monaten um " + z(9) + ", nach 12 Monaten um " + z(12) + ". Das ist eine Spanne aus sehr wenigen Fällen, keine Prognose.</p>";
+    }
+    h += '<h3 style="margin-top:12px">Wie ein Gasmangel auf den Warenkorb wirken könnte (Überlegungen, nicht aus den Daten)</h3><table><tr><th>Fall</th><th>mögliche Wege zum Einkaufswagen</th></tr>' +
+      '<tr><td>Gaspreis bleibt hoch</td><td>Teurere Energie bei Erzeugern und Verarbeitern (Backwaren, Molkereien, Zucker), Dünger und Verpackung. Die Weitergabe dauert nach der Erfahrung 2022/23 etwa 6 bis 12 Monate.</td></tr>' +
+      '<tr><td>Gasmangellage ohne Abschaltungen</td><td>Wie oben, zusätzlich Preisaufschläge durch Unsicherheit. Haushalte zahlen die Gasrechnung mit Verzug, je nach Vertrag.</td></tr>' +
+      '<tr><td>Abschaltung energieintensiver Industrie</td><td>Ausfälle bei Düngemitteln, Glas, Papier, Chemie, Metallverpackung und Lebensmittelverarbeitung können Angebot und Preise treffen. Die Größe lässt sich aus offenen Daten nicht schätzen.</td></tr></table>' +
+      '<p class="hint">Das ist <strong>keine Prognose</strong> der Verbraucherpreise. Es gibt in den Daten nur eine große Gaspreis-Episode (2021 bis 2023), in der gleichzeitig Krieg, Getreide, Dünger, Löhne und Lieferketten wirkten. Der Anteil des Gases lässt sich nicht herauslösen. Einen offiziellen „Standard-Einkaufswagen einer Familie“ gibt es nicht, ich nutze den europäischen Index für Nahrungsmittel und den Gesamtindex. Die Spalte „mögliche Wege“ stammt aus meinem Wissen und ist nicht geprüft.</p>';
+    set("cPreise", errNote(p) + h + meta(p, esc(p.quelle || "")));
+  }
   function renderEinsp(d) {
     var nd = noData(d, "Einspeicherung"); if (nd) return set("cEinsp", nd);
     var e = d.einspeicherung;
@@ -659,12 +693,12 @@
   }
 
   function load() {
-    Promise.all(["meta.json", "gas_speicher.json", "gas_lng.json", "gas_pipeline.json", "strom.json", "frequenz.json", "kraftstoff.json", "rohoel.json", "reichweite.json", "gas_historie.json", "wetter.json", "gas_europa.json", "gas_anlagen.json", "gaspreis.json", "lng_tanks.json", "gas_umfeld.json", "gas_vorausschau.json", "gas_umfeld_vorausschau.json", "gas_stoerungen.json", "gas_preisanalyse.json", "prognose_verlauf.json", "faktoren_extra.json", "auslandseinfluss.json", "massnahmen.json", "modellpruefung.json"].map(get)).then(function (r) {
+    Promise.all(["meta.json", "gas_speicher.json", "gas_lng.json", "gas_pipeline.json", "strom.json", "frequenz.json", "kraftstoff.json", "rohoel.json", "reichweite.json", "gas_historie.json", "wetter.json", "gas_europa.json", "gas_anlagen.json", "gaspreis.json", "lng_tanks.json", "gas_umfeld.json", "gas_vorausschau.json", "gas_umfeld_vorausschau.json", "gas_stoerungen.json", "gas_preisanalyse.json", "prognose_verlauf.json", "faktoren_extra.json", "auslandseinfluss.json", "massnahmen.json", "modellpruefung.json", "verbraucherpreise.json"].map(get)).then(function (r) {
       document.getElementById("stand").textContent = r[0] && r[0].letzter_lauf ? "Letzter Datenabruf: " + when(r[0].letzter_lauf) : "Noch kein Datenabruf.";
       [function () { renderSpeicherDE(r[1]); }, function () { renderSpeicherBB(r[1]); },
         function () { renderLngEin(r[2]); }, function () { renderPipe(r[3]); },
         function () { renderPreis(r[4]); }, function () { renderMix(r[4]); }, function () { renderFreq(r[5]); }, function () { renderKraft(r[6]); },
-        function () { renderOel(r[7]); }, function () { renderReich(r[8], r[16]); }, function () { renderHist(r[9]); }, function () { renderWetter(r[10]); }, function () { renderEuropa(r[11]); }, function () { renderAnlagen(r[12]); }, function () { renderTtf(r[13], r[19]); }, function () { renderLngTanks(r[14]); }, function () { renderUmfeld(r[15]); }, function () { renderVorausschau(r[16], r[20]); }, function () { renderEinsp(r[16]); }, function () { renderUmfeldVor(r[17], r[15]); }, function () { renderStoerungen(r[18]); }, function () { renderUeberblick(r[16], r[17]); }, function () { renderVerstromung(r[16]); }, function () { renderModellFaktoren(r[16], r[21]); }, function () { renderAusland(r[16], r[3], r[22], r[21]); }, function () { renderMassnahmen(r[23], r[16]); }, function () { renderPruefung(r[24]); }, function () { state.alle = r; renderFaktoren(r); }, function () { renderVersorgung(r[16], r[17]); }
+        function () { renderOel(r[7]); }, function () { renderReich(r[8], r[16]); }, function () { renderHist(r[9]); }, function () { renderWetter(r[10]); }, function () { renderEuropa(r[11]); }, function () { renderAnlagen(r[12]); }, function () { renderTtf(r[13], r[19]); }, function () { renderLngTanks(r[14]); }, function () { renderUmfeld(r[15]); }, function () { renderVorausschau(r[16], r[20]); }, function () { renderEinsp(r[16]); }, function () { renderUmfeldVor(r[17], r[15]); }, function () { renderStoerungen(r[18]); }, function () { renderUeberblick(r[16], r[17]); }, function () { renderVerstromung(r[16]); }, function () { renderModellFaktoren(r[16], r[21]); }, function () { renderAusland(r[16], r[3], r[22], r[21]); }, function () { renderMassnahmen(r[23], r[16]); }, function () { renderPruefung(r[24]); }, function () { renderPreise(r[25]); }, function () { state.alle = r; renderFaktoren(r); }, function () { renderVersorgung(r[16], r[17]); }
       ].forEach(function (f) { try { f(); } catch (e) { if (window.console) console.error(e); } });
     });
   }

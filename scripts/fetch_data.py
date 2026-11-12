@@ -976,6 +976,84 @@ def auslandseinfluss():
             "kaltwelle_delta_hdd": 5.0, "effekt_kaltwelle_gwh": round(coef[2] * 5.0, 0)}
 
 
+# ---------- Verbraucherpreise und Gaspreis (Eurostat HICP, Deutschland) ----------
+def verbraucherpreise():
+    old = read("verbraucherpreise.json", {})
+    try:
+        alt = datetime.strptime(old["stand"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+        if NOW - alt < timedelta(hours=20) and old.get("reihe") and not old.get("fehler"):
+            return None
+    except (KeyError, ValueError):
+        pass
+
+    def hicp(coicop):
+        d = get_json(f"https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/prc_hicp_manr?format=JSON&lang=EN&geo=DE&coicop={coicop}&sinceTimePeriod=2017-01", timeout=90)
+        idx = d["dimension"]["time"]["category"]["index"]
+        return {t: d["value"].get(str(i)) for t, i in idx.items() if d["value"].get(str(i)) is not None}
+
+    food, gesamt, energie = hicp("CP01"), hicp("CP00"), hicp("CP045")
+    tage = ttf_historie()
+    monat = {}
+    for t, v in tage.items():
+        monat.setdefault(t[:7], []).append(v)
+    ttf = {m: sum(v) / len(v) for m, v in monat.items()}
+
+    def verschiebe(m, k):
+        y, mm = int(m[:4]), int(m[5:]) + k
+        while mm < 1:
+            mm += 12
+            y -= 1
+        while mm > 12:
+            mm -= 12
+            y += 1
+        return f"{y}-{mm:02d}"
+
+    yoy = {m: (ttf[m] / ttf[verschiebe(m, -12)] - 1) * 100 for m in ttf if verschiebe(m, -12) in ttf and ttf[verschiebe(m, -12)] > 0}
+
+    def korr(a, b):
+        n = len(a)
+        ma, mb = sum(a) / n, sum(b) / n
+        sa, sb = sum((x - ma) ** 2 for x in a) ** 0.5, sum((x - mb) ** 2 for x in b) ** 0.5
+        return sum((x - ma) * (y - mb) for x, y in zip(a, b)) / (sa * sb) if sa and sb else None
+
+    kor = {}
+    for name, s in (("nahrung", food), ("gesamt", gesamt)):
+        liste = []
+        for lag in (0, 3, 6, 9, 12):
+            xs, ys = [], []
+            for m in s:
+                k = verschiebe(m, -lag)
+                if k in yoy:
+                    xs.append(yoy[k])
+                    ys.append(s[m])
+            liste.append([lag, round(korr(xs, ys), 2) if len(xs) > 20 else None, len(xs)])
+        kor[name] = liste
+    letzter = max(food)
+    aktuell_ttf_monat = max(ttf)
+    yoy_jetzt = yoy.get(aktuell_ttf_monat)
+    # Vergleichsfälle: Monate mit ähnlicher Gaspreis-Jahresänderung wie jetzt, und was die Lebensmittelinflation danach tat
+    analog = {"anzahl": 0}
+    if yoy_jetzt is not None:
+        toleranz = abs(yoy_jetzt) * 0.3 + 15
+        monate = [m for m in yoy if m != aktuell_ttf_monat and abs(yoy[m] - yoy_jetzt) <= toleranz and m in food]
+        for k in (6, 9, 12):
+            d = sorted(food[verschiebe(m, k)] - food[m] for m in monate if verschiebe(m, k) in food)
+            analog[f"k{k}"] = {"median": round(d[len(d) // 2], 1), "min": round(d[0], 1), "max": round(d[-1], 1), "n": len(d)} if d else None
+        analog["anzahl"] = len(monate)
+        analog["monate"] = sorted(monate)[:30]
+        analog["toleranz_prozentpunkte"] = round(toleranz)
+    spitze_ttf = max((m for m in ttf if "2021" <= m[:4] <= "2023"), key=lambda m: ttf[m], default=None)
+    spitze_food = max((m for m in food if "2021" <= m[:4] <= "2024"), key=lambda m: food[m], default=None)
+    reihe = [{"m": m, "ttf": round(ttf[m], 1) if m in ttf else None, "nahrung": food.get(m), "gesamt": gesamt.get(m), "energie": energie.get(m)} for m in sorted(set(food) | set(ttf)) if m >= "2018-01"]
+    return {"stand": stamp(), "quelle": "Eurostat HICP Deutschland (Jahresrate), Yahoo Finance (TTF)", "letzter_monat": letzter,
+            "aktuell": {"nahrung": food[letzter], "gesamt": gesamt.get(letzter), "energie": energie.get(letzter)},
+            "ttf_aktuell": round(ttf[aktuell_ttf_monat], 1), "ttf_monat": aktuell_ttf_monat, "ttf_yoy": round(yoy_jetzt) if yoy_jetzt is not None else None,
+            "korrelation": kor, "analog": analog,
+            "episode": {"ttf_spitze_monat": spitze_ttf, "ttf_spitze": round(ttf[spitze_ttf]) if spitze_ttf else None, "nahrung_spitze_monat": spitze_food, "nahrung_spitze": food.get(spitze_food) if spitze_food else None,
+                        "verzug_monate": ((int(spitze_food[:4]) - int(spitze_ttf[:4])) * 12 + int(spitze_food[5:]) - int(spitze_ttf[5:])) if spitze_food and spitze_ttf else None},
+            "reihe": reihe}
+
+
 def preisanalyse(hist):
     """Zusammenhang zwischen TTF-Preis und Einspeicherung im Sommer (Apr-Okt) je Jahr, und wo der Preis jetzt im Verhältnis zur Historie steht."""
     preise = {}
@@ -1192,7 +1270,7 @@ def main():
         ("gas_lng.json", gas_lng), ("gas_speicher.json", gas_speicher), ("kraftstoff.json", kraftstoff), ("rohoel.json", rohoel),
         ("wetter.json", wetter), ("gas_historie.json", gas_historie), ("reichweite.json", reichweite),
         ("gas_europa.json", gas_europa), ("gas_anlagen.json", gas_anlagen),
-        ("gaspreis.json", gaspreis), ("lng_tanks.json", lng_tanks), ("gas_umfeld.json", gas_umfeld), ("gas_stoerungen.json", gas_stoerungen), ("faktoren_extra.json", faktoren_extra), ("auslandseinfluss.json", auslandseinfluss), ("gas_vorausschau.json", gas_vorausschau),
+        ("gaspreis.json", gaspreis), ("lng_tanks.json", lng_tanks), ("gas_umfeld.json", gas_umfeld), ("gas_stoerungen.json", gas_stoerungen), ("faktoren_extra.json", faktoren_extra), ("auslandseinfluss.json", auslandseinfluss), ("verbraucherpreise.json", verbraucherpreise), ("gas_vorausschau.json", gas_vorausschau),
     ]
     for name, fn in jobs:
         if nur and name.split(".")[0] not in nur:
