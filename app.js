@@ -130,7 +130,7 @@
   function applyScope(sc) {
     state.scope = sc;
     document.body.classList.toggle("scope-bb", sc === "bb"); document.body.classList.toggle("scope-de", sc === "de");
-    document.querySelectorAll(".seg button").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.scope === sc ? "true" : "false"); });
+    document.querySelectorAll(".seg button").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.ansicht === sc ? "true" : "false"); });
     try { localStorage.setItem("energie.scope", sc); } catch (e) {}
     if (state.wetter) renderWetter(state.wetter);
   }
@@ -204,7 +204,7 @@
       ].forEach(function (f) { try { f(); } catch (e) { if (window.console) console.error(e); } });
     });
   }
-  document.querySelectorAll(".seg button").forEach(function (b) { b.addEventListener("click", function () { applyScope(b.dataset.scope); }); });
+  document.querySelectorAll(".seg button").forEach(function (b) { b.addEventListener("click", function () { applyScope(b.dataset.ansicht); }); });
   var sc = "bb"; try { sc = localStorage.getItem("energie.scope") || "bb"; } catch (e) {}
   applyScope(sc === "de" ? "de" : "bb");
   var links = [].slice.call(document.querySelectorAll(".tabbar a"));

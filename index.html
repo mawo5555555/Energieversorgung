@@ -10,15 +10,15 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Energie">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="stylesheet" href="style.css?v=5">
+<link rel="stylesheet" href="style.css?v=6">
 </head>
 <body>
 <header>
   <h1>Energie Brandenburg</h1>
   <p class="sub">Gas, Strom, Kraftstoff und Rohöl auf einen Blick. <span id="stand">Daten werden geladen …</span></p>
   <div class="seg" role="group" aria-label="Ansicht">
-    <button type="button" data-scope="bb" aria-pressed="true">Brandenburg</button>
-    <button type="button" data-scope="de" aria-pressed="false">Deutschland</button>
+    <button type="button" data-ansicht="bb" aria-pressed="true">Brandenburg</button>
+    <button type="button" data-ansicht="de" aria-pressed="false">Deutschland</button>
   </div>
   <p class="meta scopehint" data-scope="bb">Brandenburg zeigt, was sich regional belegen lässt: den Speicher Rüdersdorf, Tankstellen, und Wetter Potsdam. Gasimporte und Strom gibt es nur für Deutschland insgesamt (Ansicht „Deutschland“).</p>
 </header>
@@ -44,7 +44,7 @@
       <article class="card wide" id="cReichBB" data-scope="bb"><h3>Vorausschau: Wie lange reicht der Vorrat? (Schätzung)</h3><div class="body">…</div></article>
       <article class="card wide" id="cSpeicherDE" data-scope="de"><h3>Gasspeicher Deutschland</h3><div class="body">…</div></article>
       <article class="card wide" id="cReichDE" data-scope="de"><h3>Vorausschau: Wie lange reicht der Vorrat? (Schätzung)</h3><div class="body">…</div></article>
-      <article class="card wide" id="cHist" data-scope="de"><h3>Füllstand im Jahresvergleich</h3><div class="body">…</div></article>
+      <article class="card wide full" id="cHist" data-scope="de"><h3>Füllstand im Jahresvergleich</h3><div class="body">…</div></article>
       <article class="card" id="cLng" data-scope="de"><h3>LNG-Terminals</h3><div class="body">…</div></article>
       <article class="card" id="cPipe" data-scope="de"><h3>Pipeline-Importe</h3><div class="body">…</div></article>
     </div>
@@ -89,6 +89,6 @@
     Rohöl: Yahoo Finance (verzögert) · Wetter: <a href="https://open-meteo.com" rel="noopener">Open-Meteo.com</a> (CC BY 4.0).</p>
   <p>Alle Angaben ohne Gewähr, keine Handels- oder Versorgungsempfehlung. Die Daten werden in festen Abständen abgeholt, der Stand steht an jeder Kachel.</p>
 </footer>
-<script src="app.js?v=5"></script>
+<script src="app.js?v=6"></script>
 </body>
 </html>
