@@ -1,5 +1,7 @@
 {
  "stand": "2026-11-12T13:30:28Z",
  "hinweis": "Noch kein Tankerkönig-Schlüssel hinterlegt (Secret TANKERKOENIG_API_KEY).",
- "preise": null
+ "preise": null,
+ "fehler": "ValueError: Key existiert nicht oder ist deaktiviert",
+ "fehler_stand": "2026-11-12T17:06:41Z"
 }
