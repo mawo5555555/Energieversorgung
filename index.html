@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Energie Brandenburg</title>
+<meta name="description" content="Gasspeicher, LNG- und Pipeline-Importe, Strom, Netzfrequenz, Kraftstoff und Rohöl auf einen Blick.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>Energie Brandenburg</h1>
+  <p class="sub">Gas, Strom, Kraftstoff und Rohöl auf einen Blick. <span id="stand">Daten werden geladen …</span></p>
+  <nav aria-label="Bereiche">
+    <a href="#gas">Gas</a><a href="#strom">Strom</a><a href="#frequenz">Netzfrequenz</a><a href="#kraftstoff">Kraftstoff</a><a href="#rohoel">Rohöl</a><a href="#schwedt">Schwedt</a>
+  </nav>
+</header>
+
+<main>
+  <section id="gas">
+    <h2>Gas</h2>
+    <div class="grid">
+      <article class="card wide" id="cSpeicher"><h3>Gasspeicher</h3><div class="body">…</div></article>
+      <article class="card" id="cLng"><h3>LNG-Terminals</h3><div class="body">…</div></article>
+      <article class="card" id="cPipe"><h3>Pipeline-Importe</h3><div class="body">…</div></article>
+    </div>
+  </section>
+
+  <section id="strom">
+    <h2>Strom</h2>
+    <div class="grid">
+      <article class="card" id="cPreis"><h3>Börsenstrompreis</h3><div class="body">…</div></article>
+      <article class="card wide" id="cMix"><h3>Stromerzeugung</h3><div class="body">…</div></article>
+    </div>
+  </section>
+
+  <section id="frequenz">
+    <h2>Netzfrequenz</h2>
+    <div class="grid"><article class="card wide" id="cFreq"><h3>Aktuelle Netzfrequenz</h3><div class="body">…</div></article></div>
+  </section>
+
+  <section id="kraftstoff">
+    <h2>Kraftstoff Brandenburg</h2>
+    <div class="grid"><article class="card wide" id="cKraft"><h3>Preise an Tankstellen</h3><div class="body">…</div></article></div>
+  </section>
+
+  <section id="rohoel">
+    <h2>Rohöl</h2>
+    <div class="grid"><article class="card wide" id="cOel"><h3>Brent</h3><div class="body">…</div></article></div>
+  </section>
+
+  <section id="schwedt">
+    <h2>Raffinerie Schwedt</h2>
+    <div class="grid"><article class="card wide" id="cSchwedt"><h3>PCK Raffinerie Schwedt/Oder</h3><div class="body">…</div></article></div>
+  </section>
+</main>
+
+<footer>
+  <p><strong>Quellen:</strong>
+    Gasspeicher und LNG: <a href="https://agsi.gie.eu" rel="noopener">Gas Infrastructure Europe (GIE), AGSI+</a> ·
+    Pipelines und LNG-Einspeisung: <a href="https://transparency.entsog.eu" rel="noopener">ENTSOG Transparency Platform</a> ·
+    Strom: <a href="https://www.smard.de" rel="noopener">Bundesnetzagentur | SMARD.de</a> (CC BY 4.0) ·
+    Netzfrequenz: netzfrequenz.info (inoffiziell) ·
+    Kraftstoff: <a href="https://www.tankerkoenig.de" rel="noopener">Tankerkönig.de</a> (CC BY 4.0) ·
+    Rohöl: stooq.com (verzögert).</p>
+  <p>Alle Angaben ohne Gewähr, keine Handels- oder Versorgungsempfehlung. Die Daten werden in festen Abständen abgeholt, der Stand steht an jeder Kachel.</p>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>

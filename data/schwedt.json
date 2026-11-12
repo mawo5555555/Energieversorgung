@@ -1,0 +1,14 @@
+{
+  "name": "PCK Raffinerie Schwedt/Oder",
+  "pruefen": true,
+  "hinweis": "Feste Eckdaten aus öffentlichen Berichten, keine Live-Daten. Bitte vor einer Veröffentlichung gegen aktuelle Quellen prüfen.",
+  "eckdaten": [
+    { "label": "Verarbeitungskapazität", "wert": "ca. 12 Mio. t Rohöl pro Jahr" },
+    { "label": "Rolle", "wert": "Größte Raffinerie im Osten Deutschlands, versorgt vor allem Berlin und Brandenburg mit Diesel, Benzin und Heizöl" },
+    { "label": "Rohölzufuhr", "wert": "Über Pipelines (u. a. aus dem Hafen Rostock)" }
+  ],
+  "quellen": [
+    { "titel": "BAFA: Amtliche Mineralöldaten", "url": "https://www.bafa.de/DE/Energie/Rohstoffe/Mineraloel/mineraloel_node.html" },
+    { "titel": "en2x: Statistiken zu Mineralöl und Raffinerien", "url": "https://en2x.de" }
+  ]
+}
