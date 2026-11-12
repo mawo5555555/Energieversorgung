@@ -1,0 +1,853 @@
+{
+ "stand": "2026-11-12T13:28:03Z",
+ "quelle": "Eurostat HICP Deutschland (Jahresrate), Yahoo Finance (TTF)",
+ "letzter_monat": "2025-12",
+ "aktuell": {
+  "nahrung": 1.7,
+  "gesamt": 2.0,
+  "energie": -1.7
+ },
+ "ttf_aktuell": 89.2,
+ "ttf_monat": "2026-11",
+ "ttf_yoy": 190,
+ "korrelation": {
+  "nahrung": [
+   [
+    0,
+    0.07,
+    87
+   ],
+   [
+    3,
+    0.33,
+    84
+   ],
+   [
+    6,
+    0.59,
+    81
+   ],
+   [
+    9,
+    0.79,
+    78
+   ],
+   [
+    12,
+    0.92,
+    75
+   ]
+  ],
+  "gesamt": [
+   [
+    0,
+    0.35,
+    87
+   ],
+   [
+    3,
+    0.6,
+    84
+   ],
+   [
+    6,
+    0.78,
+    81
+   ],
+   [
+    9,
+    0.86,
+    78
+   ],
+   [
+    12,
+    0.87,
+    75
+   ]
+  ]
+ },
+ "analog": {
+  "anzahl": 2,
+  "k6": {
+   "median": 4.4,
+   "min": 2.5,
+   "max": 4.4,
+   "n": 2
+  },
+  "k9": {
+   "median": 2.9,
+   "min": -3.6,
+   "max": 2.9,
+   "n": 2
+  },
+  "k12": {
+   "median": 6.1,
+   "min": -9.4,
+   "max": 6.1,
+   "n": 2
+  },
+  "monate": [
+   "2021-04",
+   "2022-09"
+  ],
+  "toleranz_prozentpunkte": 72
+ },
+ "episode": {
+  "ttf_spitze_monat": "2022-08",
+  "ttf_spitze": 239,
+  "nahrung_spitze_monat": "2023-03",
+  "nahrung_spitze": 21.8,
+  "verzug_monate": 7
+ },
+ "reihe": [
+  {
+   "m": "2018-01",
+   "ttf": 18.7,
+   "nahrung": 2.8,
+   "gesamt": 1.5,
+   "energie": 1.4
+  },
+  {
+   "m": "2018-02",
+   "ttf": 18.5,
+   "nahrung": 1.0,
+   "gesamt": 1.2,
+   "energie": 0.5
+  },
+  {
+   "m": "2018-03",
+   "ttf": 18.5,
+   "nahrung": 2.7,
+   "gesamt": 1.7,
+   "energie": 1.1
+  },
+  {
+   "m": "2018-04",
+   "ttf": 19.3,
+   "nahrung": 3.1,
+   "gesamt": 1.3,
+   "energie": 1.5
+  },
+  {
+   "m": "2018-05",
+   "ttf": 21.5,
+   "nahrung": 3.3,
+   "gesamt": 2.5,
+   "energie": 3.3
+  },
+  {
+   "m": "2018-06",
+   "ttf": 21.7,
+   "nahrung": 3.1,
+   "gesamt": 2.1,
+   "energie": 3.6
+  },
+  {
+   "m": "2018-07",
+   "ttf": 22.2,
+   "nahrung": 2.5,
+   "gesamt": 2.2,
+   "energie": 3.6
+  },
+  {
+   "m": "2018-08",
+   "ttf": 23.8,
+   "nahrung": 2.4,
+   "gesamt": 2.1,
+   "energie": 4.0
+  },
+  {
+   "m": "2018-09",
+   "ttf": 27.7,
+   "nahrung": 2.7,
+   "gesamt": 2.2,
+   "energie": 4.9
+  },
+  {
+   "m": "2018-10",
+   "ttf": 26.2,
+   "nahrung": 1.9,
+   "gesamt": 2.6,
+   "energie": 5.6
+  },
+  {
+   "m": "2018-11",
+   "ttf": 24.8,
+   "nahrung": 1.6,
+   "gesamt": 2.2,
+   "energie": 5.9
+  },
+  {
+   "m": "2018-12",
+   "ttf": 24.0,
+   "nahrung": 0.9,
+   "gesamt": 1.7,
+   "energie": 3.1
+  },
+  {
+   "m": "2019-01",
+   "ttf": 21.9,
+   "nahrung": 0.6,
+   "gesamt": 1.7,
+   "energie": 3.5
+  },
+  {
+   "m": "2019-02",
+   "ttf": 18.1,
+   "nahrung": 1.2,
+   "gesamt": 1.7,
+   "energie": 4.6
+  },
+  {
+   "m": "2019-03",
+   "ttf": 15.6,
+   "nahrung": 0.6,
+   "gesamt": 1.4,
+   "energie": 4.7
+  },
+  {
+   "m": "2019-04",
+   "ttf": 15.0,
+   "nahrung": 0.6,
+   "gesamt": 2.1,
+   "energie": 4.5
+  },
+  {
+   "m": "2019-05",
+   "ttf": 13.3,
+   "nahrung": 0.8,
+   "gesamt": 1.3,
+   "energie": 3.8
+  },
+  {
+   "m": "2019-06",
+   "ttf": 10.9,
+   "nahrung": 1.1,
+   "gesamt": 1.5,
+   "energie": 3.2
+  },
+  {
+   "m": "2019-07",
+   "ttf": 11.1,
+   "nahrung": 1.9,
+   "gesamt": 1.1,
+   "energie": 3.5
+  },
+  {
+   "m": "2019-08",
+   "ttf": 11.4,
+   "nahrung": 2.2,
+   "gesamt": 1.0,
+   "energie": 2.9
+  },
+  {
+   "m": "2019-09",
+   "ttf": 13.0,
+   "nahrung": 1.3,
+   "gesamt": 0.9,
+   "energie": 1.9
+  },
+  {
+   "m": "2019-10",
+   "ttf": 15.7,
+   "nahrung": 1.0,
+   "gesamt": 0.9,
+   "energie": 0.9
+  },
+  {
+   "m": "2019-11",
+   "ttf": 15.9,
+   "nahrung": 1.6,
+   "gesamt": 1.2,
+   "energie": -0.3
+  },
+  {
+   "m": "2019-12",
+   "ttf": 14.2,
+   "nahrung": 2.0,
+   "gesamt": 1.5,
+   "energie": 2.5
+  },
+  {
+   "m": "2020-01",
+   "ttf": 11.3,
+   "nahrung": 2.5,
+   "gesamt": 1.6,
+   "energie": 2.5
+  },
+  {
+   "m": "2020-02",
+   "ttf": 9.1,
+   "nahrung": 3.3,
+   "gesamt": 1.7,
+   "energie": 1.7
+  },
+  {
+   "m": "2020-03",
+   "ttf": 8.4,
+   "nahrung": 3.6,
+   "gesamt": 1.3,
+   "energie": 0.6
+  },
+  {
+   "m": "2020-04",
+   "ttf": 6.7,
+   "nahrung": 4.6,
+   "gesamt": 0.8,
+   "energie": -0.3
+  },
+  {
+   "m": "2020-05",
+   "ttf": 4.9,
+   "nahrung": 4.3,
+   "gesamt": 0.5,
+   "energie": -1.4
+  },
+  {
+   "m": "2020-06",
+   "ttf": 5.3,
+   "nahrung": 4.1,
+   "gesamt": 0.8,
+   "energie": -0.9
+  },
+  {
+   "m": "2020-07",
+   "ttf": 5.4,
+   "nahrung": 0.9,
+   "gesamt": 0.0,
+   "energie": -3.0
+  },
+  {
+   "m": "2020-08",
+   "ttf": 8.2,
+   "nahrung": 0.6,
+   "gesamt": -0.1,
+   "energie": -3.2
+  },
+  {
+   "m": "2020-09",
+   "ttf": 11.4,
+   "nahrung": 0.5,
+   "gesamt": -0.4,
+   "energie": -4.4
+  },
+  {
+   "m": "2020-10",
+   "ttf": 14.2,
+   "nahrung": 1.3,
+   "gesamt": -0.5,
+   "energie": -4.4
+  },
+  {
+   "m": "2020-11",
+   "ttf": 13.9,
+   "nahrung": 1.2,
+   "gesamt": -0.7,
+   "energie": -4.5
+  },
+  {
+   "m": "2020-12",
+   "ttf": 16.4,
+   "nahrung": 0.4,
+   "gesamt": -0.7,
+   "energie": -3.6
+  },
+  {
+   "m": "2021-01",
+   "ttf": 20.3,
+   "nahrung": 1.9,
+   "gesamt": 1.6,
+   "energie": -1.6
+  },
+  {
+   "m": "2021-02",
+   "ttf": 17.3,
+   "nahrung": 1.4,
+   "gesamt": 1.6,
+   "energie": -0.6
+  },
+  {
+   "m": "2021-03",
+   "ttf": 17.6,
+   "nahrung": 1.5,
+   "gesamt": 2.0,
+   "energie": 0.8
+  },
+  {
+   "m": "2021-04",
+   "ttf": 20.2,
+   "nahrung": 1.8,
+   "gesamt": 2.1,
+   "energie": 0.9
+  },
+  {
+   "m": "2021-05",
+   "ttf": 24.9,
+   "nahrung": 1.3,
+   "gesamt": 2.4,
+   "energie": 2.0
+  },
+  {
+   "m": "2021-06",
+   "ttf": 29.1,
+   "nahrung": 1.2,
+   "gesamt": 2.1,
+   "energie": 2.7
+  },
+  {
+   "m": "2021-07",
+   "ttf": 36.1,
+   "nahrung": 4.3,
+   "gesamt": 3.1,
+   "energie": 5.2
+  },
+  {
+   "m": "2021-08",
+   "ttf": 44.5,
+   "nahrung": 4.4,
+   "gesamt": 3.4,
+   "energie": 5.5
+  },
+  {
+   "m": "2021-09",
+   "ttf": 64.8,
+   "nahrung": 4.8,
+   "gesamt": 4.1,
+   "energie": 7.2
+  },
+  {
+   "m": "2021-10",
+   "ttf": 89.4,
+   "nahrung": 4.3,
+   "gesamt": 4.6,
+   "energie": 10.5
+  },
+  {
+   "m": "2021-11",
+   "ttf": 82.2,
+   "nahrung": 4.5,
+   "gesamt": 6.0,
+   "energie": 12.1
+  },
+  {
+   "m": "2021-12",
+   "ttf": 115.9,
+   "nahrung": 5.8,
+   "gesamt": 5.7,
+   "energie": 11.0
+  },
+  {
+   "m": "2022-01",
+   "ttf": 84.9,
+   "nahrung": 4.7,
+   "gesamt": 5.1,
+   "energie": 18.4
+  },
+  {
+   "m": "2022-02",
+   "ttf": 82.0,
+   "nahrung": 5.0,
+   "gesamt": 5.5,
+   "energie": 20.7
+  },
+  {
+   "m": "2022-03",
+   "ttf": 131.6,
+   "nahrung": 5.9,
+   "gesamt": 7.6,
+   "energie": 32.7
+  },
+  {
+   "m": "2022-04",
+   "ttf": 101.3,
+   "nahrung": 7.9,
+   "gesamt": 7.8,
+   "energie": 32.5
+  },
+  {
+   "m": "2022-05",
+   "ttf": 94.0,
+   "nahrung": 10.4,
+   "gesamt": 8.7,
+   "energie": 35.8
+  },
+  {
+   "m": "2022-06",
+   "ttf": 106.8,
+   "nahrung": 11.8,
+   "gesamt": 8.2,
+   "energie": 39.3
+  },
+  {
+   "m": "2022-07",
+   "ttf": 169.8,
+   "nahrung": 13.7,
+   "gesamt": 8.5,
+   "energie": 42.1
+  },
+  {
+   "m": "2022-08",
+   "ttf": 238.7,
+   "nahrung": 15.5,
+   "gesamt": 8.8,
+   "energie": 46.0
+  },
+  {
+   "m": "2022-09",
+   "ttf": 201.2,
+   "nahrung": 17.4,
+   "gesamt": 10.9,
+   "energie": 51.3
+  },
+  {
+   "m": "2022-10",
+   "ttf": 137.8,
+   "nahrung": 18.9,
+   "gesamt": 11.6,
+   "energie": 54.8
+  },
+  {
+   "m": "2022-11",
+   "ttf": 118.0,
+   "nahrung": 19.7,
+   "gesamt": 11.3,
+   "energie": 53.9
+  },
+  {
+   "m": "2022-12",
+   "ttf": 114.4,
+   "nahrung": 19.5,
+   "gesamt": 9.6,
+   "energie": 33.5
+  },
+  {
+   "m": "2023-01",
+   "ttf": 64.7,
+   "nahrung": 19.6,
+   "gesamt": 9.2,
+   "energie": 36.0
+  },
+  {
+   "m": "2023-02",
+   "ttf": 52.7,
+   "nahrung": 21.2,
+   "gesamt": 9.3,
+   "energie": 32.4
+  },
+  {
+   "m": "2023-03",
+   "ttf": 44.4,
+   "nahrung": 21.8,
+   "gesamt": 7.8,
+   "energie": 19.9
+  },
+  {
+   "m": "2023-04",
+   "ttf": 42.1,
+   "nahrung": 17.4,
+   "gesamt": 7.6,
+   "energie": 20.5
+  },
+  {
+   "m": "2023-05",
+   "ttf": 31.5,
+   "nahrung": 15.0,
+   "gesamt": 6.3,
+   "energie": 16.5
+  },
+  {
+   "m": "2023-06",
+   "ttf": 32.1,
+   "nahrung": 13.8,
+   "gesamt": 6.8,
+   "energie": 12.4
+  },
+  {
+   "m": "2023-07",
+   "ttf": 29.6,
+   "nahrung": 11.3,
+   "gesamt": 6.5,
+   "energie": 9.2
+  },
+  {
+   "m": "2023-08",
+   "ttf": 34.7,
+   "nahrung": 9.3,
+   "gesamt": 6.4,
+   "energie": 6.8
+  },
+  {
+   "m": "2023-09",
+   "ttf": 37.0,
+   "nahrung": 8.0,
+   "gesamt": 4.3,
+   "energie": 1.8
+  },
+  {
+   "m": "2023-10",
+   "ttf": 47.3,
+   "nahrung": 6.7,
+   "gesamt": 3.0,
+   "energie": -4.6
+  },
+  {
+   "m": "2023-11",
+   "ttf": 46.0,
+   "nahrung": 6.1,
+   "gesamt": 2.3,
+   "energie": -6.7
+  },
+  {
+   "m": "2023-12",
+   "ttf": 36.0,
+   "nahrung": 5.4,
+   "gesamt": 3.8,
+   "energie": 6.2
+  },
+  {
+   "m": "2024-01",
+   "ttf": 30.3,
+   "nahrung": 4.7,
+   "gesamt": 3.1,
+   "energie": -3.7
+  },
+  {
+   "m": "2024-02",
+   "ttf": 25.9,
+   "nahrung": 2.1,
+   "gesamt": 2.7,
+   "energie": -4.1
+  },
+  {
+   "m": "2024-03",
+   "ttf": 26.9,
+   "nahrung": 0.6,
+   "gesamt": 2.3,
+   "energie": -5.1
+  },
+  {
+   "m": "2024-04",
+   "ttf": 29.0,
+   "nahrung": 1.6,
+   "gesamt": 2.4,
+   "energie": -3.6
+  },
+  {
+   "m": "2024-05",
+   "ttf": 31.8,
+   "nahrung": 1.6,
+   "gesamt": 2.8,
+   "energie": -3.6
+  },
+  {
+   "m": "2024-06",
+   "ttf": 34.4,
+   "nahrung": 1.9,
+   "gesamt": 2.5,
+   "energie": -3.3
+  },
+  {
+   "m": "2024-07",
+   "ttf": 32.5,
+   "nahrung": 2.2,
+   "gesamt": 2.6,
+   "energie": -2.9
+  },
+  {
+   "m": "2024-08",
+   "ttf": 38.4,
+   "nahrung": 2.4,
+   "gesamt": 2.0,
+   "energie": -3.8
+  },
+  {
+   "m": "2024-09",
+   "ttf": 36.4,
+   "nahrung": 2.4,
+   "gesamt": 1.8,
+   "energie": -3.7
+  },
+  {
+   "m": "2024-10",
+   "ttf": 40.5,
+   "nahrung": 3.1,
+   "gesamt": 2.4,
+   "energie": -2.8
+  },
+  {
+   "m": "2024-11",
+   "ttf": 44.6,
+   "nahrung": 2.6,
+   "gesamt": 2.4,
+   "energie": -1.4
+  },
+  {
+   "m": "2024-12",
+   "ttf": 45.2,
+   "nahrung": 2.8,
+   "gesamt": 2.8,
+   "energie": -0.3
+  },
+  {
+   "m": "2025-01",
+   "ttf": 48.2,
+   "nahrung": 1.5,
+   "gesamt": 2.8,
+   "energie": -2.3
+  },
+  {
+   "m": "2025-02",
+   "ttf": 50.8,
+   "nahrung": 2.9,
+   "gesamt": 2.6,
+   "energie": -1.9
+  },
+  {
+   "m": "2025-03",
+   "ttf": 41.8,
+   "nahrung": 3.6,
+   "gesamt": 2.3,
+   "energie": -1.3
+  },
+  {
+   "m": "2025-04",
+   "ttf": 35.0,
+   "nahrung": 3.3,
+   "gesamt": 2.2,
+   "energie": -3.1
+  },
+  {
+   "m": "2025-05",
+   "ttf": 35.1,
+   "nahrung": 3.3,
+   "gesamt": 2.1,
+   "energie": -2.8
+  },
+  {
+   "m": "2025-06",
+   "ttf": 36.6,
+   "nahrung": 2.5,
+   "gesamt": 2.0,
+   "energie": -2.6
+  },
+  {
+   "m": "2025-07",
+   "ttf": 33.9,
+   "nahrung": 2.7,
+   "gesamt": 1.8,
+   "energie": -2.5
+  },
+  {
+   "m": "2025-08",
+   "ttf": 32.6,
+   "nahrung": 3.1,
+   "gesamt": 2.1,
+   "energie": -2.2
+  },
+  {
+   "m": "2025-09",
+   "ttf": 32.3,
+   "nahrung": 2.8,
+   "gesamt": 2.4,
+   "energie": -1.9
+  },
+  {
+   "m": "2025-10",
+   "ttf": 31.9,
+   "nahrung": 2.1,
+   "gesamt": 2.3,
+   "energie": -1.7
+  },
+  {
+   "m": "2025-11",
+   "ttf": 30.7,
+   "nahrung": 2.0,
+   "gesamt": 2.6,
+   "energie": -1.3
+  },
+  {
+   "m": "2025-12",
+   "ttf": 27.7,
+   "nahrung": 1.7,
+   "gesamt": 2.0,
+   "energie": -1.7
+  },
+  {
+   "m": "2026-01",
+   "ttf": 34.0,
+   "nahrung": null,
+   "gesamt": null,
+   "energie": null
+  },
+  {
+   "m": "2026-02",
+   "ttf": 32.9,
+   "nahrung": null,
+   "gesamt": null,
+   "energie": null
+  },
+  {
+   "m": "2026-03",
+   "ttf": 52.6,
+   "nahrung": null,
+   "gesamt": null,
+   "energie": null
+  },
+  {
+   "m": "2026-04",
+   "ttf": 45.0,
+   "nahrung": null,
+   "gesamt": null,
+   "energie": null
+  },
+  {
+   "m": "2026-05",
+   "ttf": 47.2,
+   "nahrung": null,
+   "gesamt": null,
+   "energie": null
+  },
+  {
+   "m": "2026-06",
+   "ttf": 44.7,
+   "nahrung": null,
+   "gesamt": null,
+   "energie": null
+  },
+  {
+   "m": "2026-07",
+   "ttf": 53.8,
+   "nahrung": null,
+   "gesamt": null,
+   "energie": null
+  },
+  {
+   "m": "2026-08",
+   "ttf": 62.0,
+   "nahrung": null,
+   "gesamt": null,
+   "energie": null
+  },
+  {
+   "m": "2026-09",
+   "ttf": 75.4,
+   "nahrung": null,
+   "gesamt": null,
+   "energie": null
+  },
+  {
+   "m": "2026-10",
+   "ttf": 86.7,
+   "nahrung": null,
+   "gesamt": null,
+   "energie": null
+  },
+  {
+   "m": "2026-11",
+   "ttf": 89.2,
+   "nahrung": null,
+   "gesamt": null,
+   "energie": null
+  }
+ ]
+}
