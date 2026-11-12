@@ -716,6 +716,19 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None, strom=None)
             eintrag_f[name] = {"fuellstand_ziel_tag": wert_am(sim["verlauf"], ziel_tag), "fuellstand_ende": sim["verlauf"][-1][1], "erreicht": sim["erreicht"],
                                "fehl_twh": sim["fehl_twh"], "fehl_tage": sim["fehl_tage"], "fehl_erster": sim["fehl_erster"], "fehl_spitze_gwh": sim["fehl_spitze_gwh"]}
         empf.append(eintrag_f)
+    if (import_ref or {}).get("kaelte_ausland_gwh"):
+        xk = float(import_ref["kaelte_ausland_gwh"])
+        eintrag_k = {"fall": "Kältewelle in den Nachbarländern, 14 Tage im Januar (weniger Importe)", "gwh_tag": round(xk), "schwach": not import_ref.get("kaelte_ausland_beleg", False)}
+        for name in ("normal", "kalt"):
+            basis_fn = extra_fn_fuer(tmaps[name]) if extra_fn_fuer else None
+
+            def ex_k(d, basis_fn=basis_fn):
+                z = basis_fn(d) if basis_fn else 0.0
+                return z + (xk if date(bis.year, 1, 11) <= d <= date(bis.year, 1, 24) else 0.0)
+            sim = simuliere(start_sim, r0["twh"], r0["kap"], i_tag, tmaps[name], bis, fit, cap_fn("faellt", hoch, tief), basis, 0.0, ex_k)
+            eintrag_k[name] = {"fuellstand_ziel_tag": wert_am(sim["verlauf"], ziel_tag), "fuellstand_ende": sim["verlauf"][-1][1], "erreicht": sim["erreicht"],
+                               "fehl_twh": sim["fehl_twh"], "fehl_tage": sim["fehl_tage"], "fehl_erster": sim["fehl_erster"], "fehl_spitze_gwh": sim["fehl_spitze_gwh"]}
+        empf.append(eintrag_k)
     for text, extra in faelle:
         eintrag = {"fall": text, "gwh_tag": round(extra)}
         for name in ("normal", "kalt"):
