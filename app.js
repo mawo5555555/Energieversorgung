@@ -207,6 +207,40 @@
       '<p class="hint">Mehr Einspeicherung heißt mehr Gas im Land: aus zusätzlichen Importen und LNG oder aus geringerem Verbrauch. Jede eingesparte Gasmenge wirkt wie eine zusätzlich eingespeicherte. Die Rechnung nimmt eine gleichbleibende Einspeicherung an und gilt wie die Vorausschau mit einer Unsicherheit von etwa ' + nf0.format(d.rueckrechnung_mittlerer_fehler_pp || 8) + " Prozentpunkten. Ob die Mengen am Markt beschaffbar wären, hängt von Preisen, Terminal-Kapazitäten und Lieferverträgen ab und ist hier nicht berechnet.</p>" + meta(d, esc(d.quelle || "")));
   }
 
+  function renderUmfeldVor(v, u) {
+    var nd = noData(v, "Vorausschau Umfeld"); if (nd) return set("cUmfeldVor", nd);
+    if (!v.anlagen) return set("cUmfeldVor", errNote(v) + hint(v.hinweis || "Keine Daten."));
+    function dat(s) { return s ? new Date(s + "T12:00:00").toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" }) : "nicht bis 31.3."; }
+    var farben = { mild: "var(--green)", normal: "var(--blue)", kalt: "var(--red)" }, namen = { mild: "Milder Winter", normal: "Normaler Winter", kalt: "Kalter Winter" };
+    var W = 340, H = 150, L = 28, T0 = 8, B = 20, pw = W - L - 8, ph = H - T0 - B, t0 = new Date("2026-11-10T12:00:00").getTime(), t1 = new Date("2027-03-31T12:00:00").getTime();
+    function X(s) { return L + (new Date(s + "T12:00:00").getTime() - t0) / (t1 - t0) * pw; } function Y(x) { return T0 + (100 - x) / 100 * ph; }
+    var g = "";
+    [0, 25, 50, 75, 100].forEach(function (x) { g += '<line x1="' + L + '" x2="' + (W - 8) + '" y1="' + Y(x) + '" y2="' + Y(x) + '" stroke="var(--sep)" stroke-width="0.6"/><text x="' + (L - 4) + '" y="' + (Y(x) + 3) + '" text-anchor="end" font-size="8" fill="var(--muted)">' + x + "</text>"; });
+    [["2026-12-01", "Dez"], ["2027-01-01", "Jan"], ["2027-02-01", "Feb"], ["2027-03-01", "Mär"]].forEach(function (m) { g += '<text x="' + (X(m[0]) + 2) + '" y="' + (H - 6) + '" font-size="8" fill="var(--muted)">' + m[1] + "</text>"; });
+    function line(a, col, w, dash) { return '<path d="' + a.map(function (p, i) { return (i ? "L" : "M") + X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1); }).join(" ") + '" fill="none" stroke="' + col + '" stroke-width="' + w + '" stroke-linejoin="round"' + (dash ? ' stroke-dasharray="3 2"' : "") + "/>"; }
+    ["mild", "normal", "kalt"].forEach(function (k) { g += line(v.gesamt[k].konstant.verlauf, farben[k], 1.8, false) + line(v.gesamt[k].faellt.verlauf, farben[k], 1.2, true); });
+    var rows = ["mild", "normal", "kalt"].map(function (k) {
+      var a = v.gesamt[k].konstant, b = v.gesamt[k].faellt;
+      return '<tr><td><span style="color:' + farben[k] + '">■</span> ' + namen[k] + '</td><td class="n">' + nf0.format(a.fuellstand_ziel_tag) + ' %<div class="meta" style="margin:0">mit Leistungsabfall ' + nf0.format(b.fuellstand_ziel_tag) + ' %</div></td><td class="n">' + nf0.format(a.fuellstand_ende) + ' %</td><td class="n">' + dat(a.erreicht["30"]) + '</td><td class="n">' + dat(a.erreicht["10"]) + "</td></tr>";
+    }).join("");
+    var fr = v.anlagen.map(function (a) {
+      var n = a.szenarien.normal, kk = a.szenarien.kalt.faellt;
+      return "<tr><td>" + esc(a.name) + '<div class="meta" style="margin:0">' + esc(a.region) + (a.hinweise && a.hinweise.length ? " · " + esc(a.hinweise.join("; ")) : "") + '</div></td><td class="n">' + nf0.format(a.fuellstand_prozent) + ' %</td><td class="n">' + nf0.format(a.hoechste_entnahme_gwh) + " / " + (a.ausspeicherleistung_gemeldet_gwh ? nf0.format(a.ausspeicherleistung_gemeldet_gwh) : "–") + '</td><td class="n">' + dat(n.konstant.erreicht["30"]) + '</td><td class="n">' + dat(n.konstant.erreicht["10"]) + '</td><td class="n">' + (kk.erster_engpass ? dat(kk.erster_engpass) : "kein Engpass") + "</td></tr>";
+    }).join("");
+    var gp = ((u && u.grenzpunkte) || []).map(function (p) {
+      return "<tr><td>" + esc(p.name) + '</td><td class="n">' + p.tage.map(function (t) { return nf0.format(t[1]) + "/" + nf0.format(t[2]); }).join(" · ") + "</td></tr>";
+    }).join("");
+    set("cUmfeldVor", errNote(v) +
+      '<p style="margin:0 0 6px">Die fünf Speicher im Umfeld Brandenburgs zusammen: heute <strong>' + nf.format(v.gesamt_gas_twh / v.gesamt_kapazitaet_twh * 100) + " %</strong> (" + nf.format(v.gesamt_gas_twh) + " von " + nf.format(v.gesamt_kapazitaet_twh) + " TWh). Jeder Speicher wird mit seiner eigenen Entnahme seit 2018 gerechnet.</p>" +
+      '<svg viewBox="0 0 ' + W + " " + H + '" style="width:100%;height:auto" role="img" aria-label="Voraussichtlicher Füllstand im Umfeld Brandenburgs bis 31. März">' + g + "</svg>" +
+      '<p class="meta">Durchgezogen: Leistung bleibt auf dem höchsten beobachteten Niveau. Gestrichelt: Leistung sinkt bei niedrigem Füllstand (Annahme).</p>' +
+      '<table><tr><th>Szenario</th><th class="n">1. Februar</th><th class="n">31. März</th><th class="n">unter 30 % ab</th><th class="n">unter 10 % ab</th></tr>' + rows + "</table>" +
+      '<h3 style="margin-top:14px">Die einzelnen Speicher im normalen Winter</h3><table><tr><th>Speicher</th><th class="n">heute</th><th class="n">Höchstentnahme / gemeldete Leistung (GWh/Tag)</th><th class="n">unter 30 % ab</th><th class="n">unter 10 % ab</th><th class="n">Engpass ab (kalt, Leistungsabfall)</th></tr>' + fr + "</table>" +
+      '<p class="meta">„Engpass“ bedeutet: Der kältebedingte Entnahmebedarf des Speichers liegt über seiner angenommenen Ausspeicherleistung bei diesem Füllstand.</p>' +
+      (gp ? '<h3 style="margin-top:14px">Gaszufluss aus Polen (Grenzpunkte in Brandenburg), letzte Tage</h3><table><tr><th>Punkt</th><th class="n">Einspeisung/Ausfuhr GWh/Tag</th></tr>' + gp + "</table>" : "") +
+      '<p class="hint">Das ist die Sicht der Speicher. Der Gasbedarf und die Netzlage in Brandenburg selbst habe ich nicht als offene Daten gefunden, die Versorgung läuft über das Verbundnetz, auch aus Speichern in den Nachbarländern und über Pipelines. „Kritisch“ heißt hier nur: niedriger Füllstand oder Entnahmebedarf über der Höchstleistung, nicht dass die Versorgung vor Ort ausfällt. Die Unsicherheit ist größer als bei der Deutschland-Rechnung, weil einzelne Speicher stärker schwanken. Wo ein Speicher nie so niedrige Füllstände hatte, ist die Leistung bei niedrigem Füllstand angenommen (siehe Hinweis am Speicher).</p>' + meta(v, esc(v.quelle || "")));
+  }
+
   function renderUmfeld(d) {
     var nd = noData(d, "Umfeld"); if (nd) return set("cUmfeld", nd);
     if (!d.anlagen) return set("cUmfeld", errNote(d) + hint(d.hinweis || "Keine Daten."));
@@ -337,12 +371,12 @@
   }
 
   function load() {
-    Promise.all(["meta.json", "gas_speicher.json", "gas_lng.json", "gas_pipeline.json", "strom.json", "frequenz.json", "kraftstoff.json", "rohoel.json", "reichweite.json", "gas_historie.json", "wetter.json", "gas_europa.json", "gas_anlagen.json", "gaspreis.json", "lng_tanks.json", "gas_umfeld.json", "gas_vorausschau.json"].map(get)).then(function (r) {
+    Promise.all(["meta.json", "gas_speicher.json", "gas_lng.json", "gas_pipeline.json", "strom.json", "frequenz.json", "kraftstoff.json", "rohoel.json", "reichweite.json", "gas_historie.json", "wetter.json", "gas_europa.json", "gas_anlagen.json", "gaspreis.json", "lng_tanks.json", "gas_umfeld.json", "gas_vorausschau.json", "gas_umfeld_vorausschau.json"].map(get)).then(function (r) {
       document.getElementById("stand").textContent = r[0] && r[0].letzter_lauf ? "Letzter Datenabruf: " + when(r[0].letzter_lauf) : "Noch kein Datenabruf.";
       [function () { renderSpeicherDE(r[1]); }, function () { renderSpeicherBB(r[1]); },
         function () { renderLngEin(r[2]); }, function () { renderPipe(r[3]); },
         function () { renderPreis(r[4]); }, function () { renderMix(r[4]); }, function () { renderFreq(r[5]); }, function () { renderKraft(r[6]); },
-        function () { renderOel(r[7]); }, function () { renderReich(r[8]); }, function () { renderHist(r[9]); }, function () { renderWetter(r[10]); }, function () { renderEuropa(r[11]); }, function () { renderAnlagen(r[12]); }, function () { renderTtf(r[13]); }, function () { renderLngTanks(r[14]); }, function () { renderUmfeld(r[15]); }, function () { renderVorausschau(r[16]); }, function () { renderEinsp(r[16]); }
+        function () { renderOel(r[7]); }, function () { renderReich(r[8]); }, function () { renderHist(r[9]); }, function () { renderWetter(r[10]); }, function () { renderEuropa(r[11]); }, function () { renderAnlagen(r[12]); }, function () { renderTtf(r[13]); }, function () { renderLngTanks(r[14]); }, function () { renderUmfeld(r[15]); }, function () { renderVorausschau(r[16]); }, function () { renderEinsp(r[16]); }, function () { renderUmfeldVor(r[17], r[15]); }
       ].forEach(function (f) { try { f(); } catch (e) { if (window.console) console.error(e); } });
     });
   }

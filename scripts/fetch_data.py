@@ -358,7 +358,15 @@ def gas_umfeld():
         raise ValueError("keine Umfeld-Daten: " + "; ".join(fehler))
     stock = sum(a["gas_twh"] for a in anlagen)
     kap = sum(a["kapazitaet_twh"] for a in anlagen)
-    out = {"stand": stamp(), "quelle": "GIE AGSI+ (agsi.gie.eu)", "ohne_daten": fehler, "anlagen": anlagen,
+    grenz = []
+    try:
+        best = entsog_tage(["ITP-00096", "ITP-00497"], 10)
+        for pk, nm in (("ITP-00096", "Mallnow (Polen–Deutschland, Brandenburg)"), ("ITP-00497", "GCP Gaz-System/ONTRAS (Polen–Deutschland)")):
+            tg = sorted({t for (p_, _, t) in best if p_ == pk})[-7:]
+            grenz.append({"name": nm, "tage": [[t, round(best.get((pk, "entry", t), 0) / 1e6, 1), round(best.get((pk, "exit", t), 0) / 1e6, 1)] for t in tg]})
+    except Exception:  # noqa: BLE001
+        grenz = []
+    out = {"stand": stamp(), "quelle": "GIE AGSI+ (agsi.gie.eu)", "ohne_daten": fehler, "anlagen": anlagen, "grenzpunkte": grenz,
            "summe": {"gas_twh": round(stock, 2), "kapazitaet_twh": round(kap, 2), "fuellstand_prozent": round(stock / kap * 100, 1) if kap else None,
                      "ausspeicherung_7t_gwh": round(sum(a["ausspeicherung_7t_gwh"] for a in anlagen), 1),
                      "einspeicherung_7t_gwh": round(sum(a["einspeicherung_7t_gwh"] for a in anlagen), 1),
@@ -588,10 +596,10 @@ def gas_historie():
 
 
 # ---------- Modell-Grundlagen: Historie der Speicher und Temperaturen ----------
-def agsi_de_historie(key, ab_jahr=2018):
+def agsi_de_historie(key, ab_jahr=2018, extra=""):
     rows, page = [], 1
     while page <= 30:
-        d = get_json(f"https://agsi.gie.eu/api?country=DE&from={ab_jahr}-01-01&size=300&page={page}", {"x-key": key}, 90)
+        d = get_json(f"https://agsi.gie.eu/api?country=DE{extra}&from={ab_jahr}-01-01&size=300&page={page}", {"x-key": key}, 90)
         rows += d.get("data", [])
         if page >= int(d.get("last_page", 1) or 1):
             break
@@ -636,7 +644,7 @@ def gas_vorausschau():
     old = read("gas_vorausschau.json", {})
     try:
         alt = datetime.strptime(old["stand"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
-        if NOW - alt < timedelta(hours=5) and old.get("szenarien") and old.get("einspeicherung") and not old.get("fehler"):
+        if NOW - alt < timedelta(hours=5) and old.get("szenarien") and old.get("einspeicherung") and read("gas_umfeld_vorausschau.json", {}).get("anlagen") and not old.get("fehler"):
             return None  # aufwendig (Historie seit 2018), deshalb nur alle paar Stunden
     except (KeyError, ValueError):
         pass
@@ -644,9 +652,25 @@ def gas_vorausschau():
     hist = agsi_de_historie(key)
     temp = temp_historie()
     pipe, lng = read("gas_pipeline.json", {}), read("gas_lng.json", {})
-    res = modell.vorausschau(hist, temp, read("wetter.json", {}), read_cfg("modell.json"), max(hist),
-                             {"pipeline_netto": pipe.get("summe_netto"), "lng": lng.get("summe")})
+    cfg = read_cfg("modell.json")
+    res, ctx = modell.vorausschau(hist, temp, read("wetter.json", {}), cfg, max(hist),
+                                  {"pipeline_netto": pipe.get("summe_netto"), "lng": lng.get("summe")})
     res["stand"] = stamp()
+    # Speicher im Umfeld Brandenburgs: je Anlage eigene Historie und eigene Vorausschau
+    try:
+        fac = []
+        for a in read_cfg("brandenburg-speicher.json").get("umfeld", []):
+            h = agsi_de_historie(key, 2018, f"&company={firma_von(a['eic'])}&facility={a['eic']}")
+            if h:
+                fac.append({"name": a["name"], "region": a.get("region", ""), "hist": h})
+        ev = modell.umfeld_vorausschau(fac, hist, ctx["fit"], temp, ctx["tmaps"], ctx["start"], ctx["bis"], cfg["ziel"]["datum"], ctx["basis"])
+        ev["stand"] = stamp()
+        ev["quelle"] = "GIE AGSI+ (je Anlage seit 2018), Open-Meteo, eigene Berechnung"
+        ev["ziel"] = cfg["ziel"]
+        write("gas_umfeld_vorausschau.json", ev)
+    except Exception as e:  # noqa: BLE001
+        write("gas_umfeld_vorausschau.json", {"stand": stamp(), "fehler": f"{type(e).__name__}: {e}"[:500]})
+        print("FEHL umfeld_vorausschau", e, file=sys.stderr)
     res["quelle"] = "GIE AGSI+ (Speicherdaten seit 2018), Open-Meteo (Temperaturen), eigene Berechnung"
     return res
 

@@ -104,6 +104,7 @@ def simuliere(start, stock, kap, i_tag, tmap, bis, fit, cap, basis=15.0):
     """Tagesweise Simulation. tmap(datum) -> Temperatur. Gibt Verlauf und Kennzahlen zurück."""
     verlauf, ungedeckt, engpass = [], 0.0, 0
     erreicht = {}
+    erster_engpass = None
     d = start
     while d <= bis:
         f = stock / kap * 100
@@ -112,6 +113,8 @@ def simuliere(start, stock, kap, i_tag, tmap, bis, fit, cap, basis=15.0):
         w = min(bedarf, c)
         if bedarf > c + 1e-9:
             engpass += 1
+            if erster_engpass is None:
+                erster_engpass = d2s(d)
             ungedeckt += (bedarf - c) / 1000.0
         zu = i_tag if f < 99.5 else 0.0
         stock = min(kap, max(0.0, stock + (zu - w) / 1000.0))
@@ -123,7 +126,7 @@ def simuliere(start, stock, kap, i_tag, tmap, bis, fit, cap, basis=15.0):
         if "leer" not in erreicht and stock <= 0.001:
             erreicht["leer"] = d2s(d)
         d += timedelta(days=1)
-    return {"verlauf": verlauf, "erreicht": erreicht, "engpass_tage": engpass, "ungedeckt_twh": round(ungedeckt, 2)}
+    return {"verlauf": verlauf, "erreicht": erreicht, "engpass_tage": engpass, "ungedeckt_twh": round(ungedeckt, 2), "erster_engpass": erster_engpass}
 
 
 def wert_am(verlauf, tag):
@@ -202,6 +205,77 @@ def einspeicher_historie(hist, temp, laenge):
             "hoechster_durchschnitt_winter_gwh": max((w["einspeicherung_gwh"] for w in winter), default=None),
             "hoechster_durchschnitt_beliebig_gwh": round(best), "hoechster_durchschnitt_von": alle[best_i], "hoechster_durchschnitt_bis": alle[best_i + laenge - 1],
             "laenge_tage": laenge}
+
+
+def umfeld_vorausschau(anlagen, nat_hist, nat_fit, temp, tmaps, start, bis, ziel_tag, basis=15.0):
+    """Vorausschau je Speicher im Umfeld Brandenburgs (eigene Entnahme-Historie, eigene Höchstleistung) und zusammen.
+
+    anlagen: Liste von {"name", "region", "hist"}. Ohne ausreichende eigene Historie wird die Entnahme über den Anteil
+    am deutschen Verlauf geschätzt, ohne beobachtete Leistung bei niedrigem Füllstand gilt die Hälfte der Höchstleistung (Annahme).
+    """
+    res, summe = [], {}
+    letzte_nat = sorted(nat_hist)[-30:]
+    nat_w30 = sum(nat_hist[t]["w"] for t in letzte_nat) or 1.0
+    for a in anlagen:
+        h = a["hist"]
+        tage = sorted(h)
+        if not tage:
+            continue
+        last = tage[-1]
+        r0 = h[last]
+        kap, stock = r0["kap"], r0["twh"]
+        if kap <= 0:
+            continue
+        l7 = [h[t]["i"] for t in tage[-7:]]
+        i7 = sum(l7) / len(l7)
+        hinweise = []
+        try:
+            fit = fit_entnahme(h, temp, basis)
+            if fit["b"] <= 0:
+                raise ValueError("kein Temperaturzusammenhang")
+        except ValueError:
+            anteil = (sum(h[t]["w"] for t in tage[-30:] if t in nat_hist) / nat_w30) if nat_w30 else 0.0
+            fit = {"a": nat_fit["a"] * anteil, "b": nat_fit["b"] * anteil, "r2": None, "n": 0}
+            hinweise.append("Entnahme über Anteil am deutschen Verlauf geschätzt")
+        w_alle = [h[t]["w"] for t in tage]
+        hoch_kand = [h[t]["w"] for t in tage if h[t]["full"] >= 30]
+        hoch = sorted(hoch_kand)[int(0.995 * (len(hoch_kand) - 1))] if len(hoch_kand) >= 30 else max(w_alle)
+        hoch = max(hoch, 1.0)
+        tief = cap_tief(h)
+        if tief is None:
+            tief = 0.5 * hoch
+            hinweise.append("Leistung bei niedrigem Füllstand nie beobachtet, Hälfte der Höchstleistung angenommen")
+        tief = min(tief, hoch)
+        eintrag = {"name": a["name"], "region": a.get("region", ""), "gastag": last, "fuellstand_prozent": round(r0["full"], 1), "gas_twh": round(stock, 2),
+                   "kapazitaet_twh": round(kap, 2), "ausspeicherleistung_gemeldet_gwh": round(r0.get("wcap", 0) or 0),
+                   "hoechste_entnahme_gwh": round(max(w_alle)), "leistung_hoch_gwh": round(hoch), "leistung_tief_gwh": round(tief),
+                   "einspeicherung_7t_gwh": round(i7, 1), "hinweise": hinweise, "szenarien": {}}
+        for name, tm in tmaps.items():
+            eintrag["szenarien"][name] = {}
+            for var in ("konstant", "faellt"):
+                sim = simuliere(start, stock, kap, i7, tm, bis, fit, cap_fn(var, hoch, tief), basis)
+                eintrag["szenarien"][name][var] = {"fuellstand_ziel_tag": wert_am(sim["verlauf"], ziel_tag), "fuellstand_ende": sim["verlauf"][-1][1],
+                                                  "erreicht": sim["erreicht"], "erster_engpass": sim["erster_engpass"], "engpass_tage": sim["engpass_tage"]}
+                bucket = summe.setdefault((name, var), {"kap": 0.0, "pfade": []})
+                bucket["kap"] += kap
+                bucket["pfade"].append((kap, sim["verlauf"]))
+        res.append(eintrag)
+    agg = {}
+    for (name, var), b in summe.items():
+        tage = [t for t, _ in b["pfade"][0][1]]
+        verlauf = []
+        for k, t in enumerate(tage):
+            st = sum(kap * v[k][1] / 100.0 for kap, v in b["pfade"])
+            verlauf.append([t, round(st / b["kap"] * 100, 1)])
+        erreicht = {}
+        for marke in (30, 20, 10):
+            for t, v in verlauf:
+                if v < marke:
+                    erreicht[marke] = t
+                    break
+        agg.setdefault(name, {})[var] = {"verlauf": verlauf[::2], "fuellstand_ziel_tag": wert_am(verlauf, ziel_tag), "fuellstand_ende": verlauf[-1][1], "erreicht": erreicht}
+    return {"anlagen": res, "gesamt": agg, "gesamt_kapazitaet_twh": round(sum(a["kapazitaet_twh"] for a in res), 2),
+            "gesamt_gas_twh": round(sum(a["gas_twh"] for a in res), 2)}
 
 
 def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None):
@@ -284,7 +358,8 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None):
     einsp = {"jetzt_gwh": round(i_tag), "mindest_ende_prozent": mind_ende, "szenarien": bedarf, "historie": his,
              "einspeicherleistung_gemeldet_gwh": round(r0.get("icap", 0)) if r0.get("icap") else None, "importe_gwh": quote}
     verbrauch_tag = cfg["jahresverbrauch_twh"] / 365.0
-    return {
+    kontext = {"fit": fit, "tmaps": tmaps, "start": start_sim, "bis": bis, "basis": basis}
+    ergebnis = {
         "ausgangslage": {"gastag": stand_tag, "fuellstand_prozent": round(r0["full"], 1), "gas_twh": round(r0["twh"], 1), "kapazitaet_twh": round(r0["kap"], 1),
                          "einspeicherung_7t_gwh": round(i_tag, 1), "wetter_bis": fc_ende},
         "modell": {"a_gwh": round(fit["a"], 1), "b_gwh_je_grad": round(fit["b"], 1), "r2": round(fit["r2"], 2), "tage": fit["n"], "heizgrenze_c": basis,
@@ -296,3 +371,4 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None):
         "ohne_importe": {"jahresverbrauch_twh": cfg["jahresverbrauch_twh"], "quelle": cfg.get("jahresverbrauch_quelle"), "verbrauch_tag_twh": round(verbrauch_tag, 2),
                          "tage": round(r0["twh"] / verbrauch_tag)},
     }
+    return ergebnis, kontext
