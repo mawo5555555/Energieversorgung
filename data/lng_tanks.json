@@ -1,4 +1,4 @@
 {
- "fehler": "ValueError: keine LNG-Daten, Antwort: {\"last_page\": 3, \"total\": 3, \"dataset\": \"<a href=\\\"/data-overview/eu\\\">EU</a> > DE\", \"gas_day\": \"2026-11-10\", \"data\": [{\"name\": \"Germany\", \"code\": \"DE\", \"url\": \"DE\", \"updatedAt\": \"2026-11-11 14:48:50\", \"gasDayStart\": \"2026-11-10\", \"gasDayEnd\": \"2026-11-11\", \"inv",
- "fehler_stand": "2026-11-12T07:28:36Z"
+ "fehler": "KeyError: 'full'",
+ "fehler_stand": "2026-11-12T07:29:58Z"
 }
