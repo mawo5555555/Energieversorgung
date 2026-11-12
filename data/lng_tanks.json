@@ -1,13 +1,13 @@
 {
- "stand": "2026-11-12T17:41:12Z",
+ "stand": "2026-11-12T21:27:52Z",
  "quelle": "GIE ALSI (alsi.gie.eu)",
  "deutschland": {
   "name": "Deutschland gesamt",
   "firma": "",
-  "gastag": "2026-11-10",
+  "gastag": "2026-11-11",
   "fuellstand_prozent": null,
-  "inhalt_gwh": 1708.26,
-  "ausspeisung_gwh": 312.1,
+  "inhalt_gwh": 1387.7,
+  "ausspeisung_gwh": 476.0,
   "anlieferung_schiffe": null,
   "verlauf": [
    [
@@ -45,6 +45,10 @@
    [
     "2026-11-10",
     null
+   ],
+   [
+    "2026-11-11",
+    null
    ]
   ]
  },
@@ -52,43 +56,43 @@
   {
    "name": "Wilhelmshaven LNG Terminal 1 (FSRU Hoegh Esperanza)",
    "firma": "Deutsche Energy Terminal GmbH",
-   "gastag": "2026-11-10",
+   "gastag": "2026-11-11",
    "fuellstand_prozent": null,
-   "inhalt_gwh": 75.42,
-   "ausspeisung_gwh": 1.4,
+   "inhalt_gwh": 73.63,
+   "ausspeisung_gwh": 160.1,
    "anlieferung_schiffe": null
   },
   {
    "name": "Brunsbuettel LNG Terminal 1 (FSRU Hoegh Gannet)",
    "firma": "Deutsche Energy Terminal GmbH",
-   "gastag": "2026-11-10",
+   "gastag": "2026-11-11",
    "fuellstand_prozent": null,
-   "inhalt_gwh": 699.73,
-   "ausspeisung_gwh": 101.8,
+   "inhalt_gwh": 597.28,
+   "ausspeisung_gwh": 101.7,
    "anlieferung_schiffe": null
   },
   {
    "name": "Stade LNG Terminal 1 (FSRU Energos Force)",
    "firma": "Deutsche Energy Terminal GmbH",
-   "gastag": "2026-11-10",
+   "gastag": "2026-11-11",
    "fuellstand_prozent": null,
-   "inhalt_gwh": 636.39,
-   "ausspeisung_gwh": 135.0,
+   "inhalt_gwh": 470.86,
+   "ausspeisung_gwh": 163.1,
    "anlieferung_schiffe": null
   },
   {
    "name": "Wilhelmshaven LNG Terminal 2 (FSRU Excelerate Excelsior)",
    "firma": "Deutsche Energy Terminal GmbH",
-   "gastag": "2026-11-10",
+   "gastag": "2026-11-11",
    "fuellstand_prozent": null,
-   "inhalt_gwh": 86.46,
-   "ausspeisung_gwh": 72.1,
+   "inhalt_gwh": 35.66,
+   "ausspeisung_gwh": 49.3,
    "anlieferung_schiffe": null
   },
   {
    "name": "Mukran LNG Terminal (FSRU Neptune / FSRU Energos Power)",
    "firma": "Deutsche ReGas GmbH & Co. KGaA",
-   "gastag": "2026-11-10",
+   "gastag": "2026-11-11",
    "fuellstand_prozent": null,
    "inhalt_gwh": 210.27,
    "ausspeisung_gwh": 1.7,

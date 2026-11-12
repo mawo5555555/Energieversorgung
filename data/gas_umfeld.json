@@ -1,20 +1,20 @@
 {
- "stand": "2026-11-12T17:41:12Z",
+ "stand": "2026-11-12T21:27:52Z",
  "quelle": "GIE AGSI+ (agsi.gie.eu)",
  "ohne_daten": [],
  "anlagen": [
   {
    "name": "Rüdersdorf H (EWE)",
    "region": "Brandenburg",
-   "gastag": "2026-11-10",
-   "fuellstand_prozent": 91.11,
-   "gas_twh": 0.9101,
+   "gastag": "2026-11-11",
+   "fuellstand_prozent": 90.66,
+   "gas_twh": 0.9057,
    "kapazitaet_twh": 0.999,
-   "ausspeicherung_gwh": 5.1,
-   "einspeicherung_gwh": 0.01,
+   "ausspeicherung_gwh": 4.4,
+   "einspeicherung_gwh": 0.0,
    "ausspeicherleistung_gwh": 32.76,
    "einspeicherleistung_gwh": 10.66,
-   "ausspeicherung_7t_gwh": 3.0,
+   "ausspeicherung_7t_gwh": 3.4,
    "einspeicherung_7t_gwh": 0.0,
    "leistung_verlauf": [
     [
@@ -111,21 +111,26 @@
      "2026-11-10",
      32.76,
      91.11
+    ],
+    [
+     "2026-11-11",
+     32.76,
+     90.66
     ]
    ]
   },
   {
    "name": "Kraak",
    "region": "Mecklenburg-Vorpommern",
-   "gastag": "2026-11-10",
-   "fuellstand_prozent": 84.82,
-   "gas_twh": 1.9253,
+   "gastag": "2026-11-11",
+   "fuellstand_prozent": 84.53,
+   "gas_twh": 1.9188,
    "kapazitaet_twh": 2.27,
-   "ausspeicherung_gwh": 20.0,
+   "ausspeicherung_gwh": 6.5,
    "einspeicherung_gwh": 0.0,
    "ausspeicherleistung_gwh": 80.64,
    "einspeicherleistung_gwh": 48.38,
-   "ausspeicherung_7t_gwh": 7.9,
+   "ausspeicherung_7t_gwh": 7.5,
    "einspeicherung_7t_gwh": 0.0,
    "leistung_verlauf": [
     [
@@ -222,21 +227,26 @@
      "2026-11-10",
      80.64,
      84.82
+    ],
+    [
+     "2026-11-11",
+     80.64,
+     84.53
     ]
    ]
   },
   {
    "name": "Peckensen",
    "region": "Sachsen-Anhalt",
-   "gastag": "2026-11-10",
-   "fuellstand_prozent": 85.52,
-   "gas_twh": 3.3189,
+   "gastag": "2026-11-11",
+   "fuellstand_prozent": 85.28,
+   "gas_twh": 3.3096,
    "kapazitaet_twh": 3.881,
-   "ausspeicherung_gwh": 10.5,
+   "ausspeicherung_gwh": 9.3,
    "einspeicherung_gwh": 0.0,
    "ausspeicherleistung_gwh": 244.32,
    "einspeicherleistung_gwh": 86.04,
-   "ausspeicherung_7t_gwh": 9.7,
+   "ausspeicherung_7t_gwh": 9.2,
    "einspeicherung_7t_gwh": 0.0,
    "leistung_verlauf": [
     [
@@ -333,21 +343,26 @@
      "2026-11-10",
      244.32,
      85.52
+    ],
+    [
+     "2026-11-11",
+     244.32,
+     85.28
     ]
    ]
   },
   {
    "name": "Staßfurt",
    "region": "Sachsen-Anhalt",
-   "gastag": "2026-11-10",
-   "fuellstand_prozent": 83.29,
-   "gas_twh": 5.3255,
+   "gastag": "2026-11-11",
+   "fuellstand_prozent": 82.9,
+   "gas_twh": 5.3,
    "kapazitaet_twh": 6.3936,
-   "ausspeicherung_gwh": 22.6,
+   "ausspeicherung_gwh": 25.5,
    "einspeicherung_gwh": 0.0,
    "ausspeicherleistung_gwh": 179.74,
    "einspeicherleistung_gwh": 85.72,
-   "ausspeicherung_7t_gwh": 8.8,
+   "ausspeicherung_7t_gwh": 11.9,
    "einspeicherung_7t_gwh": 2.2,
    "leistung_verlauf": [
     [
@@ -444,21 +459,26 @@
      "2026-11-10",
      179.74,
      83.29
+    ],
+    [
+     "2026-11-11",
+     179.74,
+     82.9
     ]
    ]
   },
   {
    "name": "VNG Storage Hub (Bernburg, Bad Lauchstädt, Katharina)",
    "region": "Sachsen-Anhalt",
-   "gastag": "2026-11-10",
-   "fuellstand_prozent": 62.6,
-   "gas_twh": 18.0332,
+   "gastag": "2026-11-11",
+   "fuellstand_prozent": 62.13,
+   "gas_twh": 17.8985,
    "kapazitaet_twh": 28.8064,
-   "ausspeicherung_gwh": 197.4,
+   "ausspeicherung_gwh": 134.8,
    "einspeicherung_gwh": 0.0,
    "ausspeicherleistung_gwh": 785.08,
    "einspeicherleistung_gwh": 486.01,
-   "ausspeicherung_7t_gwh": 138.1,
+   "ausspeicherung_7t_gwh": 129.9,
    "einspeicherung_7t_gwh": 0.0,
    "leistung_verlauf": [
     [
@@ -555,6 +575,11 @@
      "2026-11-10",
      785.08,
      62.6
+    ],
+    [
+     "2026-11-11",
+     785.08,
+     62.13
     ]
    ]
   }
@@ -642,69 +667,69 @@
   }
  ],
  "summe": {
-  "gas_twh": 29.51,
+  "gas_twh": 29.33,
   "kapazitaet_twh": 42.35,
-  "fuellstand_prozent": 69.7,
-  "ausspeicherung_7t_gwh": 167.5,
+  "fuellstand_prozent": 69.3,
+  "ausspeicherung_7t_gwh": 161.9,
   "einspeicherung_7t_gwh": 2.2,
   "ausspeicherleistung_gwh": 1322.5
  },
  "projektion": [
   [
    "2026-11-12",
-   69.3
+   68.9
   ],
   [
    "2026-11-13",
-   69.0
+   68.6
   ],
   [
    "2026-11-14",
-   68.7
-  ],
-  [
-   "2026-11-15",
    68.3
   ],
   [
-   "2026-11-16",
-   68.1
+   "2026-11-15",
+   67.9
   ],
   [
-   "2026-11-17",
+   "2026-11-16",
    67.7
   ],
   [
+   "2026-11-17",
+   67.4
+  ],
+  [
    "2026-11-18",
-   67.5
+   67.2
   ],
   [
    "2026-11-19",
-   67.3
-  ],
-  [
-   "2026-11-20",
    67.0
   ],
   [
+   "2026-11-20",
+   66.7
+  ],
+  [
    "2026-11-21",
-   66.6
+   66.3
   ],
   [
    "2026-11-22",
-   66.4
-  ],
-  [
-   "2026-11-23",
-   66.2
-  ],
-  [
-   "2026-11-24",
    65.9
   ],
   [
-   "2026-11-25",
+   "2026-11-23",
    65.5
+  ],
+  [
+   "2026-11-24",
+   65.2
+  ],
+  [
+   "2026-11-25",
+   64.9
   ]
  ],
  "engpass_tage": 0
