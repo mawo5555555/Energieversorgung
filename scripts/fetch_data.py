@@ -330,6 +330,75 @@ def kraftstoff():
 
 
 # ---------- Rohöl (Brent) ----------
+def yahoo_reihe(symbol, quelle, nachkomma=2):
+    d = get_json(f"https://query1.finance.yahoo.com/v8/finance/chart/{urllib.parse.quote(symbol)}?range=3mo&interval=1d", {"User-Agent": "Mozilla/5.0"}, 30)
+    res = d["chart"]["result"][0]
+    rows = [(datetime.fromtimestamp(t, timezone.utc).strftime("%Y-%m-%d"), c) for t, c in zip(res["timestamp"], res["indicators"]["quote"][0]["close"]) if c is not None]
+    if len(rows) < 2:
+        raise ValueError("keine Kursdaten")
+    c, p = rows[-1][1], rows[-2][1]
+    return {"stand": stamp(), "datum": rows[-1][0], "preis": round(c, nachkomma), "aenderung_prozent": round((c - p) / p * 100, 2),
+            "verlauf": [[d_, round(v, nachkomma)] for d_, v in rows[-60:]], "quelle": quelle}
+
+
+def gaspreis():
+    return yahoo_reihe("TTF=F", "Yahoo Finance (TTF Erdgas-Future, Euro je MWh, verzögert)")
+
+
+# ---------- LNG-Terminals: Tankfüllstand und Ausspeisung (GIE ALSI) ----------
+def zahl(x):
+    try:
+        return float(x)
+    except (TypeError, ValueError):
+        return None
+
+
+def alsi_zeile(r, name, firma=""):
+    inv = r.get("inventory")
+    inv_gwh = zahl(inv.get("gwh")) if isinstance(inv, dict) else zahl(inv)
+    return {"name": name, "firma": firma, "gastag": r.get("gasDayStart"), "fuellstand_prozent": zahl(r.get("full")),
+            "inhalt_gwh": inv_gwh, "ausspeisung_gwh": zahl(r.get("sendOut")), "anlieferung_schiffe": zahl(r.get("dtmi"))}
+
+
+def lng_tanks():
+    key = os.environ.get("GIE_API_KEY", "").strip()
+    if not key:
+        return {"stand": stamp(), "hinweis": "Noch kein GIE-Schlüssel hinterlegt."}
+    h = {"x-key": key}
+    von = (NOW - timedelta(days=10)).strftime("%Y-%m-%d")
+
+    def letzte(query):
+        d = get_json(f"https://alsi.gie.eu/api?{query}&from={von}&size=30", h, 60).get("data", [])
+        d = [r for r in d if r.get("full") not in (None, "", "-")]
+        d.sort(key=lambda r: r["gasDayStart"])
+        return d
+
+    lst = get_json("https://alsi.gie.eu/api/about?show=listing", h, 60)
+    # Struktur: Liste von Firmen mit Anlagen (wie bei AGSI+), je mit Länderkennung
+    firmen = lst if isinstance(lst, list) else next((v for v in lst.values() if isinstance(v, list)), [])
+    terminals, de_roh = [], None
+    d = letzte("country=DE")
+    if d:
+        de_roh = alsi_zeile(d[-1], "Deutschland gesamt")
+        de_roh["verlauf"] = [[r["gasDayStart"], zahl(r["full"])] for r in d]
+    for c in firmen:
+        if c.get("country") != "DE":
+            continue
+        for f in c.get("facilities", []):
+            ende = f.get("operational_end_date")
+            if ende and ende < NOW.strftime("%Y-%m-%d"):
+                continue
+            try:
+                dd = letzte(f"country=DE&company={c['eic']}&facility={f['eic']}")
+                if dd:
+                    terminals.append(alsi_zeile(dd[-1], f["name"], c["name"].strip()))
+            except Exception:  # noqa: BLE001
+                pass
+    if not terminals and not de_roh:
+        raise ValueError("keine LNG-Daten")
+    return {"stand": stamp(), "quelle": "GIE ALSI (alsi.gie.eu)", "deutschland": de_roh, "terminals": terminals}
+
+
 def rohoel_yahoo():
     d = get_json("https://query1.finance.yahoo.com/v8/finance/chart/BZ%3DF?range=3mo&interval=1d", {"User-Agent": "Mozilla/5.0"}, 30)
     res = d["chart"]["result"][0]
@@ -489,6 +558,7 @@ def main():
         ("gas_lng.json", gas_lng), ("gas_speicher.json", gas_speicher), ("kraftstoff.json", kraftstoff), ("rohoel.json", rohoel),
         ("wetter.json", wetter), ("gas_historie.json", gas_historie), ("reichweite.json", reichweite),
         ("gas_europa.json", gas_europa), ("gas_anlagen.json", gas_anlagen),
+        ("gaspreis.json", gaspreis), ("lng_tanks.json", lng_tanks),
     ]
     for name, fn in jobs:
         if nur and name.split(".")[0] not in nur:

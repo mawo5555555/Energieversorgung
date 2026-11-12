@@ -109,6 +109,27 @@
       '<p class="meta">Die 15 größten von ' + d.anlagen.length + " Anlagen mit Daten, sortiert nach nutzbarem Speichervolumen.</p>" + meta(d, esc(d.quelle || "")));
   }
 
+  function renderTtf(d) {
+    var nd = noData(d, "Erdgaspreis"); if (nd) return set("cTtf", nd);
+    if (d.preis == null) return set("cTtf", errNote(d) || hint("Kein Erdgaspreis verfügbar."));
+    var up = d.aenderung_prozent >= 0;
+    set("cTtf", errNote(d) + '<div class="big">' + nf2.format(d.preis) + ' <span class="unit">€/MWh</span></div><p style="margin:4px 0;color:var(--' + (up ? "bad" : "ok") + ')">' + (up ? "▲ " : "▼ ") + nf2.format(Math.abs(d.aenderung_prozent)) + " % zum Vortag</p>" +
+      spark((d.verlauf || []).map(function (p) { return [0, p[1]]; }), { label: "TTF, 60 Tage" }) + '<p class="meta">Niederländischer Großhandelspreis (TTF), Leitpreis für Erdgas in Europa. Kursdatum ' + esc(d.datum) + ", verzögert</p>" + meta(d, esc(d.quelle || "")));
+  }
+  function renderLngTanks(d) {
+    var nd = noData(d, "LNG-Tanks"); if (nd) return set("cLngTanks", nd);
+    if (!d.terminals && !d.deutschland) return set("cLngTanks", errNote(d) + hint(d.hinweis || "Keine Daten."));
+    var de = d.deutschland, h = errNote(d);
+    if (de && de.fuellstand_prozent != null) h += '<div class="gauge"><div>' + gauge(de.fuellstand_prozent, false, "Tankfüllstand LNG Deutschland") + '</div><div><div class="big">' + nf.format(de.fuellstand_prozent) + ' <span class="unit">%</span></div><div class="num">LNG-Tanks in Deutschland</div>' +
+      '<p class="meta" style="margin-top:4px">' + (de.inhalt_gwh != null ? nf0.format(de.inhalt_gwh) + " GWh gelagert" : "") + (de.ausspeisung_gwh != null ? " · Ausspeisung ins Netz " + nf0.format(de.ausspeisung_gwh) + " GWh/Tag" : "") + "</p></div></div>";
+    if (de && de.verlauf) h += spark(de.verlauf.map(function (p) { return [0, p[1]]; }), { label: "Tankfüllstand LNG, 10 Tage", minSpan: 5 });
+    h += (d.terminals || []).map(function (t) {
+      var col = t.fuellstand_prozent == null ? "var(--muted)" : t.fuellstand_prozent < 30 ? "var(--red)" : t.fuellstand_prozent < 60 ? "var(--orange)" : "var(--green)";
+      return '<div class="row"><span>' + esc(t.name) + '</span><div class="bar"><span style="width:' + Math.min(100, t.fuellstand_prozent || 0) + "%;background:" + col + '"></span></div><span class="val">' + (t.fuellstand_prozent == null ? "–" : nf.format(t.fuellstand_prozent) + " %") + "</span></div>";
+    }).join("");
+    set("cLngTanks", h + '<p class="meta">Tankfüllstand der LNG-Terminals und Ausspeisung ins Gasnetz, letzter gemeldeter Gastag' + (de && de.gastag ? " " + esc(de.gastag) : "") + "</p>" + meta(d, esc(d.quelle || "")));
+  }
+
   var MONATE = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"], MSTART = [1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335];
   function renderHist(d) {
     var nd = noData(d, "Jahresvergleich"); if (nd) return set("cHist", nd);
@@ -216,12 +237,12 @@
   }
 
   function load() {
-    Promise.all(["meta.json", "gas_speicher.json", "gas_lng.json", "gas_pipeline.json", "strom.json", "frequenz.json", "kraftstoff.json", "rohoel.json", "reichweite.json", "gas_historie.json", "wetter.json", "gas_europa.json", "gas_anlagen.json"].map(get)).then(function (r) {
+    Promise.all(["meta.json", "gas_speicher.json", "gas_lng.json", "gas_pipeline.json", "strom.json", "frequenz.json", "kraftstoff.json", "rohoel.json", "reichweite.json", "gas_historie.json", "wetter.json", "gas_europa.json", "gas_anlagen.json", "gaspreis.json", "lng_tanks.json"].map(get)).then(function (r) {
       document.getElementById("stand").textContent = r[0] && r[0].letzter_lauf ? "Letzter Datenabruf: " + when(r[0].letzter_lauf) : "Noch kein Datenabruf.";
       [function () { renderSpeicherDE(r[1]); }, function () { renderSpeicherBB(r[1]); },
         function () { renderGruppen("cLng", r[2], "terminals", "LNG"); }, function () { renderGruppen("cPipe", r[3], "gruppen", "Pipelines"); },
         function () { renderPreis(r[4]); }, function () { renderMix(r[4]); }, function () { renderFreq(r[5]); }, function () { renderKraft(r[6]); },
-        function () { renderOel(r[7]); }, function () { renderReich(r[8]); }, function () { renderHist(r[9]); }, function () { renderWetter(r[10]); }, function () { renderEuropa(r[11]); }, function () { renderAnlagen(r[12]); }
+        function () { renderOel(r[7]); }, function () { renderReich(r[8]); }, function () { renderHist(r[9]); }, function () { renderWetter(r[10]); }, function () { renderEuropa(r[11]); }, function () { renderAnlagen(r[12]); }, function () { renderTtf(r[13]); }, function () { renderLngTanks(r[14]); }
       ].forEach(function (f) { try { f(); } catch (e) { if (window.console) console.error(e); } });
     });
   }
