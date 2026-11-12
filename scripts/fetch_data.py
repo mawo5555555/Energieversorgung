@@ -427,6 +427,14 @@ def gas_stoerungen():
                     "von": von.isoformat(), "bis": bis.isoformat() if bis else None, "nicht_verfuegbar_gwh": round(nicht, 1) if nicht is not None else None,
                     "technisch_gwh": round(tech, 1) if tech is not None else None, "richtung": r.get("direction"), "grund": r.get("unavailabilityReason"),
                     "hinweis": (r.get("remarks") or "")[:200], "aktiv_jetzt": von <= heute})
+    # gleiche Meldungen verschiedener Netzbetreiber und Mehrfachmeldungen zusammenfassen
+    seen, uniq = set(), []
+    for x in out:
+        k = (x["anlage"], x["art"], x["von"], x["bis"], x["nicht_verfuegbar_gwh"], x["richtung"])
+        if k not in seen:
+            seen.add(k)
+            uniq.append(x)
+    out = uniq
     out.sort(key=lambda x: (x["nicht_verfuegbar_gwh"] or 0), reverse=True)
     geplant = [x for x in out if str(x["art"]).lower().startswith("planned")]
     ungeplant = [x for x in out if str(x["art"]).lower().startswith("unplanned")]
@@ -689,11 +697,17 @@ def temp_historie():
 
 def preisanalyse(hist):
     """Zusammenhang zwischen TTF-Preis und Einspeicherung im Sommer (Apr-Okt) je Jahr, und wo der Preis jetzt im Verhältnis zur Historie steht."""
-    p1 = int(datetime(2018, 1, 1, tzinfo=timezone.utc).timestamp())
-    d = get_json(f"https://query1.finance.yahoo.com/v8/finance/chart/TTF%3DF?period1={p1}&period2={int(NOW.timestamp())}&interval=1d", {"User-Agent": "Mozilla/5.0"}, 60)
-    res = d["chart"]["result"][0]
-    preise = {datetime.fromtimestamp(t, timezone.utc).strftime("%Y-%m-%d"): c for t, c in zip(res.get("timestamp") or [], res["indicators"]["quote"][0].get("close") or []) if c is not None}
-    if len(preise) < 500:
+    preise = {}
+    for q in ("range=10y&interval=1d", f"period1={int(datetime(2018, 1, 1, tzinfo=timezone.utc).timestamp())}&period2={int(NOW.timestamp())}&interval=1d", "range=max&interval=1wk"):
+        try:
+            d = get_json("https://query1.finance.yahoo.com/v8/finance/chart/TTF%3DF?" + q, {"User-Agent": "Mozilla/5.0"}, 60)
+            res = d["chart"]["result"][0]
+            preise = {datetime.fromtimestamp(t, timezone.utc).strftime("%Y-%m-%d"): c for t, c in zip(res.get("timestamp") or [], res["indicators"]["quote"][0].get("close") or []) if c is not None}
+        except Exception:  # noqa: BLE001
+            preise = {}
+        if len(preise) >= 400:
+            break
+    if len(preise) < 400:
         raise ValueError(f"zu wenig Preisdaten ({len(preise)})")
     jahre = []
     for y in range(2018, NOW.year + 1):
