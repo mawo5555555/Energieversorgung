@@ -241,6 +241,70 @@
       '<table><tr><th>Winter</th><th class="n">Gasmangellage-Anzeige (unter 20 %)</th><th class="n">Speicher theoretisch erschöpft (0 %)</th></tr>' + rows + "</table>" +
       '<p class="meta"><strong>Unterschied:</strong> Unter 20 % wird es kritisch, weil die Entnahmeleistung sinkt und kaum noch Reserve bleibt. „Erschöpft“ heißt, die Speicher wären rechnerisch ganz leer, das ist ein theoretischer Wert ohne Reaktion von Markt, Importen und Politik. Details und Annahmen weiter unten.</p>' + meta(q, ""));
   }
+  function renderVerstromung(v, w) {
+    var nd = noData(v, "Verstromung"); if (nd) return set("cVerstromung", nd);
+    var x = v.verstromung;
+    if (!x || !x.aktiv) return set("cVerstromung", errNote(v) + hint("Der Einfluss der Gaskraftwerke ist derzeit nicht in der Rechnung: " + ((x && x.grund) || "keine Daten") + "."));
+    var vs = x.vorschau || [], rows = vs.slice(0, 10).map(function (p) {
+      return "<tr><td>" + new Date(p[0] + "T12:00:00").toLocaleDateString("de-DE", { weekday: "short", day: "2-digit", month: "2-digit" }) + '</td><td class="n">' + nf.format(p[1]) + ' km/h</td><td class="n">' + nf0.format(p[2]) + " GWh</td></tr>";
+    }).join("");
+    var fl = x.flaute, ei = (v.importausfall || []).filter(function (e) { return /Windflaute/.test(e.fall); })[0], nm = v.szenarien.normal.konstant;
+    set("cVerstromung", errNote(v) +
+      (x.aktuell ? '<div class="big">' + nf0.format(x.aktuell.gas_mw) + ' <span class="unit">MW Strom aus Erdgas</span></div><p class="meta" style="margin-top:4px">Das entspricht einem Gaseinsatz von etwa ' + nf0.format(x.aktuell.gas_gwh_tag) + " GWh am Tag (Wirkungsgrad " + nf0.format(x.wirkungsgrad * 100) + " %, Annahme). Im Winter seit 2018 im Mittel " + nf0.format(x.winter.mittel_gwh_gas) + " GWh/Tag, an 5 % der Tage über " + nf0.format(x.winter.p95_gwh_gas) + ", in der windärmsten 14-Tage-Phase " + nf0.format(x.winter.max14_gwh_gas) + " GWh/Tag.</p>" : "") +
+      '<h3 style="margin-top:12px">Wie Wetter die Gaskraftwerke steuert</h3><ul class="plain"><li>Kälte: je Grad unter 15 °C etwa +' + nf.format(x.fit_strom.kaelte_gwh_je_grad) + " GWh Strom aus Gas pro Tag.</li><li>Wind: je 1 km/h mehr Wind etwa " + nf.format(x.fit_strom.wind_gwh_je_ms) + " GWh Strom aus Gas pro Tag.</li><li>Sonne: je MJ/m² Einstrahlung etwa " + nf.format(x.fit_strom.strahlung_gwh_je_mj) + " GWh. Erklärte Schwankung (R²): " + nf2.format(x.fit_strom.r2) + ".</li></ul>" +
+      (rows ? '<h3 style="margin-top:12px">Vorschau nach Wettervorhersage</h3><table><tr><th>Tag</th><th class="n">Wind (Mittel)</th><th class="n">Gas für Strom</th></tr>' + rows + "</table>" : "") +
+      '<h3 style="margin-top:12px">Einfluss auf den Speicherfüllstand</h3><p style="margin:0">Die Gaskraftwerke sind im Entnahme-Modell enthalten. Mit ihnen erklärt es ' + nf0.format(x.fit_entnahme.r2_neu * 100) + " % der Schwankung der täglichen Entnahme, ohne nur " + nf0.format(x.fit_entnahme.r2_alt * 100) + " %.</p>" +
+      (fl && ei ? '<p style="margin:8px 0 0"><strong>Windflaute (' + esc(fl.zeitraum) + "):</strong> Wären diese 14 Tage windarm und trüb, liefen die Gaskraftwerke im Mittel mit etwa " + nf0.format(fl.zusatz_gwh_tag) + " GWh/Tag mehr. Der Füllstand am 1. Februar läge im normalen Winter bei " + nf0.format(ei.normal.fuellstand_ziel_tag) + " % statt " + nf0.format(nm.fuellstand_ziel_tag) + " %, im kalten Winter bei " + nf0.format(ei.kalt.fuellstand_ziel_tag) + " %.</p>" : "") +
+      '<p class="hint">Wichtig: Der statistische Zusammenhang zwischen Gaskraftwerken und Speicherentnahme ist stärker als es die Gasmenge allein erklärt, weil kalte, windarme Tage zugleich mehr Heizbedarf und mehr Gas im Kraftwerk bedeuten. Deshalb rechnet die Windflaute-Variante nur mit dem Mehrverbrauch der Kraftwerke selbst. Wirkungsgrad, Windmittel aus sechs Städten und die Winde der kommenden Wochen sind Näherungen. Wind in km/h.</p>' + meta(v, "SMARD.de (Erdgas-Erzeugung), Open-Meteo (Wetter), eigene Berechnung"));
+  }
+  function renderFaktoren(r) {
+    var v = r[16], bb = state.scope === "bb";
+    if (!v || !v.szenarien) return set("cFaktoren", hint("Die Parameter werden gerade berechnet."));
+    var wet = r[10] || {}, sp = r[1] && r[1].deutschland, re = r[8] && r[8].deutschland, pi = r[3] || {}, lng = r[2] || {}, ttf = r[19] || {}, st = r[18] || {}, eu = r[11] || {}, hi = r[9] || {}, md = v.modell, x = v.verstromung || {};
+    var rowsData = [];
+    function add(name, jetzt, wirkung, ampel, quelle) { rowsData.push({ name: name, jetzt: jetzt, wirkung: wirkung, ampel: ampel, quelle: quelle }); }
+    // Wetter
+    if (wet.tage && wet.deutschland) {
+      var i0 = wet.heute_index || 7, nx = wet.deutschland.slice(i0, i0 + 7), pv = wet.deutschland.slice(Math.max(0, i0 - 7), i0);
+      function hd(a) { var l = a.filter(function (z) { return z != null; }).map(function (z) { return Math.max(0, 15 - z); }); return l.length ? l.reduce(function (a1, b1) { return a1 + b1; }, 0) / l.length : null; }
+      var tn = nx.filter(function (z) { return z != null; }), tm = tn.length ? tn.reduce(function (a1, b1) { return a1 + b1; }, 0) / tn.length : null, hn = hd(nx), hp = hd(pv);
+      var mehr = hn != null && hp != null ? (hn - hp) * (md.b_gwh_je_grad || 0) : null;
+      add("Temperatur (Vorhersage 7 Tage)", tm == null ? "–" : nf.format(tm) + " °C im Mittel", "Je 1 °C kälter etwa +" + nf0.format(md.b_gwh_je_grad) + " GWh/Tag Entnahme." + (mehr != null ? " Gegenüber den letzten 7 Tagen " + (mehr >= 0 ? "+" : "") + nf0.format(mehr) + " GWh/Tag." : ""), mehr == null ? "" : mehr > 100 ? "bad" : mehr > 0 ? "warn" : "ok", "Open-Meteo");
+    }
+    // Wind / Gaskraftwerke
+    if (x.aktiv) {
+      var wnx = (wet.wind || []).slice((wet.heute_index || 7), (wet.heute_index || 7) + 7).filter(function (z) { return z != null; }), wm = wnx.length ? wnx.reduce(function (a1, b1) { return a1 + b1; }, 0) / wnx.length : null;
+      add("Wind, Sonne und Gaskraftwerke", (x.aktuell ? nf0.format(x.aktuell.gas_mw) + " MW aus Gas" : "–") + (wm != null ? ", Wind " + nf.format(wm) + " km/h" : ""), "Weniger Wind heißt mehr Gas im Kraftwerk. Eine 14-tägige Flaute im Januar: " + (x.flaute ? "+" + nf0.format(x.flaute.zusatz_gwh_tag) + " GWh/Tag." : "nicht berechnet."), x.flaute && x.flaute.zusatz_gwh_tag > 150 ? "warn" : "", "SMARD, Open-Meteo");
+    }
+    // Entnahme / Einspeicherung
+    if (sp && re) {
+      add("Ausspeicherung (7-Tage-Mittel)", nf0.format(re.ausspeicherung_7t_gwh) + " GWh/Tag", "Heute " + nf0.format(sp.ausspeicherung_gwh) + " GWh. Steigt mit der Kälte, begrenzt durch die Ausspeicherleistung (beobachtet höchstens " + nf0.format(md.leistung_hoch_gwh) + " GWh/Tag, bei 10 bis 20 % Füllstand " + (md.leistung_tief_gwh != null ? nf0.format(md.leistung_tief_gwh) : "–") + ").", re.ausspeicherung_7t_gwh > 1500 ? "bad" : re.ausspeicherung_7t_gwh > 900 ? "warn" : "", "GIE AGSI+");
+      var dtage = 82, plus100 = 100 * dtage / 1000 / v.ausgangslage.kapazitaet_twh * 100;
+      add("Einspeicherung (7-Tage-Mittel)", nf0.format(re.einspeicherung_7t_gwh) + " GWh/Tag", "Je +100 GWh/Tag mehr etwa +" + nf.format(plus100) + " Prozentpunkte Füllstand bis 1. Februar. Im Winter wurden bisher im Mittel höchstens " + (v.einspeicherung && v.einspeicherung.historie ? nf0.format(v.einspeicherung.historie.hoechster_durchschnitt_winter_gwh) : "–") + " GWh/Tag erreicht.", re.einspeicherung_7t_gwh < 80 ? "warn" : "ok", "GIE AGSI+");
+    }
+    // Importe
+    if (pi.summe_netto != null) {
+      var ei10 = (v.importausfall || []).filter(function (e) { return /10 %/.test(e.fall); })[0];
+      add("Importe (Pipeline netto + LNG)", nf0.format(pi.summe_netto + (lng.summe || 0)) + " GWh/Tag", "Davon Norwegen " + nf0.format(((pi.gruppen || []).filter(function (g) { return g.name === "Norwegen"; })[0] || {}).netto || 0) + ", LNG " + nf0.format(lng.summe || 0) + ". " + (ei10 ? "Importe −10 %: Füllstand 1. Februar " + nf0.format(ei10.normal.fuellstand_ziel_tag) + " % statt " + nf0.format(v.szenarien.normal.konstant.fuellstand_ziel_tag) + " %." : ""), "", "ENTSOG, GIE ALSI");
+    }
+    // Preis
+    if (ttf.ttf_aktuell != null) add("Gaspreis (TTF)", nf.format(ttf.ttf_aktuell) + " €/MWh", "Höher als an " + ttf.perzentil_seit_2018 + " % der Tage seit 2018. Hohe Preise verteuern die Einspeicherung und dämpfen den Verbrauch, ein klarer Effekt auf die Einspeicherung ist in den Daten nicht belegt.", ttf.perzentil_seit_2018 > 80 ? "warn" : "", "Yahoo Finance");
+    // Störungen
+    if (st.anzahl != null) add("Netzausfälle und Wartung", st.anzahl + " Meldungen, " + nf0.format(st.summe_nicht_verfuegbar_gwh) + " GWh/Tag", "Größtenteils Kapazitätsregeln und kleine Wartungen, keine großen Ausfälle gemeldet.", st.summe_nicht_verfuegbar_gwh > 300 ? "warn" : "ok", "ENTSOG");
+    // Vorjahre
+    if (hi.band && hi.jahre) {
+      var cur = hi.jahre[String(hi.aktuelles_jahr)] || [], lastc = cur[cur.length - 1], avg = lastc ? (hi.band[lastc[0] - 1] || [])[3] : null;
+      if (lastc && avg != null) add("Füllstand gegenüber den Vorjahren", nf.format(lastc[1]) + " %", "Mittel " + hi.vorjahre[0] + "–" + hi.vorjahre[hi.vorjahre.length - 1] + " zur selben Zeit: " + nf.format(avg) + " %, also " + nf.format(lastc[1] - avg) + " Prozentpunkte.", lastc[1] - avg < -20 ? "bad" : lastc[1] - avg < -8 ? "warn" : "ok", "GIE AGSI+");
+    }
+    if (eu.laender) { var eud = eu.laender.filter(function (c) { return c.code === "EU"; })[0], ded = eu.laender.filter(function (c) { return c.code === "DE"; })[0]; if (eud && ded) add("Europa", "EU " + nf.format(eud.fuellstand_prozent) + " %", "Deutschland " + nf.format(ded.fuellstand_prozent) + " %, also " + nf.format(ded.fuellstand_prozent - eud.fuellstand_prozent) + " Prozentpunkte zum EU-Schnitt. Niedrige Speicher in Europa verschärfen den Wettbewerb um LNG.", ded.fuellstand_prozent - eud.fuellstand_prozent < -10 ? "warn" : "", "GIE AGSI+"); }
+    add("Verbrauch", nf2.format(v.ohne_importe.verbrauch_tag_twh) + " TWh/Tag im Jahresmittel", "Würden die Speicher alles allein liefern, reichten sie rechnerisch " + v.ohne_importe.tage + " Tage. Im Winter liegt der Verbrauch darüber.", "", "Angabe aus einer Gasspeicher-App");
+    add("Unsicherheit der Rechnung", "±" + nf0.format(v.rueckrechnung_mittlerer_fehler_pp || 8) + " Prozentpunkte", "Typische Abweichung der Rückrechnung an acht vergangenen Wintern am 1. Februar.", "", "eigene Rückrechnung");
+    var rows = rowsData.map(function (q) {
+      var col = q.ampel === "bad" ? "var(--red)" : q.ampel === "warn" ? "var(--orange)" : q.ampel === "ok" ? "var(--green)" : "var(--fill)";
+      return '<div class="fk"><span class="dot" style="background:' + col + '"></span><div><strong>' + esc(q.name) + '</strong><div class="fk-j">' + esc(q.jetzt) + '</div></div><div class="fk-w">' + esc(q.wirkung) + '<div class="meta" style="margin:2px 0 0">' + esc(q.quelle) + "</div></div></div>";
+    }).join("");
+    set("cFaktoren", rows + '<p class="meta">Punkt: grün unauffällig, orange beachten, rot kritisch (einfache Faustregeln dieser Seite, keine amtliche Bewertung). ' + (bb ? "Alle Werte gelten für Deutschland. Für das Brandenburger Umfeld siehe die Kacheln weiter unten. " : "") + "Alle Parameter fließen in die Vorausschau ein, außer Preis, Netzausfälle und Europa, die nur zur Einordnung dienen.</p>");
+  }
   function renderEinsp(d) {
     var nd = noData(d, "Einspeicherung"); if (nd) return set("cEinsp", nd);
     var e = d.einspeicherung;
@@ -422,6 +486,7 @@
     try { localStorage.setItem("energie.ansicht", sc); } catch (e) {}
     if (state.wetter) renderWetter(state.wetter);
     if (state.ueber) renderUeberblick(state.ueber[0], state.ueber[1]);
+    if (state.alle) renderFaktoren(state.alle);
   }
 
   function renderPipe(d) {
@@ -494,7 +559,7 @@
       [function () { renderSpeicherDE(r[1]); }, function () { renderSpeicherBB(r[1]); },
         function () { renderLngEin(r[2]); }, function () { renderPipe(r[3]); },
         function () { renderPreis(r[4]); }, function () { renderMix(r[4]); }, function () { renderFreq(r[5]); }, function () { renderKraft(r[6]); },
-        function () { renderOel(r[7]); }, function () { renderReich(r[8], r[16]); }, function () { renderHist(r[9]); }, function () { renderWetter(r[10]); }, function () { renderEuropa(r[11]); }, function () { renderAnlagen(r[12]); }, function () { renderTtf(r[13], r[19]); }, function () { renderLngTanks(r[14]); }, function () { renderUmfeld(r[15]); }, function () { renderVorausschau(r[16], r[20]); }, function () { renderEinsp(r[16]); }, function () { renderUmfeldVor(r[17], r[15]); }, function () { renderStoerungen(r[18]); }, function () { renderUeberblick(r[16], r[17]); }, function () { renderVersorgung(r[16], r[17]); }
+        function () { renderOel(r[7]); }, function () { renderReich(r[8], r[16]); }, function () { renderHist(r[9]); }, function () { renderWetter(r[10]); }, function () { renderEuropa(r[11]); }, function () { renderAnlagen(r[12]); }, function () { renderTtf(r[13], r[19]); }, function () { renderLngTanks(r[14]); }, function () { renderUmfeld(r[15]); }, function () { renderVorausschau(r[16], r[20]); }, function () { renderEinsp(r[16]); }, function () { renderUmfeldVor(r[17], r[15]); }, function () { renderStoerungen(r[18]); }, function () { renderUeberblick(r[16], r[17]); }, function () { renderVerstromung(r[16]); }, function () { state.alle = r; renderFaktoren(r); }, function () { renderVersorgung(r[16], r[17]); }
       ].forEach(function (f) { try { f(); } catch (e) { if (window.console) console.error(e); } });
     });
   }

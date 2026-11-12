@@ -99,3 +99,11 @@ body.scope-bb [data-scope="de"], body.scope-de [data-scope="bb"] { display: none
 @media (min-width: 1500px) {
   header, main, footer, .tabs { max-width: 1440px; }
 }
+
+/* Faktoren-Liste */
+.fk { display: grid; grid-template-columns: 14px minmax(120px, 34%) 1fr; gap: 10px; align-items: start; padding: 10px 0; border-top: 1px solid var(--sep); font-size: 15px; }
+.fk:first-child { border-top: 0; }
+.fk .dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 6px; }
+.fk-j { color: var(--muted); font-size: 14px; }
+.fk-w { font-size: 14px; }
+@media (max-width: 560px) { .fk { grid-template-columns: 14px 1fr; } .fk-w { grid-column: 2; } }

@@ -413,9 +413,12 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None, strom=None)
             def extra_fn_fuer(tmap, flaute=False):
                 def fnc(d):
                     w_, r_ = wetter_tag(d)
+                    g_norm = gas_fuer_strom(fv, tmap(d), w_, r_, basis)
                     if flaute and date(jahr_f, 1, 11) <= d <= date(jahr_f, 1, 24):
-                        w_, r_ = min(w_, wp10), min(r_, rp25)
-                    return fit2["e"] * gas_fuer_strom(fv, tmap(d), w_, r_, basis)
+                        g_fl = gas_fuer_strom(fv, tmap(d), min(w_, wp10), min(r_, rp25), basis)
+                        # Mehrbedarf der Kraftwerke höchstens 1:1 (physikalische Obergrenze), nicht mit dem größeren statistischen Faktor
+                        return fit2["e"] * g_norm + min(fit2["e"], 1.0) * (g_fl - g_norm)
+                    return fit2["e"] * g_norm
                 return fnc
 
             nutzen = fit2["r2"] - fit["r2"]
