@@ -1,5 +1,5 @@
 {
- "stand": "2026-11-12T13:18:06Z",
+ "stand": "2026-11-12T13:28:03Z",
  "daten_stand_ms": 1794486600000,
  "erzeugung_mw": {
   "Braunkohle": 11760,
@@ -14,7 +14,7 @@
   "Sonstige Erneuerbare": 91,
   "Pumpspeicher": 579
  },
- "verbrauch_mw": 67078,
+ "verbrauch_mw": 70639,
  "preis_eur_mwh": 181.56,
  "preis_verlauf": [
   [

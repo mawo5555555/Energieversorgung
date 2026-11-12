@@ -1,5 +1,5 @@
 {
- "stand": "2026-11-12T13:18:06Z",
+ "stand": "2026-11-12T13:28:03Z",
  "quelle": "GIE AGSI+ (agsi.gie.eu)",
  "laender": [
   {
@@ -51,6 +51,16 @@
    "kapazitaet_twh": 123.8779,
    "einspeicherung_gwh": 83.67,
    "ausspeicherung_gwh": 881.9
+  },
+  {
+   "code": "IT",
+   "name": "Italien",
+   "gastag": "2026-11-10",
+   "fuellstand_prozent": 88.24,
+   "gas_twh": 179.4965,
+   "kapazitaet_twh": 203.4249,
+   "einspeicherung_gwh": 0.17,
+   "ausspeicherung_gwh": 703.0
   },
   {
    "code": "PL",
@@ -133,7 +143,5 @@
    "ausspeicherung_gwh": 125.3
   }
  ],
- "ohne_daten": [
-  "IT"
- ]
+ "ohne_daten": []
 }
