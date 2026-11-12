@@ -1,0 +1,30 @@
+name: Speicherliste holen
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  liste:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Anlagenliste holen
+        env:
+          GIE_API_KEY: ${{ secrets.GIE_API_KEY }}
+        run: python scripts/list_speicher.py
+      - name: Speichern
+        run: |
+          git config user.name "daten-bot"
+          git config user.email "daten-bot@users.noreply.github.com"
+          git add data/agsi_anlagen.json
+          if git diff --cached --quiet; then echo "keine Änderung"; exit 0; fi
+          git commit -m "AGSI+-Anlagenliste"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push
