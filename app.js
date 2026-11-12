@@ -171,6 +171,42 @@
       '<p class="hint">Das ist ein Rechenbeispiel, keine Prognose der Versorgungssicherheit. Annahmen: Einspeicherung bleibt wie im Mittel der letzten 7 Tage; Importe und Verbrauch reagieren nicht auf niedrige Füllstände. Wie stark die Ausspeicherleistung bei niedrigem Füllstand sinkt, lässt sich aus den Daten nicht sicher bestimmen: Die gemeldete technische Leistung bleibt über alle Füllstände gleich, beobachtet wurden unter 20 % Füllstand nur wenige Tage. Die gestrichelte Variante ist deshalb eine Annahme. Die Szenarien Mild und Kalt entsprechen dem wärmsten und kältesten Winterdurchschnitt seit 2018. Einzelne Kältewellen können stärker wirken als ein kalter Durchschnitt.</p>' + meta(d, esc(d.quelle || "")));
   }
 
+  function renderEinsp(d) {
+    var nd = noData(d, "Einspeicherung"); if (nd) return set("cEinsp", nd);
+    var e = d.einspeicherung;
+    if (!e) return set("cEinsp", errNote(d) + hint("Die Berechnung wird gerade aktualisiert."));
+    var hi = e.historie, n = e.szenarien, namen = { mild: "Milder Winter", normal: "Normaler Winter", kalt: "Kalter Winter" }, farben = { mild: "var(--green)", normal: "var(--blue)", kalt: "var(--red)" };
+    function zelle(p) {
+      if (!p || p.noetig_gwh == null) return "nicht erreichbar";
+      if (p.noetig_gwh === 0) return "nicht nötig";
+      return "<strong>" + nf0.format(p.noetig_gwh) + "</strong> GWh/Tag<div class=\"meta\" style=\"margin:0\">+" + nf0.format(p.zusatz_gwh) + (p.faktor ? " (" + nf.format(p.faktor) + "-fach)" : "") + "</div>";
+    }
+    var rows = ["mild", "normal", "kalt"].map(function (k) {
+      return '<tr><td><span style="color:' + farben[k] + '">■</span> ' + namen[k] + '</td><td class="n">' + zelle(n[k].nicht_leer) + '</td><td class="n">' + zelle(n[k].vorgabe_1_feb) + "</td></tr>";
+    }).join("");
+    function urteil(p) {
+      if (!p || p.noetig_gwh == null) return "wäre mit der angenommenen Rechnung nicht erreichbar";
+      if (p.noetig_gwh === 0) return "ist ohne zusätzliche Einspeicherung erreicht";
+      if (hi.hoechster_durchschnitt_winter_gwh != null && p.noetig_gwh <= hi.hoechster_durchschnitt_winter_gwh) return "läge im Rahmen dessen, was in einem Winter seit 2018 im Durchschnitt erreicht wurde";
+      if (p.noetig_gwh <= hi.hoechster_durchschnitt_beliebig_gwh) return "läge nur auf dem Niveau der besten Sommer-Einspeicherung, im Winter wurde das im Durchschnitt noch nie erreicht";
+      return "läge über allem, was seit 2018 im Durchschnitt über einen so langen Zeitraum erreicht wurde";
+    }
+    var nn = n.normal;
+    function dat(s) { return new Date(s + "T12:00:00").toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" }); }
+    var wr = (hi.winter || []).map(function (w) { return "<tr><td>" + esc(w.winter) + '</td><td class="n">' + (w.temp_c == null ? "–" : nf.format(w.temp_c)) + ' °C</td><td class="n">' + nf0.format(w.entnahme_gwh) + '</td><td class="n">' + nf0.format(w.einspeicherung_gwh) + '</td><td class="n">' + nf0.format(w.start) + " → " + nf0.format(w.ende) + " %</td></tr>"; }).join("");
+    set("cEinsp", errNote(d) +
+      '<p style="margin:0">Im Mittel der letzten 7 Tage werden <strong>' + nf0.format(e.jetzt_gwh) + " GWh/Tag</strong> eingespeichert. Wie viel müsste es bis 31. März im Durchschnitt sein, damit die Speicher nicht leerlaufen?</p>" +
+      '<table style="margin-top:8px"><tr><th>Szenario</th><th class="n">am 31. März mindestens ' + nf0.format(e.mindest_ende_prozent) + ' % voll</th><th class="n">' + d.ziel.prozent + " % am 1. Februar (Vorgabe)</th></tr>" + rows + "</table>" +
+      '<p style="margin:10px 0 0"><strong>Ist das realistisch?</strong> Im normalen Winter ' + urteil(nn.nicht_leer) + " (Ziel: nicht unter " + nf0.format(e.mindest_ende_prozent) + " %). Für die Vorgabe " + d.ziel.prozent + " % am 1. Februar " + urteil(nn.vorgabe_1_feb) + ".</p>" +
+      '<ul class="plain"><li>Höchste Einspeicherung an einem Wintertag seit 2018: ' + nf0.format(hi.tagesmax_winter_gwh) + " GWh (95 % der Wintertage lagen unter " + nf0.format(hi.tages_p95_winter_gwh) + " GWh).</li>" +
+      "<li>Höchster Winterdurchschnitt (12.11. bis 31.3.): " + nf0.format(hi.hoechster_durchschnitt_winter_gwh) + " GWh/Tag.</li>" +
+      "<li>Höchster Durchschnitt über " + hi.laenge_tage + " Tage zu irgendeiner Jahreszeit: " + nf0.format(hi.hoechster_durchschnitt_beliebig_gwh) + " GWh/Tag (" + dat(hi.hoechster_durchschnitt_von) + " bis " + dat(hi.hoechster_durchschnitt_bis) + ").</li>" +
+      (e.einspeicherleistung_gemeldet_gwh ? "<li>Von den Betreibern gemeldete technische Einspeicherleistung: " + nf0.format(e.einspeicherleistung_gemeldet_gwh) + " GWh/Tag. Das ist die Obergrenze der Anlagen, nicht der Gasmenge, die verfügbar ist.</li>" : "") +
+      (e.importe_gwh ? "<li>Zum Vergleich: Netto-Importe über Pipelines und LNG zusammen derzeit etwa " + nf0.format(e.importe_gwh) + " GWh/Tag. Eine Mehr-Einspeicherung von " + nf0.format(nn.nicht_leer.zusatz_gwh || 0) + " GWh/Tag entspräche " + nf0.format(e.importe_gwh ? (nn.nicht_leer.zusatz_gwh || 0) / e.importe_gwh * 100 : 0) + " % davon.</li>" : "") + "</ul>" +
+      '<h3 style="margin-top:14px">Die letzten Winter im Vergleich (12.11. bis 31.3.)</h3><table><tr><th>Winter</th><th class="n">Ø Temperatur</th><th class="n">Ø Entnahme GWh/Tag</th><th class="n">Ø Einspeicherung GWh/Tag</th><th class="n">Füllstand Start → Ende</th></tr>' + wr + "</table>" +
+      '<p class="hint">Mehr Einspeicherung heißt mehr Gas im Land: aus zusätzlichen Importen und LNG oder aus geringerem Verbrauch. Jede eingesparte Gasmenge wirkt wie eine zusätzlich eingespeicherte. Die Rechnung nimmt eine gleichbleibende Einspeicherung an und gilt wie die Vorausschau mit einer Unsicherheit von etwa ' + nf0.format(d.rueckrechnung_mittlerer_fehler_pp || 8) + " Prozentpunkten. Ob die Mengen am Markt beschaffbar wären, hängt von Preisen, Terminal-Kapazitäten und Lieferverträgen ab und ist hier nicht berechnet.</p>" + meta(d, esc(d.quelle || "")));
+  }
+
   function renderUmfeld(d) {
     var nd = noData(d, "Umfeld"); if (nd) return set("cUmfeld", nd);
     if (!d.anlagen) return set("cUmfeld", errNote(d) + hint(d.hinweis || "Keine Daten."));
@@ -306,7 +342,7 @@
       [function () { renderSpeicherDE(r[1]); }, function () { renderSpeicherBB(r[1]); },
         function () { renderLngEin(r[2]); }, function () { renderPipe(r[3]); },
         function () { renderPreis(r[4]); }, function () { renderMix(r[4]); }, function () { renderFreq(r[5]); }, function () { renderKraft(r[6]); },
-        function () { renderOel(r[7]); }, function () { renderReich(r[8]); }, function () { renderHist(r[9]); }, function () { renderWetter(r[10]); }, function () { renderEuropa(r[11]); }, function () { renderAnlagen(r[12]); }, function () { renderTtf(r[13]); }, function () { renderLngTanks(r[14]); }, function () { renderUmfeld(r[15]); }, function () { renderVorausschau(r[16]); }
+        function () { renderOel(r[7]); }, function () { renderReich(r[8]); }, function () { renderHist(r[9]); }, function () { renderWetter(r[10]); }, function () { renderEuropa(r[11]); }, function () { renderAnlagen(r[12]); }, function () { renderTtf(r[13]); }, function () { renderLngTanks(r[14]); }, function () { renderUmfeld(r[15]); }, function () { renderVorausschau(r[16]); }, function () { renderEinsp(r[16]); }
       ].forEach(function (f) { try { f(); } catch (e) { if (window.console) console.error(e); } });
     });
   }

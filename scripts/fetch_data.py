@@ -636,14 +636,16 @@ def gas_vorausschau():
     old = read("gas_vorausschau.json", {})
     try:
         alt = datetime.strptime(old["stand"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
-        if NOW - alt < timedelta(hours=5) and old.get("szenarien") and not old.get("fehler"):
+        if NOW - alt < timedelta(hours=5) and old.get("szenarien") and old.get("einspeicherung") and not old.get("fehler"):
             return None  # aufwendig (Historie seit 2018), deshalb nur alle paar Stunden
     except (KeyError, ValueError):
         pass
     import modell
     hist = agsi_de_historie(key)
     temp = temp_historie()
-    res = modell.vorausschau(hist, temp, read("wetter.json", {}), read_cfg("modell.json"), max(hist))
+    pipe, lng = read("gas_pipeline.json", {}), read("gas_lng.json", {})
+    res = modell.vorausschau(hist, temp, read("wetter.json", {}), read_cfg("modell.json"), max(hist),
+                             {"pipeline_netto": pipe.get("summe_netto"), "lng": lng.get("summe")})
     res["stand"] = stamp()
     res["quelle"] = "GIE AGSI+ (Speicherdaten seit 2018), Open-Meteo (Temperaturen), eigene Berechnung"
     return res
