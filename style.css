@@ -107,3 +107,4 @@ body.scope-bb [data-scope="de"], body.scope-de [data-scope="bb"] { display: none
 .fk-j { color: var(--muted); font-size: 14px; }
 .fk-w { font-size: 14px; }
 @media (max-width: 560px) { .fk { grid-template-columns: 14px 1fr; } .fk-w { grid-column: 2; } }
+.fk strong, .fk-w { overflow-wrap: anywhere; hyphens: auto; }

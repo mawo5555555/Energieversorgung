@@ -378,7 +378,7 @@
         '<p class="meta">Das Jahresmittel des Verbrauchs (' + nf0.format(v.ohne_importe.jahresverbrauch_twh) + " TWh, Angabe aus einer Gasspeicher-App) dient als Bezug. Sparen wie 2022 wären rund " + nf0.format(e22.gwh_tag) + " GWh/Tag" + (spitze ? ", die Spitzen-Fehlmenge im kalten Winter liegt bei " + nf0.format(spitze) + " GWh/Tag" : "") + ". Im Winter liegt der Verbrauch über dem Jahresmittel, 2022 kam das Sparen zudem aus hohen Preisen und Appellen, ob dasselbe Niveau heute erreichbar wäre, ist offen.</p>";
     }
     h += '<p class="hint">Einordnung: Die Bundesnetzagentur sieht die Versorgungslage derzeit als stabil. Diese Kachel beschreibt Möglichkeiten und frühere Erfahrungen, sie ist keine Prognose, dass solche Maßnahmen nötig werden, und keine Rechtsberatung.</p>';
-    set("cMassnahmen", h + meta(m, "Bundesnetzagentur, EUR-Lex, weitere Quellen oben"));
+    set("cMassnahmen", h + '<p class="meta">Stand der Zusammenstellung: 12.11.2026 · Quellen siehe oben.</p>');
   }
   function renderEinsp(d) {
     var nd = noData(d, "Einspeicherung"); if (nd) return set("cEinsp", nd);
