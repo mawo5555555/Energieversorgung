@@ -1,10 +1,10 @@
 {
- "stand": "2026-11-13T11:31:46Z",
+ "stand": "2026-11-13T18:30:03Z",
  "quelle": "GIE ALSI (alsi.gie.eu)",
  "deutschland": {
   "name": "Deutschland gesamt",
   "firma": "",
-  "gastag": "2026-11-11",
+  "gastag": "2026-11-12",
   "fuellstand_prozent": null,
   "inhalt_gwh": 1387.7,
   "ausspeisung_gwh": 476.0,
@@ -45,6 +45,10 @@
    [
     "2026-11-11",
     null
+   ],
+   [
+    "2026-11-12",
+    null
    ]
   ]
  },
@@ -52,7 +56,7 @@
   {
    "name": "Wilhelmshaven LNG Terminal 1 (FSRU Hoegh Esperanza)",
    "firma": "Deutsche Energy Terminal GmbH",
-   "gastag": "2026-11-11",
+   "gastag": "2026-11-12",
    "fuellstand_prozent": null,
    "inhalt_gwh": 73.63,
    "ausspeisung_gwh": 160.1,
@@ -61,7 +65,7 @@
   {
    "name": "Brunsbuettel LNG Terminal 1 (FSRU Hoegh Gannet)",
    "firma": "Deutsche Energy Terminal GmbH",
-   "gastag": "2026-11-11",
+   "gastag": "2026-11-12",
    "fuellstand_prozent": null,
    "inhalt_gwh": 597.28,
    "ausspeisung_gwh": 101.7,
@@ -70,7 +74,7 @@
   {
    "name": "Stade LNG Terminal 1 (FSRU Energos Force)",
    "firma": "Deutsche Energy Terminal GmbH",
-   "gastag": "2026-11-11",
+   "gastag": "2026-11-12",
    "fuellstand_prozent": null,
    "inhalt_gwh": 470.86,
    "ausspeisung_gwh": 163.1,
@@ -79,7 +83,7 @@
   {
    "name": "Wilhelmshaven LNG Terminal 2 (FSRU Excelerate Excelsior)",
    "firma": "Deutsche Energy Terminal GmbH",
-   "gastag": "2026-11-11",
+   "gastag": "2026-11-12",
    "fuellstand_prozent": null,
    "inhalt_gwh": 35.66,
    "ausspeisung_gwh": 49.3,
@@ -88,7 +92,7 @@
   {
    "name": "Mukran LNG Terminal (FSRU Neptune / FSRU Energos Power)",
    "firma": "Deutsche ReGas GmbH & Co. KGaA",
-   "gastag": "2026-11-11",
+   "gastag": "2026-11-12",
    "fuellstand_prozent": null,
    "inhalt_gwh": 210.27,
    "ausspeisung_gwh": 1.7,
