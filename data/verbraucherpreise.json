@@ -849,5 +849,7 @@
    "gesamt": null,
    "energie": null
   }
- ]
+ ],
+ "fehler": "ValueError: zu wenig TTF-Daten (1)",
+ "fehler_stand": "2026-11-13T10:54:31Z"
 }

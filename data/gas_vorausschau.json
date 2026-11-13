@@ -2385,7 +2385,7 @@
    "laenge_tage": 140
   },
   "einspeicherleistung_gemeldet_gwh": 4294,
-  "importe_gwh": 1234
+  "importe_gwh": 1290
  },
  "analog": {
   "anzahl": 8,
@@ -3343,11 +3343,6 @@
    "wirkung": "Je +10 €/MWh Börsenstrompreis etwa -1 GWh Gas für Strom. Der Preis wird auf dem Stand der letzten 14 Tage gehalten."
   },
   {
-   "name": "Gaspreis (Preiselastizität)",
-   "status": "geprüft, nicht eingerechnet",
-   "wirkung": "In den Daten seit 2018 ergibt sich ein unplausibler Zusammenhang (höherer Preis, mehr Entnahme: +24 GWh/Tag je +10 €/MWh), das ist eine Scheinkorrelation mit den Krisenjahren. Ein dämpfender Preiseffekt auf den Verbrauch ist plausibel, aber aus diesen Daten nicht belegbar."
-  },
-  {
    "name": "Nachführung an die letzten Tage",
    "status": "eingerechnet",
    "wirkung": "Die tatsächliche Entnahme lag in den letzten 6 Tagen im Mittel -404 GWh/Tag unter der Modellrechnung. Diese Abweichung wird auf die Vorschau übertragen und klingt über 4 Wochen ab, damit Änderungen bei Importen oder Verhalten schneller durchschlagen."
@@ -3451,92 +3446,92 @@
   },
   {
    "fall": "Importe 10 % niedriger",
-   "gwh_tag": 123,
+   "gwh_tag": 129,
    "normal": {
-    "fuellstand_ziel_tag": 17.4,
+    "fuellstand_ziel_tag": 17.2,
     "fuellstand_ende": 0.7,
     "erreicht": {
      "30": "2027-01-11",
      "20": "2027-01-27",
      "10": "2027-02-15"
     },
-    "fehl_twh": 13.22,
-    "fehl_tage": 32,
+    "fehl_twh": 13.95,
+    "fehl_tage": 33,
     "fehl_erster": "2027-02-25",
-    "fehl_spitze_gwh": 659
+    "fehl_spitze_gwh": 675
    },
    "kalt": {
-    "fuellstand_ziel_tag": 14.1,
+    "fuellstand_ziel_tag": 13.9,
     "fuellstand_ende": 0.5,
     "erreicht": {
      "30": "2027-01-07",
      "20": "2027-01-22",
      "10": "2027-02-08"
     },
-    "fehl_twh": 27.85,
+    "fehl_twh": 28.62,
     "fehl_tage": 46,
     "fehl_erster": "2027-02-10",
-    "fehl_spitze_gwh": 1094
+    "fehl_spitze_gwh": 1113
    }
   },
   {
    "fall": "Importe 20 % niedriger",
-   "gwh_tag": 247,
+   "gwh_tag": 258,
    "normal": {
-    "fuellstand_ziel_tag": 13.3,
+    "fuellstand_ziel_tag": 12.9,
     "fuellstand_ende": 0.5,
     "erreicht": {
      "30": "2027-01-06",
      "20": "2027-01-21",
-     "10": "2027-02-07"
+     "10": "2027-02-06"
     },
-    "fehl_twh": 29.9,
-    "fehl_tage": 50,
-    "fehl_erster": "2027-02-09",
-    "fehl_spitze_gwh": 1137
+    "fehl_twh": 31.45,
+    "fehl_tage": 52,
+    "fehl_erster": "2027-02-08",
+    "fehl_spitze_gwh": 1164
    },
    "kalt": {
-    "fuellstand_ziel_tag": 10.0,
+    "fuellstand_ziel_tag": 9.6,
     "fuellstand_ende": 0.4,
     "erreicht": {
-     "30": "2027-01-02",
-     "20": "2027-01-18",
+     "30": "2027-01-01",
+     "20": "2027-01-17",
      "10": "2027-02-01"
     },
-    "fehl_twh": 44.93,
-    "fehl_tage": 56,
-    "fehl_erster": "2027-02-04",
-    "fehl_spitze_gwh": 1385
+    "fehl_twh": 46.49,
+    "fehl_tage": 57,
+    "fehl_erster": "2027-02-03",
+    "fehl_spitze_gwh": 1406
    }
   },
   {
    "fall": "LNG fällt ganz aus",
-   "gwh_tag": 316,
+   "gwh_tag": 372,
    "normal": {
-    "fuellstand_ziel_tag": 11.0,
+    "fuellstand_ziel_tag": 9.1,
     "fuellstand_ende": 0.4,
     "erreicht": {
-     "30": "2027-01-04",
-     "20": "2027-01-19",
-     "10": "2027-02-03"
+     "30": "2026-12-31",
+     "20": "2027-01-17",
+     "10": "2027-01-31"
     },
-    "fehl_twh": 39.42,
-    "fehl_tage": 53,
-    "fehl_erster": "2027-02-05",
-    "fehl_spitze_gwh": 1295
+    "fehl_twh": 47.21,
+    "fehl_tage": 57,
+    "fehl_erster": "2027-02-03",
+    "fehl_spitze_gwh": 1407
    },
    "kalt": {
-    "fuellstand_ziel_tag": 7.9,
+    "fuellstand_ziel_tag": 6.5,
     "fuellstand_ende": 0.4,
     "erreicht": {
-     "30": "2026-12-30",
-     "20": "2027-01-15",
-     "10": "2027-01-29"
+     "30": "2026-12-28",
+     "20": "2027-01-13",
+     "10": "2027-01-27"
     },
-    "fehl_twh": 54.5,
-    "fehl_tage": 63,
-    "fehl_erster": "2027-01-19",
-    "fehl_spitze_gwh": 1504
+    "fehl_twh": 62.32,
+    "fehl_tage": 68,
+    "fehl_erster": "2027-01-18",
+    "fehl_spitze_gwh": 1591
    }
   },
   {
@@ -3768,7 +3763,7 @@
  },
  "importe_ref": {
   "pipeline_netto": 918.3,
-  "lng": 315.6,
+  "lng": 371.7,
   "norwegen": 746.0
  },
  "ohne_importe": {
@@ -3777,7 +3772,7 @@
   "verbrauch_tag_twh": 2.48,
   "tage": 58
  },
- "stand": "2026-11-13T02:37:15Z",
+ "stand": "2026-11-13T10:54:31Z",
  "modell_version": 6,
  "gegenprobe": {
   "bis3": 0.1,

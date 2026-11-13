@@ -118,5 +118,7 @@
   2.74,
   2.24
  ],
- "wind_variable": "wind_speed_10m_mean"
+ "wind_variable": "wind_speed_10m_mean",
+ "fehler": "URLError: <urlopen error _ssl.c:994: The handshake operation timed out>",
+ "fehler_stand": "2026-11-13T10:54:31Z"
 }
