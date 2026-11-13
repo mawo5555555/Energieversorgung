@@ -1,5 +1,5 @@
 {
- "stand": "2026-11-12T21:27:52Z",
+ "stand": "2026-11-13T02:37:15Z",
  "quelle": "GIE AGSI+ (agsi.gie.eu)",
  "laender": [
   {
@@ -21,6 +21,16 @@
    "kapazitaet_twh": 247.3563,
    "einspeicherung_gwh": 43.82,
    "ausspeicherung_gwh": 975.5
+  },
+  {
+   "code": "NL",
+   "name": "Niederlande",
+   "gastag": "2026-11-11",
+   "fuellstand_prozent": 62.23,
+   "gas_twh": 89.6345,
+   "kapazitaet_twh": 144.0428,
+   "einspeicherung_gwh": 10.69,
+   "ausspeicherung_gwh": 619.0
   },
   {
    "code": "AT",
@@ -133,7 +143,5 @@
    "ausspeicherung_gwh": 104.3
   }
  ],
- "ohne_daten": [
-  "NL"
- ]
+ "ohne_daten": []
 }

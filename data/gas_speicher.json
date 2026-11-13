@@ -1,5 +1,5 @@
 {
- "stand": "2026-11-12T21:27:52Z",
+ "stand": "2026-11-13T02:37:15Z",
  "quelle": "GIE AGSI+ (agsi.gie.eu)",
  "deutschland": {
   "gastag": "2026-11-11",
@@ -9,10 +9,6 @@
   "einspeicherung_gwh": 43.82,
   "ausspeicherung_gwh": 975.5,
   "verlauf": [
-   [
-    "2026-10-13",
-    60.37
-   ],
    [
     "2026-10-14",
     60.49
@@ -212,10 +208,6 @@
    "gas_twh": 0.9057,
    "kapazitaet_twh": 0.999,
    "verlauf": [
-    [
-     "2026-10-13",
-     95.67
-    ],
     [
      "2026-10-14",
      95.53

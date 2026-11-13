@@ -1,5 +1,5 @@
 {
- "stand": "2026-11-12T21:27:52Z",
+ "stand": "2026-11-13T02:37:15Z",
  "quelle": "GIE ALSI (alsi.gie.eu)",
  "deutschland": {
   "name": "Deutschland gesamt",
@@ -10,10 +10,6 @@
   "ausspeisung_gwh": 476.0,
   "anlieferung_schiffe": null,
   "verlauf": [
-   [
-    "2026-11-02",
-    null
-   ],
    [
     "2026-11-03",
     null
