@@ -398,5 +398,7 @@
     ]
    ]
   }
- ]
+ ],
+ "fehler": "ValueError: AGSI+ lieferte keine Daten: ",
+ "fehler_stand": "2026-11-14T19:55:19Z"
 }
