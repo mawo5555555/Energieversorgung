@@ -1,5 +1,5 @@
 {
- "stand": "2026-11-13T18:30:03Z",
+ "stand": "2026-11-14T07:36:07Z",
  "quelle": "GIE AGSI+ (agsi.gie.eu)",
  "anlagen": [
   {
@@ -209,6 +209,16 @@
    "fuellstand_prozent": 84.53,
    "gas_twh": 1.9188,
    "kapazitaet_twh": 2.27,
+   "einspeicherung_gwh": 0.0,
+   "ausspeicherung_gwh": 0.0
+  },
+  {
+   "name": "Etzel EGL (Equinor Storage Deutschland)",
+   "firma": "Equinor Storage Deutschland GmbH",
+   "gastag": "2026-11-12",
+   "fuellstand_prozent": 78.41,
+   "gas_twh": 1.6743,
+   "kapazitaet_twh": 2.1352,
    "einspeicherung_gwh": 0.0,
    "ausspeicherung_gwh": 0.0
   },

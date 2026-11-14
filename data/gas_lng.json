@@ -1,8 +1,8 @@
 {
- "stand": "2026-11-14T00:19:32Z",
+ "stand": "2026-11-14T07:36:07Z",
  "einheit": "GWh/Tag",
  "tag": "2026-11-12",
- "neuester_tag_in_daten": "2026-11-13",
+ "neuester_tag_in_daten": "2026-11-14",
  "terminals": [
   {
    "name": "Wilhelmshaven",

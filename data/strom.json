@@ -1,20 +1,20 @@
 {
- "stand": "2026-11-14T00:19:32Z",
- "daten_stand_ms": 1794612600000,
+ "stand": "2026-11-14T07:36:07Z",
+ "daten_stand_ms": 1794638700000,
  "erzeugung_mw": {
-  "Braunkohle": 8027,
-  "Steinkohle": 3457,
-  "Erdgas": 8057,
+  "Braunkohle": 9052,
+  "Steinkohle": 3155,
+  "Erdgas": 8320,
   "Kernenergie": 0,
-  "Wind offshore": 6269,
-  "Wind onshore": 18916,
-  "Photovoltaik": 0,
-  "Wasserkraft": 1064,
-  "Sonstige Konventionelle": 1771,
+  "Wind offshore": 6830,
+  "Wind onshore": 15084,
+  "Photovoltaik": 1113,
+  "Wasserkraft": 995,
+  "Sonstige Konventionelle": 1685,
   "Sonstige Erneuerbare": 91,
-  "Pumpspeicher": 173
+  "Pumpspeicher": 1079
  },
- "verbrauch_mw": 48561,
+ "verbrauch_mw": 51025,
  "preis_eur_mwh": 189.06,
  "preis_verlauf": [
   [
