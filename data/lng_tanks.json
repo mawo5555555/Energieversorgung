@@ -1,7 +1,53 @@
 {
- "stand": "2026-11-14T07:36:07Z",
+ "stand": "2026-11-14T10:55:04Z",
  "quelle": "GIE ALSI (alsi.gie.eu)",
- "deutschland": null,
+ "deutschland": {
+  "name": "Deutschland gesamt",
+  "firma": "",
+  "gastag": "2026-11-12",
+  "fuellstand_prozent": null,
+  "inhalt_gwh": 2393.22,
+  "ausspeisung_gwh": 545.6,
+  "anlieferung_schiffe": null,
+  "verlauf": [
+   [
+    "2026-11-04",
+    null
+   ],
+   [
+    "2026-11-05",
+    null
+   ],
+   [
+    "2026-11-06",
+    null
+   ],
+   [
+    "2026-11-07",
+    null
+   ],
+   [
+    "2026-11-08",
+    null
+   ],
+   [
+    "2026-11-09",
+    null
+   ],
+   [
+    "2026-11-10",
+    null
+   ],
+   [
+    "2026-11-11",
+    null
+   ],
+   [
+    "2026-11-12",
+    null
+   ]
+  ]
+ },
  "terminals": [
   {
    "name": "Wilhelmshaven LNG Terminal 1 (FSRU Hoegh Esperanza)",
