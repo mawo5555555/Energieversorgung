@@ -67,5 +67,7 @@
   ]
  ],
  "ohne_daten": [],
- "quelle": "ENTSOG Transparency Platform (Einspeisung ins Netz)"
+ "quelle": "ENTSOG Transparency Platform (Einspeisung ins Netz)",
+ "fehler": "TimeoutError: The read operation timed out",
+ "fehler_stand": "2026-11-14T15:01:48Z"
 }

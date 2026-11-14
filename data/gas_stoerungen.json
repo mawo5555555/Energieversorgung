@@ -132,5 +132,7 @@
    "hinweis": "The reason for this is a national obligation by the NRA to reallocate capacities for upcoming auctions in the gas year.",
    "aktiv_jetzt": true
   }
- ]
+ ],
+ "fehler": "URLError: <urlopen error timed out>",
+ "fehler_stand": "2026-11-14T15:01:48Z"
 }
