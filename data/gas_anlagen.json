@@ -1,13 +1,13 @@
 {
- "stand": "2026-11-14T23:53:25Z",
+ "stand": "2026-11-15T06:23:51Z",
  "quelle": "GIE AGSI+ (agsi.gie.eu)",
  "anlagen": [
   {
    "name": "Rehden",
    "firma": "SEFE Storage GmbH",
-   "gastag": "2026-11-14",
-   "fuellstand_prozent": 22.74,
-   "gas_twh": 8.1259,
+   "gastag": "2026-11-13",
+   "fuellstand_prozent": 22.8,
+   "gas_twh": 8.1487,
    "kapazitaet_twh": 35.741,
    "einspeicherung_gwh": 0.0,
    "ausspeicherung_gwh": 22.8
@@ -15,7 +15,7 @@
   {
    "name": "Epe Uniper H-Gas",
    "firma": "Uniper Energy Storage GmbH",
-   "gastag": "2026-11-14",
+   "gastag": "2026-11-13",
    "fuellstand_prozent": 79.55,
    "gas_twh": 12.2332,
    "kapazitaet_twh": 15.3788,
@@ -25,9 +25,9 @@
   {
    "name": "Breitbrunn",
    "firma": "Uniper Energy Storage GmbH",
-   "gastag": "2026-11-14",
-   "fuellstand_prozent": 7.48,
-   "gas_twh": 0.8497,
+   "gastag": "2026-11-13",
+   "fuellstand_prozent": 7.67,
+   "gas_twh": 0.8711,
    "kapazitaet_twh": 11.3584,
    "einspeicherung_gwh": 0.0,
    "ausspeicherung_gwh": 21.4
@@ -35,7 +35,7 @@
   {
    "name": "Etzel ESE (Uniper Energy Storage)",
    "firma": "Uniper Energy Storage GmbH",
-   "gastag": "2026-11-14",
+   "gastag": "2026-11-13",
    "fuellstand_prozent": 68.26,
    "gas_twh": 7.4065,
    "kapazitaet_twh": 10.8509,
@@ -45,9 +45,9 @@
   {
    "name": "Etzel EKB",
    "firma": "Etzel-Kavernenbetriebsgesellschaft GmbH & Co. KG",
-   "gastag": "2026-11-14",
-   "fuellstand_prozent": 78.17,
-   "gas_twh": 8.2028,
+   "gastag": "2026-11-13",
+   "fuellstand_prozent": 78.94,
+   "gas_twh": 8.2834,
    "kapazitaet_twh": 10.4935,
    "einspeicherung_gwh": 8.21,
    "ausspeicherung_gwh": 88.9
@@ -55,7 +55,7 @@
   {
    "name": "Etzel Erdgas Lager EGL",
    "firma": "Uniper Energy Storage GmbH",
-   "gastag": "2026-11-14",
+   "gastag": "2026-11-13",
    "fuellstand_prozent": 95.64,
    "gas_twh": 10.023,
    "kapazitaet_twh": 10.4801,
@@ -65,9 +65,9 @@
   {
    "name": "Uelsen",
    "firma": "Storengy Deutschland GmbH",
-   "gastag": "2026-11-14",
+   "gastag": "2026-11-13",
    "fuellstand_prozent": 54.01,
-   "gas_twh": 5.3329,
+   "gas_twh": 5.3328,
    "kapazitaet_twh": 9.874,
    "einspeicherung_gwh": 0.06,
    "ausspeicherung_gwh": 0.0
@@ -75,9 +75,9 @@
   {
    "name": "Jemgum H (SEFE Storage)",
    "firma": "SEFE Storage GmbH",
-   "gastag": "2026-11-14",
-   "fuellstand_prozent": 70.43,
-   "gas_twh": 6.6548,
+   "gastag": "2026-11-13",
+   "fuellstand_prozent": 70.87,
+   "gas_twh": 6.6966,
    "kapazitaet_twh": 9.4491,
    "einspeicherung_gwh": 0.0,
    "ausspeicherung_gwh": 41.9
@@ -85,9 +85,9 @@
   {
    "name": "Bierwang",
    "firma": "Uniper Energy Storage GmbH",
-   "gastag": "2026-11-14",
-   "fuellstand_prozent": 79.53,
-   "gas_twh": 7.4672,
+   "gastag": "2026-11-13",
+   "fuellstand_prozent": 79.55,
+   "gas_twh": 7.4692,
    "kapazitaet_twh": 9.389,
    "einspeicherung_gwh": 0.0,
    "ausspeicherung_gwh": 2.0
@@ -95,9 +95,9 @@
   {
    "name": "STASSFURT-RWEGSWEST",
    "firma": "RWE Gas Storage West GmbH",
-   "gastag": "2026-11-14",
-   "fuellstand_prozent": 83.25,
-   "gas_twh": 5.3227,
+   "gastag": "2026-11-13",
+   "fuellstand_prozent": 83.33,
+   "gas_twh": 5.3279,
    "kapazitaet_twh": 6.3936,
    "einspeicherung_gwh": 0.0,
    "ausspeicherung_gwh": 5.2
@@ -105,9 +105,9 @@
   {
    "name": "Inzenham-West",
    "firma": "NAFTA Speicher Inzenham GmbH",
-   "gastag": "2026-11-14",
-   "fuellstand_prozent": 4.95,
-   "gas_twh": 0.2377,
+   "gastag": "2026-11-13",
+   "fuellstand_prozent": 5.09,
+   "gas_twh": 0.2443,
    "kapazitaet_twh": 4.8025,
    "einspeicherung_gwh": 0.0,
    "ausspeicherung_gwh": 6.6
@@ -115,17 +115,17 @@
   {
    "name": "Etzel ESE (OMV)",
    "firma": "OMV Gas Storage Germany GmbH",
-   "gastag": "2026-11-14",
-   "fuellstand_prozent": 41.53,
-   "gas_twh": 1.9687,
+   "gastag": "2026-11-13",
+   "fuellstand_prozent": 41.52,
+   "gas_twh": 1.9682,
    "kapazitaet_twh": 4.74,
-   "einspeicherung_gwh": 22.07,
-   "ausspeicherung_gwh": 21.6
+   "einspeicherung_gwh": 0.0,
+   "ausspeicherung_gwh": 22.5
   },
   {
    "name": "Wolfersberg",
    "firma": "bayernugs GmbH",
-   "gastag": "2026-11-14",
+   "gastag": "2026-11-13",
    "fuellstand_prozent": 0.39,
    "gas_twh": 0.0159,
    "kapazitaet_twh": 4.088,
@@ -135,9 +135,9 @@
   {
    "name": "Peckensen",
    "firma": "Storengy Deutschland GmbH",
-   "gastag": "2026-11-14",
-   "fuellstand_prozent": 85.01,
-   "gas_twh": 3.2994,
+   "gastag": "2026-11-13",
+   "fuellstand_prozent": 85.04,
+   "gas_twh": 3.3003,
    "kapazitaet_twh": 3.881,
    "einspeicherung_gwh": 0.0,
    "ausspeicherung_gwh": 0.9
@@ -145,9 +145,9 @@
   {
    "name": "Jemgum H (EWE)",
    "firma": "EWE Gasspeicher GmbH",
-   "gastag": "2026-11-14",
+   "gastag": "2026-11-13",
    "fuellstand_prozent": 43.67,
-   "gas_twh": 1.4833,
+   "gas_twh": 1.4834,
    "kapazitaet_twh": 3.3968,
    "einspeicherung_gwh": 0.0,
    "ausspeicherung_gwh": 0.1
@@ -155,7 +155,7 @@
   {
    "name": "Ronnenberg-Empelde",
    "firma": "enercity Speichervermarktungsgesellschaft mbH",
-   "gastag": "2026-11-14",
+   "gastag": "2026-11-13",
    "fuellstand_prozent": 98.18,
    "gas_twh": 3.0949,
    "kapazitaet_twh": 3.1523,
@@ -165,9 +165,9 @@
   {
    "name": "Enschede - Epe (Nuon)",
    "firma": "NUON Epe Gasspeicher GmbH",
-   "gastag": "2026-11-14",
-   "fuellstand_prozent": 76.47,
-   "gas_twh": 2.074,
+   "gastag": "2026-11-13",
+   "fuellstand_prozent": 77.06,
+   "gas_twh": 2.09,
    "kapazitaet_twh": 2.7123,
    "einspeicherung_gwh": 0.0,
    "ausspeicherung_gwh": 16.0
@@ -175,9 +175,9 @@
   {
    "name": "Epe-DE-RWEGSWEST (Epe-L prior to 1 April 2026)",
    "firma": "RWE Gas Storage West GmbH",
-   "gastag": "2026-11-14",
-   "fuellstand_prozent": 88.46,
-   "gas_twh": 2.2421,
+   "gastag": "2026-11-13",
+   "fuellstand_prozent": 89.35,
+   "gas_twh": 2.2646,
    "kapazitaet_twh": 2.5346,
    "einspeicherung_gwh": 0.0,
    "ausspeicherung_gwh": 22.5
@@ -185,7 +185,7 @@
   {
    "name": "Nüttermoor H-3",
    "firma": "EWE Gasspeicher GmbH",
-   "gastag": "2026-11-14",
+   "gastag": "2026-11-13",
    "fuellstand_prozent": 94.35,
    "gas_twh": 2.3761,
    "kapazitaet_twh": 2.5184,
@@ -195,9 +195,9 @@
   {
    "name": "Nüttermoor H-2",
    "firma": "EWE Gasspeicher GmbH",
-   "gastag": "2026-11-14",
-   "fuellstand_prozent": 14.9,
-   "gas_twh": 0.3737,
+   "gastag": "2026-11-13",
+   "fuellstand_prozent": 14.87,
+   "gas_twh": 0.3729,
    "kapazitaet_twh": 2.5085,
    "einspeicherung_gwh": 0.84,
    "ausspeicherung_gwh": 0.0
@@ -205,9 +205,9 @@
   {
    "name": "Kraak",
    "firma": "Energiespeicher Kraak GmbH",
-   "gastag": "2026-11-14",
-   "fuellstand_prozent": 84.49,
-   "gas_twh": 1.918,
+   "gastag": "2026-11-13",
+   "fuellstand_prozent": 84.51,
+   "gas_twh": 1.9184,
    "kapazitaet_twh": 2.27,
    "einspeicherung_gwh": 0.0,
    "ausspeicherung_gwh": 0.4
@@ -215,7 +215,7 @@
   {
    "name": "Etzel EGL (Equinor Storage Deutschland)",
    "firma": "Equinor Storage Deutschland GmbH",
-   "gastag": "2026-11-14",
+   "gastag": "2026-11-13",
    "fuellstand_prozent": 78.41,
    "gas_twh": 1.6743,
    "kapazitaet_twh": 2.1352,
@@ -225,9 +225,9 @@
   {
    "name": "Epe Trianel",
    "firma": "Trianel Gasspeicher Epe GmbH & Co. KG",
-   "gastag": "2026-11-14",
-   "fuellstand_prozent": 78.49,
-   "gas_twh": 1.6466,
+   "gastag": "2026-11-13",
+   "fuellstand_prozent": 78.62,
+   "gas_twh": 1.6494,
    "kapazitaet_twh": 2.0978,
    "einspeicherung_gwh": 0.0,
    "ausspeicherung_gwh": 2.7
@@ -235,9 +235,9 @@
   {
    "name": "Nüttermoor H-5",
    "firma": "EWE Gasspeicher GmbH",
-   "gastag": "2026-11-14",
-   "fuellstand_prozent": 30.37,
-   "gas_twh": 0.6167,
+   "gastag": "2026-11-13",
+   "fuellstand_prozent": 30.38,
+   "gas_twh": 0.6169,
    "kapazitaet_twh": 2.0308,
    "einspeicherung_gwh": 0.0,
    "ausspeicherung_gwh": 0.1
@@ -245,9 +245,9 @@
   {
    "name": "Epe (MET Epe Speicher)",
    "firma": "MET Epe Speicher GmbH & Co. KG",
-   "gastag": "2026-11-14",
-   "fuellstand_prozent": 54.42,
-   "gas_twh": 1.1048,
+   "gastag": "2026-11-13",
+   "fuellstand_prozent": 56.76,
+   "gas_twh": 1.1522,
    "kapazitaet_twh": 2.03,
    "einspeicherung_gwh": 0.0,
    "ausspeicherung_gwh": 47.4
@@ -255,9 +255,9 @@
   {
    "name": "Schmidhausen",
    "firma": "Storengy Deutschland GmbH",
-   "gastag": "2026-11-14",
-   "fuellstand_prozent": 40.08,
-   "gas_twh": 0.7154,
+   "gastag": "2026-11-13",
+   "fuellstand_prozent": 40.58,
+   "gas_twh": 0.7244,
    "kapazitaet_twh": 1.785,
    "einspeicherung_gwh": 0.0,
    "ausspeicherung_gwh": 9.0
@@ -265,7 +265,7 @@
   {
    "name": "Epe-NL-RWEGSWEST",
    "firma": "RWE Gas Storage West GmbH",
-   "gastag": "2026-11-14",
+   "gastag": "2026-11-13",
    "fuellstand_prozent": 92.85,
    "gas_twh": 1.5742,
    "kapazitaet_twh": 1.6954,
@@ -275,7 +275,7 @@
   {
    "name": "Lesum",
    "firma": "Storengy Deutschland GmbH",
-   "gastag": "2026-11-14",
+   "gastag": "2026-11-13",
    "fuellstand_prozent": 63.67,
    "gas_twh": 1.0785,
    "kapazitaet_twh": 1.694,
@@ -285,7 +285,7 @@
   {
    "name": "Reckrod",
    "firma": "MET Speicher GmbH",
-   "gastag": "2026-11-14",
+   "gastag": "2026-11-13",
    "fuellstand_prozent": 74.23,
    "gas_twh": 1.1951,
    "kapazitaet_twh": 1.61,
@@ -295,9 +295,9 @@
   {
    "name": "Epe Uniper L-Gas",
    "firma": "Uniper Energy Storage GmbH",
-   "gastag": "2026-11-14",
-   "fuellstand_prozent": 83.63,
-   "gas_twh": 1.3423,
+   "gastag": "2026-11-13",
+   "fuellstand_prozent": 83.5,
+   "gas_twh": 1.3403,
    "kapazitaet_twh": 1.6052,
    "einspeicherung_gwh": 2.34,
    "ausspeicherung_gwh": 0.3
@@ -305,7 +305,7 @@
   {
    "name": "Etzel ESE (MET)",
    "firma": "MET Speicher GmbH",
-   "gastag": "2026-11-14",
+   "gastag": "2026-11-13",
    "fuellstand_prozent": 21.47,
    "gas_twh": 0.3251,
    "kapazitaet_twh": 1.514,
@@ -315,9 +315,9 @@
   {
    "name": "Enschede - Epe (Eneco)",
    "firma": "Eneco Gasspeicher BV",
-   "gastag": "2026-11-14",
-   "fuellstand_prozent": 66.15,
-   "gas_twh": 0.9494,
+   "gastag": "2026-11-13",
+   "fuellstand_prozent": 65.96,
+   "gas_twh": 0.9467,
    "kapazitaet_twh": 1.4352,
    "einspeicherung_gwh": 5.19,
    "ausspeicherung_gwh": 2.5
@@ -325,9 +325,9 @@
   {
    "name": "Harsefeld",
    "firma": "Storengy Deutschland GmbH",
-   "gastag": "2026-11-14",
-   "fuellstand_prozent": 78.2,
-   "gas_twh": 0.9673,
+   "gastag": "2026-11-13",
+   "fuellstand_prozent": 79.76,
+   "gas_twh": 0.9866,
    "kapazitaet_twh": 1.237,
    "einspeicherung_gwh": 0.0,
    "ausspeicherung_gwh": 19.3
@@ -335,7 +335,7 @@
   {
    "name": "Frankenthal",
    "firma": "Enovos Storage GmbH",
-   "gastag": "2026-11-14",
+   "gastag": "2026-11-13",
    "fuellstand_prozent": 0.0,
    "gas_twh": 0.0,
    "kapazitaet_twh": 1.0,
@@ -345,8 +345,8 @@
   {
    "name": "Rüdersdorf H",
    "firma": "EWE Gasspeicher GmbH",
-   "gastag": "2026-11-14",
-   "fuellstand_prozent": 90.67,
+   "gastag": "2026-11-13",
+   "fuellstand_prozent": 90.66,
    "gas_twh": 0.9057,
    "kapazitaet_twh": 0.999,
    "einspeicherung_gwh": 0.0,
@@ -355,7 +355,7 @@
   {
    "name": "Kiel-Rönne",
    "firma": "SWKiel Speicher GmbH",
-   "gastag": "2026-11-14",
+   "gastag": "2026-11-13",
    "fuellstand_prozent": 22.55,
    "gas_twh": 0.1179,
    "kapazitaet_twh": 0.523,

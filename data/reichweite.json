@@ -1,23 +1,23 @@
 {
- "stand": "2026-11-14T23:53:25Z",
+ "stand": "2026-11-15T06:23:51Z",
  "annahmen": "Reine Schätzung nur für die Gasspeicher, ohne Importe, LNG und Verbrauchsänderungen. Grundlage: mittlere Ein- und Ausspeicherung der letzten 7 Tage. Mit Wetter: Die Ausspeicherung folgt dem Heizbedarf (Heizgradtage, Basis 15 °C) der Temperaturvorhersage.",
  "deutschland": {
   "name": "Deutschland",
-  "inhalt_twh": 141.798,
+  "inhalt_twh": 142.096,
   "kapazitaet_twh": 247.356,
-  "fuellstand_prozent": 57.3,
-  "ausspeicherung_7t_gwh": 735.2,
-  "einspeicherung_7t_gwh": 66.5,
-  "netto_7t_gwh": 668.6,
-  "tage_aktuell": 212,
+  "fuellstand_prozent": 57.4,
+  "ausspeicherung_7t_gwh": 803.6,
+  "einspeicherung_7t_gwh": 63.5,
+  "netto_7t_gwh": 740.1,
+  "tage_aktuell": 192,
   "projektion": [
    [
     "2026-11-15",
-    57.0
+    57.1
    ],
    [
     "2026-11-16",
-    56.8
+    56.9
    ],
    [
     "2026-11-17",
@@ -37,44 +37,44 @@
    ],
    [
     "2026-11-21",
-    55.9
+    55.7
    ],
    [
     "2026-11-22",
-    55.5
+    55.3
    ],
    [
     "2026-11-23",
-    55.2
+    54.9
    ],
    [
     "2026-11-24",
-    54.8
-   ],
-   [
-    "2026-11-25",
     54.5
    ],
    [
-    "2026-11-26",
+    "2026-11-25",
     54.2
    ],
    [
+    "2026-11-26",
+    53.8
+   ],
+   [
     "2026-11-27",
-    53.9
+    53.5
    ],
    [
     "2026-11-28",
-    53.6
+    53.2
    ]
   ],
-  "tage_wetter": 193,
+  "tage_wetter": 191,
   "ziel": {
    "prozent": 30,
    "datum": "2027-02-01",
-   "tage_bis_stichtag": 79,
-   "tage_bis_marke": 101,
-   "marke_ca_datum": "2027-02-23"
+   "tage_bis_stichtag": 78,
+   "tage_bis_marke": 92,
+   "marke_ca_datum": "2027-02-15"
   }
  },
  "ziel_quelle": "Bundesnetzagentur, Seite „Aktuelle Lage der Gasversorgung“ (Füllstandsvorgabe 30 % zum 1. Februar 2027)",
@@ -115,27 +115,27 @@
     ],
     [
      "2026-11-21",
-     89.5
+     89.4
     ],
     [
      "2026-11-22",
-     89.2
+     89.1
     ],
     [
      "2026-11-23",
-     88.9
+     88.8
     ],
     [
      "2026-11-24",
-     88.6
+     88.5
     ],
     [
      "2026-11-25",
-     88.3
+     88.2
     ],
     [
      "2026-11-26",
-     88.1
+     88.0
     ],
     [
      "2026-11-27",
@@ -143,10 +143,10 @@
     ],
     [
      "2026-11-28",
-     87.6
+     87.5
     ]
    ],
-   "tage_wetter": 452
+   "tage_wetter": 306
   }
  ]
 }
