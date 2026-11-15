@@ -3743,5 +3743,7 @@
   "bis14": null,
   "anzahl": 4
  },
- "quelle": "GIE AGSI+ (Speicherdaten seit 2018), Open-Meteo (Temperaturen), eigene Berechnung"
+ "quelle": "GIE AGSI+ (Speicherdaten seit 2018), Open-Meteo (Temperaturen), eigene Berechnung",
+ "fehler": "ValueError: zu wenig Daten für die Schätzung",
+ "fehler_stand": "2026-11-15T14:44:04Z"
 }
