@@ -104,5 +104,7 @@
    "hinweis": "The reason for this is a national obligation by the NRA to reallocate capacities for upcoming auctions in the gas year.",
    "aktiv_jetzt": true
   }
- ]
+ ],
+ "fehler": "HTTPError: HTTP Error 502: Bad Gateway",
+ "fehler_stand": "2026-11-16T18:29:30Z"
 }

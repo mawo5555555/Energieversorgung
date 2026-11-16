@@ -1,11 +1,11 @@
 {
- "stand": "2026-11-16T12:02:24Z",
+ "stand": "2026-11-16T18:29:30Z",
  "rhein": {
-  "pegel_cm": 61.0,
+  "pegel_cm": 59.0,
   "zustand": "low",
   "min_30t": 5.0,
   "max_30t": 74.0,
-  "zeit": "2026-11-16T13:00:00+01:00",
+  "zeit": "2026-11-16T19:30:00+01:00",
   "quelle": "Pegelonline (WSV), Pegel Kaub"
  },
  "industrie": {
@@ -64,6 +64,31 @@
   ],
   "quelle": "Eurostat, Produktion im produzierenden Gewerbe (saisonbereinigt, 2021=100)"
  },
- "nachbarn_wetter": [],
- "nachbarn_wetter_fehler": "URLError: <urlopen error _ssl.c:994: The handshake operation timed out>"
+ "nachbarn_wetter": [
+  {
+   "land": "Frankreich",
+   "temp_naechste_7": 11.4,
+   "temp_letzte_7": 9.0
+  },
+  {
+   "land": "Polen",
+   "temp_naechste_7": 5.1,
+   "temp_letzte_7": 2.5
+  },
+  {
+   "land": "Niederlande",
+   "temp_naechste_7": 6.9,
+   "temp_letzte_7": 6.5
+  },
+  {
+   "land": "Österreich",
+   "temp_naechste_7": 7.9,
+   "temp_letzte_7": 5.6
+  },
+  {
+   "land": "Italien",
+   "temp_naechste_7": 15.8,
+   "temp_letzte_7": 16.7
+  }
+ ]
 }

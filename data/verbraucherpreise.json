@@ -1,5 +1,5 @@
 {
- "stand": "2026-11-15T06:23:51Z",
+ "stand": "2026-11-16T18:29:30Z",
  "quelle": "Eurostat HICP Deutschland (Jahresrate), Yahoo Finance (TTF)",
  "letzter_monat": "2025-12",
  "aktuell": {
@@ -7,7 +7,7 @@
   "gesamt": 2.0,
   "energie": -1.7
  },
- "ttf_aktuell": 89.5,
+ "ttf_aktuell": 89.3,
  "ttf_monat": "2026-11",
  "ttf_yoy": 191,
  "korrelation": {
@@ -844,12 +844,10 @@
   },
   {
    "m": "2026-11",
-   "ttf": 89.5,
+   "ttf": 89.3,
    "nahrung": null,
    "gesamt": null,
    "energie": null
   }
- ],
- "fehler": "ValueError: zu wenig TTF-Daten (1)",
- "fehler_stand": "2026-11-16T12:02:24Z"
+ ]
 }

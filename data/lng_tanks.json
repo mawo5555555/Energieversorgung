@@ -1,13 +1,13 @@
 {
- "stand": "2026-11-16T12:02:24Z",
+ "stand": "2026-11-16T18:29:30Z",
  "quelle": "GIE ALSI (alsi.gie.eu)",
  "deutschland": {
   "name": "Deutschland gesamt",
   "firma": "",
-  "gastag": "2026-11-14",
+  "gastag": "2026-11-15",
   "fuellstand_prozent": null,
-  "inhalt_gwh": 2058.88,
-  "ausspeisung_gwh": 586.6,
+  "inhalt_gwh": 1637.75,
+  "ausspeisung_gwh": 407.7,
   "anlieferung_schiffe": null,
   "verlauf": [
    [
@@ -45,6 +45,10 @@
    [
     "2026-11-14",
     null
+   ],
+   [
+    "2026-11-15",
+    null
    ]
   ]
  },
@@ -52,46 +56,37 @@
   {
    "name": "Wilhelmshaven LNG Terminal 1 (FSRU Hoegh Esperanza)",
    "firma": "Deutsche Energy Terminal GmbH",
-   "gastag": "2026-11-14",
+   "gastag": "2026-11-15",
    "fuellstand_prozent": null,
-   "inhalt_gwh": 71.86,
-   "ausspeisung_gwh": 1.4,
+   "inhalt_gwh": 66.63,
+   "ausspeisung_gwh": 1.5,
    "anlieferung_schiffe": null
   },
   {
    "name": "Brunsbuettel LNG Terminal 1 (FSRU Hoegh Gannet)",
    "firma": "Deutsche Energy Terminal GmbH",
-   "gastag": "2026-11-14",
+   "gastag": "2026-11-15",
    "fuellstand_prozent": null,
-   "inhalt_gwh": 597.28,
-   "ausspeisung_gwh": 101.7,
+   "inhalt_gwh": 231.62,
+   "ausspeisung_gwh": 90.8,
    "anlieferung_schiffe": null
   },
   {
    "name": "Stade LNG Terminal 1 (FSRU Energos Force)",
    "firma": "Deutsche Energy Terminal GmbH",
-   "gastag": "2026-11-14",
+   "gastag": "2026-11-15",
    "fuellstand_prozent": null,
-   "inhalt_gwh": 470.86,
-   "ausspeisung_gwh": 163.1,
+   "inhalt_gwh": 88.41,
+   "ausspeisung_gwh": 48.6,
    "anlieferung_schiffe": null
   },
   {
    "name": "Wilhelmshaven LNG Terminal 2 (FSRU Excelerate Excelsior)",
    "firma": "Deutsche Energy Terminal GmbH",
-   "gastag": "2026-11-14",
+   "gastag": "2026-11-15",
    "fuellstand_prozent": null,
-   "inhalt_gwh": 393.83,
-   "ausspeisung_gwh": 116.2,
-   "anlieferung_schiffe": null
-  },
-  {
-   "name": "Mukran LNG Terminal (FSRU Neptune / FSRU Energos Power)",
-   "firma": "Deutsche ReGas GmbH & Co. KGaA",
-   "gastag": "2026-11-14",
-   "fuellstand_prozent": null,
-   "inhalt_gwh": 525.05,
-   "ausspeisung_gwh": 204.2,
+   "inhalt_gwh": 726.06,
+   "ausspeisung_gwh": 62.6,
    "anlieferung_schiffe": null
   }
  ]
