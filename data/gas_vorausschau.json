@@ -2361,7 +2361,7 @@
    "laenge_tage": 137
   },
   "einspeicherleistung_gemeldet_gwh": 4294,
-  "importe_gwh": 1110
+  "importe_gwh": 1122
  },
  "analog": {
   "anzahl": 8,
@@ -3410,7 +3410,7 @@
   },
   {
    "fall": "Importe 10 % niedriger",
-   "gwh_tag": 111,
+   "gwh_tag": 112,
    "normal": {
     "fuellstand_ziel_tag": 18.3,
     "fuellstand_ende": 0.9,
@@ -3419,10 +3419,10 @@
      "20": "2027-01-29",
      "10": "2027-02-17"
     },
-    "fehl_twh": 11.34,
+    "fehl_twh": 11.49,
     "fehl_tage": 28,
     "fehl_erster": "2027-02-26",
-    "fehl_spitze_gwh": 628
+    "fehl_spitze_gwh": 632
    },
    "kalt": {
     "fuellstand_ziel_tag": 15.1,
@@ -3432,70 +3432,70 @@
      "20": "2027-01-24",
      "10": "2027-02-10"
     },
-    "fehl_twh": 25.57,
+    "fehl_twh": 25.73,
     "fehl_tage": 45,
     "fehl_erster": "2027-02-11",
-    "fehl_spitze_gwh": 1040
+    "fehl_spitze_gwh": 1043
    }
   },
   {
    "fall": "Importe 20 % niedriger",
-   "gwh_tag": 222,
+   "gwh_tag": 224,
    "normal": {
-    "fuellstand_ziel_tag": 14.8,
+    "fuellstand_ziel_tag": 14.7,
     "fuellstand_ende": 0.6,
     "erreicht": {
      "30": "2027-01-08",
      "20": "2027-01-23",
      "10": "2027-02-09"
     },
-    "fehl_twh": 25.81,
+    "fehl_twh": 26.14,
     "fehl_tage": 45,
     "fehl_erster": "2027-02-11",
-    "fehl_spitze_gwh": 1042
+    "fehl_spitze_gwh": 1050
    },
    "kalt": {
-    "fuellstand_ziel_tag": 11.6,
+    "fuellstand_ziel_tag": 11.5,
     "fuellstand_ende": 0.5,
     "erreicht": {
      "30": "2027-01-05",
      "20": "2027-01-20",
      "10": "2027-02-04"
     },
-    "fehl_twh": 40.56,
-    "fehl_tage": 52,
-    "fehl_erster": "2027-02-08",
-    "fehl_spitze_gwh": 1327
+    "fehl_twh": 40.89,
+    "fehl_tage": 53,
+    "fehl_erster": "2027-02-05",
+    "fehl_spitze_gwh": 1333
    }
   },
   {
    "fall": "LNG fällt ganz aus",
-   "gwh_tag": 191,
+   "gwh_tag": 204,
    "normal": {
-    "fuellstand_ziel_tag": 15.8,
+    "fuellstand_ziel_tag": 15.4,
     "fuellstand_ende": 0.6,
     "erreicht": {
-     "30": "2027-01-10",
-     "20": "2027-01-25",
-     "10": "2027-02-11"
+     "30": "2027-01-09",
+     "20": "2027-01-24",
+     "10": "2027-02-10"
     },
-    "fehl_twh": 21.71,
-    "fehl_tage": 42,
-    "fehl_erster": "2027-02-16",
-    "fehl_spitze_gwh": 946
+    "fehl_twh": 23.34,
+    "fehl_tage": 43,
+    "fehl_erster": "2027-02-15",
+    "fehl_spitze_gwh": 985
    },
    "kalt": {
-    "fuellstand_ziel_tag": 12.6,
+    "fuellstand_ziel_tag": 12.2,
     "fuellstand_ende": 0.5,
     "erreicht": {
      "30": "2027-01-06",
-     "20": "2027-01-21",
+     "20": "2027-01-20",
      "10": "2027-02-05"
     },
-    "fehl_twh": 36.41,
+    "fehl_twh": 38.06,
     "fehl_tage": 52,
     "fehl_erster": "2027-02-08",
-    "fehl_spitze_gwh": 1259
+    "fehl_spitze_gwh": 1286
    }
   },
   {
@@ -3729,7 +3729,7 @@
  },
  "importe_ref": {
   "pipeline_netto": 918.3,
-  "lng": 191.3,
+  "lng": 203.5,
   "norwegen": 746.0
  },
  "ohne_importe": {
@@ -3738,7 +3738,7 @@
   "verbrauch_tag_twh": 2.48,
   "tage": 57
  },
- "stand": "2026-11-16T07:57:20Z",
+ "stand": "2026-11-16T12:02:24Z",
  "modell_version": 6,
  "gegenprobe": {
   "bis3": 0.3,
