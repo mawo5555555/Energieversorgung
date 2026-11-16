@@ -1,5 +1,5 @@
 {
- "stand": "2026-11-15T20:23:04Z",
+ "stand": "2026-11-16T00:59:27Z",
  "quelle": "GIE ALSI (alsi.gie.eu)",
  "deutschland": {
   "name": "Deutschland gesamt",
@@ -10,10 +10,6 @@
   "ausspeisung_gwh": 586.6,
   "anlieferung_schiffe": null,
   "verlauf": [
-   [
-    "2026-11-05",
-    null
-   ],
    [
     "2026-11-06",
     null
@@ -78,6 +74,15 @@
    "fuellstand_prozent": null,
    "inhalt_gwh": 470.86,
    "ausspeisung_gwh": 163.1,
+   "anlieferung_schiffe": null
+  },
+  {
+   "name": "Wilhelmshaven LNG Terminal 2 (FSRU Excelerate Excelsior)",
+   "firma": "Deutsche Energy Terminal GmbH",
+   "gastag": "2026-11-14",
+   "fuellstand_prozent": null,
+   "inhalt_gwh": 393.83,
+   "ausspeisung_gwh": 116.2,
    "anlieferung_schiffe": null
   },
   {
