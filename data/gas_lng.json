@@ -67,5 +67,7 @@
   ]
  ],
  "ohne_daten": [],
- "quelle": "ENTSOG Transparency Platform (Einspeisung ins Netz)"
+ "quelle": "ENTSOG Transparency Platform (Einspeisung ins Netz)",
+ "fehler": "HTTPError: HTTP Error 502: Bad Gateway",
+ "fehler_stand": "2026-11-16T07:57:20Z"
 }

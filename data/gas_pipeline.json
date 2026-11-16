@@ -99,5 +99,7 @@
  ],
  "ohne_daten": [],
  "quelle": "ENTSOG Transparency Platform",
- "hinweis": "ENTSOG-Messpunkte (Physical Flow). Pro Punkt, Richtung und Tag gilt der höchste gemeldete Wert, weil beide Netzbetreiber dieselbe Menge melden. Es werden virtuelle Handelspunkte (VIP) genutzt, wo es sie gibt, und keine Speicheranbindungen. Netto = Einspeisung nach Deutschland minus Ausfuhr aus Deutschland an denselben Punkten. Norwegen kommt über den Punkt Dornum GASPOOL, die alten Punkte Emden/Dornum EPT melden nichts mehr."
+ "hinweis": "ENTSOG-Messpunkte (Physical Flow). Pro Punkt, Richtung und Tag gilt der höchste gemeldete Wert, weil beide Netzbetreiber dieselbe Menge melden. Es werden virtuelle Handelspunkte (VIP) genutzt, wo es sie gibt, und keine Speicheranbindungen. Netto = Einspeisung nach Deutschland minus Ausfuhr aus Deutschland an denselben Punkten. Norwegen kommt über den Punkt Dornum GASPOOL, die alten Punkte Emden/Dornum EPT melden nichts mehr.",
+ "fehler": "URLError: <urlopen error timed out>",
+ "fehler_stand": "2026-11-16T07:57:20Z"
 }

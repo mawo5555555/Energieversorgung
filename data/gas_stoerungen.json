@@ -1,10 +1,10 @@
 {
- "stand": "2026-11-16T00:59:27Z",
+ "stand": "2026-11-16T07:57:20Z",
  "quelle": "ENTSOG Transparency Platform, Urgent Market Messages (Deutschland)",
- "anzahl": 9,
- "geplant": 5,
+ "anzahl": 7,
+ "geplant": 3,
  "ungeplant": 4,
- "summe_nicht_verfuegbar_gwh": 85.3,
+ "summe_nicht_verfuegbar_gwh": 82.1,
  "meldungen": [
   {
    "betreiber": "GRTgaz Deutschland",
@@ -18,34 +18,6 @@
    "richtung": "Entry",
    "grund": "Due to the current transport situation or maintenance, the day-ahead auction regarding the mentioned entry/exit points will take place with a reduced capacity offer or will be suspended on the mentioned days.",
    "hinweis": "Due to the current transport situation or maintenance, the day-ahead auction regarding the mentioned entry/exit points will take place with a reduced capacity offer or will be suspended on the mention",
-   "aktiv_jetzt": true
-  },
-  {
-   "betreiber": "Gasunie Deutschland Transport Services GmbH",
-   "anlage": "UGS UELSEN",
-   "art": "Planned",
-   "ereignis": "Compressor station unavailability",
-   "von": "2026-11-01",
-   "bis": "2026-11-16",
-   "nicht_verfuegbar_gwh": 1.9,
-   "technisch_gwh": 1.9,
-   "richtung": "Entry",
-   "grund": "Due to maintenance work the FZK capacity is reduced.",
-   "hinweis": "",
-   "aktiv_jetzt": true
-  },
-  {
-   "betreiber": "Gasunie Deutschland Transport Services GmbH",
-   "anlage": "VIP TTF-THE-H",
-   "art": "Planned",
-   "ereignis": "Compressor station unavailability",
-   "von": "2026-11-01",
-   "bis": "2026-11-16",
-   "nicht_verfuegbar_gwh": 1.3,
-   "technisch_gwh": 6.9,
-   "richtung": "Entry",
-   "grund": "Due to maintenance work the FZK capacity is reduced.",
-   "hinweis": "",
    "aktiv_jetzt": true
   },
   {
