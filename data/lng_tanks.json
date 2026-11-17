@@ -1,5 +1,5 @@
 {
- "stand": "2026-11-16T18:29:30Z",
+ "stand": "2026-11-17T02:27:56Z",
  "quelle": "GIE ALSI (alsi.gie.eu)",
  "deutschland": {
   "name": "Deutschland gesamt",
@@ -10,10 +10,6 @@
   "ausspeisung_gwh": 407.7,
   "anlieferung_schiffe": null,
   "verlauf": [
-   [
-    "2026-11-06",
-    null
-   ],
    [
     "2026-11-07",
     null
@@ -87,6 +83,15 @@
    "fuellstand_prozent": null,
    "inhalt_gwh": 726.06,
    "ausspeisung_gwh": 62.6,
+   "anlieferung_schiffe": null
+  },
+  {
+   "name": "Mukran LNG Terminal (FSRU Neptune / FSRU Energos Power)",
+   "firma": "Deutsche ReGas GmbH & Co. KGaA",
+   "gastag": "2026-11-15",
+   "fuellstand_prozent": null,
+   "inhalt_gwh": 525.05,
+   "ausspeisung_gwh": 204.2,
    "anlieferung_schiffe": null
   }
  ]
