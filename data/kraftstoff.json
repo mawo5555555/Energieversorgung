@@ -1,21 +1,21 @@
 {
- "stand": "2026-11-18T11:35:45Z",
+ "stand": "2026-11-18T12:14:24Z",
  "preise": {
   "diesel": {
    "min": 2.159,
-   "median": 2.359,
-   "max": 2.949,
+   "median": 2.309,
+   "max": 2.889,
    "anzahl": 332
   },
   "e5": {
    "min": 1.989,
-   "median": 2.209,
-   "max": 2.769,
+   "median": 2.159,
+   "max": 2.709,
    "anzahl": 326
   },
   "e10": {
    "min": 1.959,
-   "median": 2.149,
+   "median": 2.099,
    "max": 2.709,
    "anzahl": 318
   }
