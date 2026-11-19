@@ -1,4 +1,14 @@
 {
- "geprueft": null,
- "hinweis": "Die erste Modellprüfung ist für den 19. November 2026 geplant."
+ "geprueft": "2026-11-19",
+ "kurz": "Die Vorhersagen der letzten Woche lagen sehr nah am tatsächlichen Füllstand. Das Modell wurde bewusst nicht verändert.",
+ "gegenprobe": {
+  "bis3": 0.3,
+  "bis7": 0.5
+ },
+ "richtung": "Der Füllstand sank etwas langsamer als vorhergesagt (im Mittel 0,5 Prozentpunkte zu schnell gerechnet)",
+ "aenderungen": [
+  "Keine. Nur 16 Vergleichswerte aus einer milden Herbstwoche; eine Abweichung von 0,5 Prozentpunkten liegt weit unter dem Rückrechnungsfehler von etwa 7,8 Prozentpunkten und rechtfertigt keinen Eingriff."
+ ],
+ "technik": "Verglichen wurden die Zwei-Tages-Punkte der gespeicherten Vorhersagen (prognose_verlauf.json) mit den Tageswerten der Speicherstände (GIE). Der Test sagt nichts über den Winter aus, weil die Heizlast jetzt noch niedrig ist und Fehler dann größer werden können. Die Prüfung wurde von Claude selbst durchgeführt, nicht unabhängig.",
+ "naechste": "Mitte Januar 2027, wenn mehrere kalte Wochen vorliegen"
 }
