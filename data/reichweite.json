@@ -1,5 +1,5 @@
 {
- "stand": "2026-11-19T02:32:31Z",
+ "stand": "2026-11-19T11:33:37Z",
  "annahmen": "Reine Schätzung nur für die Gasspeicher, ohne Importe, LNG und Verbrauchsänderungen. Grundlage: mittlere Ein- und Ausspeicherung der letzten 7 Tage. Mit Wetter: Die Ausspeicherung folgt dem Heizbedarf (Heizgradtage, Basis 15 °C) der Temperaturvorhersage.",
  "deutschland": {
   "name": "Deutschland",
@@ -33,7 +33,7 @@
    ],
    [
     "2026-11-24",
-    55.9
+    56.0
    ],
    [
     "2026-11-25",
@@ -41,7 +41,7 @@
    ],
    [
     "2026-11-26",
-    55.4
+    55.5
    ],
    [
     "2026-11-27",
@@ -49,26 +49,26 @@
    ],
    [
     "2026-11-28",
-    55.0
-   ],
-   [
-    "2026-11-29",
     54.9
    ],
    [
-    "2026-11-30",
+    "2026-11-29",
     54.7
    ],
    [
+    "2026-11-30",
+    54.5
+   ],
+   [
     "2026-12-01",
-    54.6
+    54.3
    ],
    [
     "2026-12-02",
-    54.4
+    54.1
    ]
   ],
-  "tage_wetter": 286,
+  "tage_wetter": 285,
   "ziel": {
    "prozent": 30,
    "datum": "2027-02-01",
@@ -119,7 +119,7 @@
     ],
     [
      "2026-11-26",
-     89.9
+     90.0
     ],
     [
      "2026-11-27",
@@ -127,7 +127,7 @@
     ],
     [
      "2026-11-28",
-     89.8
+     89.7
     ],
     [
      "2026-11-29",
@@ -143,10 +143,10 @@
     ],
     [
      "2026-12-02",
-     89.5
+     89.4
     ]
    ],
-   "tage_wetter": null
+   "tage_wetter": 908
   }
  ]
 }
