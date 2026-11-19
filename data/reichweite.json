@@ -1,152 +1,152 @@
 {
- "stand": "2026-11-19T12:08:10Z",
+ "stand": "2026-11-19T20:31:39Z",
  "annahmen": "Reine Schätzung nur für die Gasspeicher, ohne Importe, LNG und Verbrauchsänderungen. Grundlage: mittlere Ein- und Ausspeicherung der letzten 7 Tage. Mit Wetter: Die Ausspeicherung folgt dem Heizbedarf (Heizgradtage, Basis 15 °C) der Temperaturvorhersage.",
  "deutschland": {
   "name": "Deutschland",
-  "inhalt_twh": 141.26,
+  "inhalt_twh": 141.359,
   "kapazitaet_twh": 247.356,
   "fuellstand_prozent": 57.1,
-  "ausspeicherung_7t_gwh": 403.6,
-  "einspeicherung_7t_gwh": 68.8,
-  "netto_7t_gwh": 334.8,
-  "tage_aktuell": 422,
+  "ausspeicherung_7t_gwh": 272.8,
+  "einspeicherung_7t_gwh": 85.1,
+  "netto_7t_gwh": 187.7,
+  "tage_aktuell": 753,
   "projektion": [
    [
     "2026-11-19",
-    57.0
+    57.1
    ],
    [
     "2026-11-20",
-    56.9
+    57.0
    ],
    [
     "2026-11-21",
-    56.7
+    56.9
    ],
    [
     "2026-11-22",
-    56.5
+    56.8
    ],
    [
     "2026-11-23",
-    56.2
+    56.6
    ],
    [
     "2026-11-24",
-    56.0
+    56.5
    ],
    [
     "2026-11-25",
-    55.7
+    56.3
    ],
    [
     "2026-11-26",
-    55.5
+    56.1
    ],
    [
     "2026-11-27",
-    55.2
+    56.0
    ],
    [
     "2026-11-28",
-    54.9
+    55.8
    ],
    [
     "2026-11-29",
-    54.7
+    55.6
    ],
    [
     "2026-11-30",
-    54.5
+    55.5
    ],
    [
     "2026-12-01",
-    54.3
+    55.3
    ],
    [
     "2026-12-02",
-    54.1
+    55.2
    ]
   ],
-  "tage_wetter": 285,
+  "tage_wetter": 566,
   "ziel": {
    "prozent": 30,
    "datum": "2027-02-01",
    "tage_bis_stichtag": 74,
-   "tage_bis_marke": 200,
-   "marke_ca_datum": "2027-06-07"
+   "tage_bis_marke": 358,
+   "marke_ca_datum": "2027-11-12"
   }
  },
  "ziel_quelle": "Bundesnetzagentur, Seite „Aktuelle Lage der Gasversorgung“ (Füllstandsvorgabe 30 % zum 1. Februar 2027)",
  "brandenburg": [
   {
    "name": "Rüdersdorf H (EWE)",
-   "inhalt_twh": 0.906,
+   "inhalt_twh": 0.907,
    "kapazitaet_twh": 0.999,
-   "fuellstand_prozent": 90.7,
-   "ausspeicherung_7t_gwh": 0.6,
-   "einspeicherung_7t_gwh": 0.0,
-   "netto_7t_gwh": 0.6,
-   "tage_aktuell": 1447,
+   "fuellstand_prozent": 90.8,
+   "ausspeicherung_7t_gwh": 0.0,
+   "einspeicherung_7t_gwh": 0.2,
+   "netto_7t_gwh": -0.2,
+   "tage_aktuell": null,
    "projektion": [
     [
      "2026-11-19",
-     90.6
+     90.8
     ],
     [
      "2026-11-20",
-     90.5
+     90.8
     ],
     [
      "2026-11-21",
-     90.5
+     90.8
     ],
     [
      "2026-11-22",
-     90.4
+     90.9
     ],
     [
      "2026-11-23",
-     90.3
+     90.9
     ],
     [
      "2026-11-24",
-     90.2
+     90.9
     ],
     [
      "2026-11-25",
-     90.1
+     90.9
     ],
     [
      "2026-11-26",
-     90.0
+     90.9
     ],
     [
      "2026-11-27",
-     89.8
+     91.0
     ],
     [
      "2026-11-28",
-     89.7
+     91.0
     ],
     [
      "2026-11-29",
-     89.7
+     91.0
     ],
     [
      "2026-11-30",
-     89.6
+     91.0
     ],
     [
      "2026-12-01",
-     89.5
+     91.0
     ],
     [
      "2026-12-02",
-     89.4
+     91.1
     ]
    ],
-   "tage_wetter": 908
+   "tage_wetter": null
   }
  ]
 }
