@@ -1,5 +1,5 @@
 {
- "stand": "2026-11-18T20:28:09Z",
+ "stand": "2026-11-19T02:32:31Z",
  "quelle": "GIE AGSI+ (agsi.gie.eu)",
  "anlagen": [
   {
@@ -349,16 +349,6 @@
    "fuellstand_prozent": 90.66,
    "gas_twh": 0.9057,
    "kapazitaet_twh": 0.999,
-   "einspeicherung_gwh": 0.0,
-   "ausspeicherung_gwh": 0.0
-  },
-  {
-   "name": "Kiel-Rönne",
-   "firma": "SWKiel Speicher GmbH",
-   "gastag": "2026-11-17",
-   "fuellstand_prozent": 22.55,
-   "gas_twh": 0.1179,
-   "kapazitaet_twh": 0.523,
    "einspeicherung_gwh": 0.0,
    "ausspeicherung_gwh": 0.0
   }
