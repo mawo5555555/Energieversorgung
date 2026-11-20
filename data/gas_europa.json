@@ -1,5 +1,5 @@
 {
- "stand": "2026-11-19T20:31:39Z",
+ "stand": "2026-11-20T02:17:50Z",
  "quelle": "GIE AGSI+ (agsi.gie.eu)",
  "laender": [
   {
@@ -7,10 +7,10 @@
    "name": "Europäische Union",
    "gastag": "2026-11-18",
    "fuellstand_prozent": 69.83,
-   "gas_twh": 790.6848,
+   "gas_twh": 790.6912,
    "kapazitaet_twh": 1132.3616,
-   "einspeicherung_gwh": 833.47,
-   "ausspeicherung_gwh": 2281.6
+   "einspeicherung_gwh": 833.46,
+   "ausspeicherung_gwh": 2280.0
   },
   {
    "code": "DE",
@@ -57,10 +57,10 @@
    "name": "Italien",
    "gastag": "2026-11-18",
    "fuellstand_prozent": 86.26,
-   "gas_twh": 175.4758,
+   "gas_twh": 175.4822,
    "kapazitaet_twh": 203.4249,
    "einspeicherung_gwh": 13.07,
-   "ausspeicherung_gwh": 501.1
+   "ausspeicherung_gwh": 499.5
   },
   {
    "code": "PL",

@@ -1,5 +1,5 @@
 {
- "stand": "2026-11-19T20:31:39Z",
+ "stand": "2026-11-20T02:17:50Z",
  "variable": "wind_speed_10m_mean",
  "quelle": "Open-Meteo Archiv (CC BY 4.0), Mittel aus 6 Großstädten",
  "tage": {
@@ -12954,6 +12954,10 @@
   "2026-11-12": [
    8.52,
    2.62
+  ],
+  "2026-11-13": [
+   13.08,
+   5.88
   ]
  }
 }

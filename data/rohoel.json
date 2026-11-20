@@ -1,13 +1,9 @@
 {
- "stand": "2026-11-19T20:31:39Z",
- "datum": "2026-11-19",
- "brent_usd": 89.69,
- "aenderung_prozent": -2.46,
+ "stand": "2026-11-20T02:17:50Z",
+ "datum": "2026-11-20",
+ "brent_usd": 89.9,
+ "aenderung_prozent": -2.26,
  "verlauf": [
-  [
-   "2026-08-27",
-   89.7
-  ],
   [
    "2026-08-28",
    89.31
@@ -242,7 +238,11 @@
   ],
   [
    "2026-11-19",
-   89.69
+   91.98
+  ],
+  [
+   "2026-11-20",
+   89.9
   ]
  ],
  "quelle": "Yahoo Finance (Brent Future BZ=F, verzögert)"
