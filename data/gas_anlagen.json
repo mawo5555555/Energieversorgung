@@ -1,5 +1,5 @@
 {
- "stand": "2026-11-19T20:31:39Z",
+ "stand": "2026-11-20T11:30:24Z",
  "quelle": "GIE AGSI+ (agsi.gie.eu)",
  "anlagen": [
   {
@@ -279,6 +279,16 @@
    "fuellstand_prozent": 63.56,
    "gas_twh": 1.0767,
    "kapazitaet_twh": 1.694,
+   "einspeicherung_gwh": 0.0,
+   "ausspeicherung_gwh": 0.0
+  },
+  {
+   "name": "Reckrod",
+   "firma": "MET Speicher GmbH",
+   "gastag": "2026-11-18",
+   "fuellstand_prozent": 74.23,
+   "gas_twh": 1.1951,
+   "kapazitaet_twh": 1.61,
    "einspeicherung_gwh": 0.0,
    "ausspeicherung_gwh": 0.0
   },
