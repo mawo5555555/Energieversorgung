@@ -1,8 +1,8 @@
 {
- "stand": "2026-11-20T11:30:24Z",
+ "stand": "2026-11-20T12:10:21Z",
  "datum": "2026-11-20",
- "preis": 86.4,
- "aenderung_prozent": 2.31,
+ "preis": 86.76,
+ "aenderung_prozent": 2.73,
  "verlauf": [
   [
    "2026-08-28",
@@ -242,7 +242,7 @@
   ],
   [
    "2026-11-20",
-   86.4
+   86.76
   ]
  ],
  "quelle": "Yahoo Finance (TTF Erdgas-Future, Euro je MWh, verzögert)"
