@@ -1,13 +1,13 @@
 {
- "stand": "2026-11-21T11:45:59Z",
+ "stand": "2026-11-21T17:28:21Z",
  "quelle": "GIE AGSI+ (agsi.gie.eu)",
  "deutschland": {
   "gastag": "2026-11-19",
-  "fuellstand_prozent": 57.0,
-  "gas_twh": 141.0013,
+  "fuellstand_prozent": 56.98,
+  "gas_twh": 140.9486,
   "kapazitaet_twh": 247.3563,
-  "einspeicherung_gwh": 33.85,
-  "ausspeicherung_gwh": 390.4,
+  "einspeicherung_gwh": 26.03,
+  "ausspeicherung_gwh": 429.8,
   "verlauf": [
    [
     "2026-10-22",
@@ -123,7 +123,7 @@
    ],
    [
     "2026-11-19",
-    57.0
+    56.98
    ]
   ],
   "fluss": [
@@ -189,13 +189,13 @@
    ],
    [
     "2026-11-18",
-    158.22,
+    152.81,
     60.3
    ],
    [
     "2026-11-19",
-    33.85,
-    390.4
+    26.03,
+    429.8
    ]
   ]
  },

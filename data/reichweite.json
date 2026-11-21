@@ -1,15 +1,15 @@
 {
- "stand": "2026-11-21T11:45:59Z",
+ "stand": "2026-11-21T17:28:21Z",
  "annahmen": "Reine Schätzung nur für die Gasspeicher, ohne Importe, LNG und Verbrauchsänderungen. Grundlage: mittlere Ein- und Ausspeicherung der letzten 7 Tage. Mit Wetter: Die Ausspeicherung folgt dem Heizbedarf (Heizgradtage, Basis 15 °C) der Temperaturvorhersage.",
  "deutschland": {
   "name": "Deutschland",
-  "inhalt_twh": 141.001,
+  "inhalt_twh": 140.949,
   "kapazitaet_twh": 247.356,
   "fuellstand_prozent": 57.0,
-  "ausspeicherung_7t_gwh": 280.2,
-  "einspeicherung_7t_gwh": 75.3,
-  "netto_7t_gwh": 204.9,
-  "tage_aktuell": 688,
+  "ausspeicherung_7t_gwh": 285.8,
+  "einspeicherung_7t_gwh": 73.4,
+  "netto_7t_gwh": 212.4,
+  "tage_aktuell": 664,
   "projektion": [
    [
     "2026-11-21",
@@ -21,60 +21,60 @@
    ],
    [
     "2026-11-23",
-    56.6
+    56.5
    ],
    [
     "2026-11-24",
-    56.4
+    56.3
    ],
    [
     "2026-11-25",
-    56.2
+    56.1
    ],
    [
     "2026-11-26",
-    56.0
+    55.9
    ],
    [
     "2026-11-27",
-    55.8
+    55.7
    ],
    [
     "2026-11-28",
-    55.6
+    55.5
    ],
    [
     "2026-11-29",
-    55.4
+    55.3
    ],
    [
     "2026-11-30",
-    55.2
-   ],
-   [
-    "2026-12-01",
     55.1
    ],
    [
+    "2026-12-01",
+    55.0
+   ],
+   [
     "2026-12-02",
-    54.9
+    54.8
    ],
    [
     "2026-12-03",
-    54.7
+    54.6
    ],
    [
     "2026-12-04",
-    54.6
+    54.4
    ]
   ],
-  "tage_wetter": 560,
+  "tage_wetter": 286,
   "ziel": {
    "prozent": 30,
    "datum": "2027-02-01",
    "tage_bis_stichtag": 72,
-   "tage_bis_marke": 326,
-   "marke_ca_datum": "2027-10-13"
+   "tage_bis_marke": 314,
+   "marke_ca_datum": "2027-10-01"
   }
  },
  "ziel_quelle": "Bundesnetzagentur, Seite „Aktuelle Lage der Gasversorgung“ (Füllstandsvorgabe 30 % zum 1. Februar 2027)",
@@ -91,7 +91,7 @@
    "projektion": [
     [
      "2026-11-21",
-     90.7
+     90.8
     ],
     [
      "2026-11-22",
