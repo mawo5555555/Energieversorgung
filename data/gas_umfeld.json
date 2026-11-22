@@ -1,16 +1,16 @@
 {
- "stand": "2026-11-22T11:58:46Z",
+ "stand": "2026-11-22T18:32:35Z",
  "quelle": "GIE AGSI+ (agsi.gie.eu)",
  "ohne_daten": [],
  "anlagen": [
   {
    "name": "Rüdersdorf H (EWE)",
    "region": "Brandenburg",
-   "gastag": "2026-11-20",
+   "gastag": "2026-11-21",
    "fuellstand_prozent": 89.95,
    "gas_twh": 0.8986,
    "kapazitaet_twh": 0.999,
-   "ausspeicherung_gwh": 8.0,
+   "ausspeicherung_gwh": 0.0,
    "einspeicherung_gwh": 0.0,
    "ausspeicherleistung_gwh": 32.76,
    "einspeicherleistung_gwh": 10.66,
@@ -111,21 +111,26 @@
      "2026-11-20",
      32.76,
      89.95
+    ],
+    [
+     "2026-11-21",
+     32.76,
+     89.95
     ]
    ]
   },
   {
    "name": "Kraak",
    "region": "Mecklenburg-Vorpommern",
-   "gastag": "2026-11-20",
+   "gastag": "2026-11-21",
    "fuellstand_prozent": 84.08,
    "gas_twh": 1.9086,
    "kapazitaet_twh": 2.27,
-   "ausspeicherung_gwh": 3.7,
+   "ausspeicherung_gwh": 0.0,
    "einspeicherung_gwh": 0.0,
    "ausspeicherleistung_gwh": 80.64,
    "einspeicherleistung_gwh": 48.38,
-   "ausspeicherung_7t_gwh": 1.4,
+   "ausspeicherung_7t_gwh": 0.7,
    "einspeicherung_7t_gwh": 0.0,
    "leistung_verlauf": [
     [
@@ -222,22 +227,27 @@
      "2026-11-20",
      80.64,
      84.08
+    ],
+    [
+     "2026-11-21",
+     80.64,
+     84.08
     ]
    ]
   },
   {
    "name": "Peckensen",
    "region": "Sachsen-Anhalt",
-   "gastag": "2026-11-20",
-   "fuellstand_prozent": 85.01,
-   "gas_twh": 3.2992,
+   "gastag": "2026-11-21",
+   "fuellstand_prozent": 85.04,
+   "gas_twh": 3.3004,
    "kapazitaet_twh": 3.881,
    "ausspeicherung_gwh": 0.0,
-   "einspeicherung_gwh": 0.0,
+   "einspeicherung_gwh": 1.17,
    "ausspeicherleistung_gwh": 244.32,
    "einspeicherleistung_gwh": 86.04,
-   "ausspeicherung_7t_gwh": 0.3,
-   "einspeicherung_7t_gwh": 0.1,
+   "ausspeicherung_7t_gwh": 0.1,
+   "einspeicherung_7t_gwh": 0.3,
    "leistung_verlauf": [
     [
      "2026-11-02",
@@ -333,22 +343,27 @@
      "2026-11-20",
      244.32,
      85.01
+    ],
+    [
+     "2026-11-21",
+     244.32,
+     85.04
     ]
    ]
   },
   {
    "name": "Staßfurt",
    "region": "Sachsen-Anhalt",
-   "gastag": "2026-11-20",
-   "fuellstand_prozent": 83.1,
-   "gas_twh": 5.3133,
+   "gastag": "2026-11-21",
+   "fuellstand_prozent": 83.23,
+   "gas_twh": 5.3214,
    "kapazitaet_twh": 6.3936,
-   "ausspeicherung_gwh": 6.5,
-   "einspeicherung_gwh": 0.0,
+   "ausspeicherung_gwh": 0.0,
+   "einspeicherung_gwh": 8.05,
    "ausspeicherleistung_gwh": 179.74,
    "einspeicherleistung_gwh": 85.72,
-   "ausspeicherung_7t_gwh": 3.7,
-   "einspeicherung_7t_gwh": 1.6,
+   "ausspeicherung_7t_gwh": 2.7,
+   "einspeicherung_7t_gwh": 2.8,
    "leistung_verlauf": [
     [
      "2026-11-02",
@@ -444,21 +459,26 @@
      "2026-11-20",
      179.74,
      83.1
+    ],
+    [
+     "2026-11-21",
+     179.74,
+     83.23
     ]
    ]
   },
   {
    "name": "VNG Storage Hub (Bernburg, Bad Lauchstädt, Katharina)",
    "region": "Sachsen-Anhalt",
-   "gastag": "2026-11-20",
-   "fuellstand_prozent": 61.63,
-   "gas_twh": 17.7527,
+   "gastag": "2026-11-21",
+   "fuellstand_prozent": 61.49,
+   "gas_twh": 17.7129,
    "kapazitaet_twh": 28.8064,
-   "ausspeicherung_gwh": 41.9,
+   "ausspeicherung_gwh": 39.8,
    "einspeicherung_gwh": 0.0,
    "ausspeicherleistung_gwh": 785.08,
    "einspeicherleistung_gwh": 486.01,
-   "ausspeicherung_7t_gwh": 17.2,
+   "ausspeicherung_7t_gwh": 19.4,
    "einspeicherung_7t_gwh": 0.1,
    "leistung_verlauf": [
     [
@@ -555,6 +575,11 @@
      "2026-11-20",
      785.08,
      61.63
+    ],
+    [
+     "2026-11-21",
+     785.08,
+     61.49
     ]
    ]
   }
@@ -642,17 +667,17 @@
   }
  ],
  "summe": {
-  "gas_twh": 29.17,
+  "gas_twh": 29.14,
   "kapazitaet_twh": 42.35,
-  "fuellstand_prozent": 68.9,
-  "ausspeicherung_7t_gwh": 23.8,
-  "einspeicherung_7t_gwh": 2.0,
+  "fuellstand_prozent": 68.8,
+  "ausspeicherung_7t_gwh": 24.1,
+  "einspeicherung_7t_gwh": 3.4,
   "ausspeicherleistung_gwh": 1322.5
  },
  "projektion": [
   [
    "2026-11-22",
-   68.8
+   68.7
   ],
   [
    "2026-11-23",
@@ -664,23 +689,23 @@
   ],
   [
    "2026-11-25",
-   68.6
-  ],
-  [
-   "2026-11-26",
    68.5
   ],
   [
-   "2026-11-27",
+   "2026-11-26",
    68.4
   ],
   [
-   "2026-11-28",
+   "2026-11-27",
    68.3
   ],
   [
-   "2026-11-29",
+   "2026-11-28",
    68.2
+  ],
+  [
+   "2026-11-29",
+   68.1
   ],
   [
    "2026-11-30",
@@ -692,11 +717,11 @@
   ],
   [
    "2026-12-02",
-   67.8
+   67.7
   ],
   [
    "2026-12-03",
-   67.7
+   67.6
   ],
   [
    "2026-12-04",
