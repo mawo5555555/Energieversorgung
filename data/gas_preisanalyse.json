@@ -1,18 +1,18 @@
 {
- "stand": "2026-11-21T23:11:31Z",
+ "stand": "2026-11-22T11:16:29Z",
  "quelle": "Yahoo Finance (TTF) und GIE AGSI+",
  "jahre": [
   {
    "jahr": 2018,
    "ttf_mittel": 23.2,
-   "einspeicherung_mittel_gwh": 960,
-   "tage": 157
+   "einspeicherung_mittel_gwh": 880,
+   "tage": 214
   },
   {
    "jahr": 2019,
    "ttf_mittel": 12.9,
-   "einspeicherung_mittel_gwh": 365,
-   "tage": 122
+   "einspeicherung_mittel_gwh": 548,
+   "tage": 214
   },
   {
    "jahr": 2020,
@@ -57,7 +57,7 @@
    "tage": 214
   }
  ],
- "korrelation": 0.62,
+ "korrelation": 0.66,
  "anzahl_jahre": 9,
  "ttf_aktuell": 88.5,
  "perzentil_seit_2018": 89,
