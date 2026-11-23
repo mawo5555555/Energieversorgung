@@ -1,13 +1,13 @@
 {
- "stand": "2026-11-23T13:38:55Z",
+ "stand": "2026-11-23T21:16:34Z",
  "quelle": "GIE ALSI (alsi.gie.eu)",
  "deutschland": {
   "name": "Deutschland gesamt",
   "firma": "",
-  "gastag": "2026-11-21",
+  "gastag": "2026-11-22",
   "fuellstand_prozent": null,
-  "inhalt_gwh": 1805.07,
-  "ausspeisung_gwh": 299.1,
+  "inhalt_gwh": 2162.48,
+  "ausspeisung_gwh": 335.6,
   "anlieferung_schiffe": null,
   "verlauf": [
    [
@@ -45,6 +45,10 @@
    [
     "2026-11-21",
     null
+   ],
+   [
+    "2026-11-22",
+    null
    ]
   ]
  },
@@ -52,46 +56,46 @@
   {
    "name": "Wilhelmshaven LNG Terminal 1 (FSRU Hoegh Esperanza)",
    "firma": "Deutsche Energy Terminal GmbH",
-   "gastag": "2026-11-21",
+   "gastag": "2026-11-22",
    "fuellstand_prozent": null,
-   "inhalt_gwh": 60.88,
-   "ausspeisung_gwh": 1.1,
+   "inhalt_gwh": 55.8,
+   "ausspeisung_gwh": 1.4,
    "anlieferung_schiffe": null
   },
   {
    "name": "Brunsbuettel LNG Terminal 1 (FSRU Hoegh Gannet)",
    "firma": "Deutsche Energy Terminal GmbH",
-   "gastag": "2026-11-21",
+   "gastag": "2026-11-22",
    "fuellstand_prozent": null,
-   "inhalt_gwh": 643.99,
-   "ausspeisung_gwh": 54.7,
+   "inhalt_gwh": 798.65,
+   "ausspeisung_gwh": 90.9,
    "anlieferung_schiffe": null
   },
   {
    "name": "Stade LNG Terminal 1 (FSRU Energos Force)",
    "firma": "Deutsche Energy Terminal GmbH",
-   "gastag": "2026-11-21",
+   "gastag": "2026-11-22",
    "fuellstand_prozent": null,
-   "inhalt_gwh": 699.0,
-   "ausspeisung_gwh": 120.8,
+   "inhalt_gwh": 342.02,
+   "ausspeisung_gwh": 120.7,
    "anlieferung_schiffe": null
   },
   {
    "name": "Wilhelmshaven LNG Terminal 2 (FSRU Excelerate Excelsior)",
    "firma": "Deutsche Energy Terminal GmbH",
-   "gastag": "2026-11-21",
+   "gastag": "2026-11-22",
    "fuellstand_prozent": null,
-   "inhalt_gwh": 237.61,
+   "inhalt_gwh": 808.33,
    "ausspeisung_gwh": 120.8,
    "anlieferung_schiffe": null
   },
   {
    "name": "Mukran LNG Terminal (FSRU Neptune / FSRU Energos Power)",
    "firma": "Deutsche ReGas GmbH & Co. KGaA",
-   "gastag": "2026-11-21",
+   "gastag": "2026-11-22",
    "fuellstand_prozent": null,
-   "inhalt_gwh": 163.6,
-   "ausspeisung_gwh": 1.7,
+   "inhalt_gwh": 157.68,
+   "ausspeisung_gwh": 1.8,
    "anlieferung_schiffe": null
   }
  ]

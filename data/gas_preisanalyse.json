@@ -1,5 +1,5 @@
 {
- "stand": "2026-11-23T08:58:50Z",
+ "stand": "2026-11-23T21:16:34Z",
  "quelle": "Yahoo Finance (TTF) und GIE AGSI+",
  "jahre": [
   {
@@ -59,8 +59,8 @@
  ],
  "korrelation": 0.66,
  "anzahl_jahre": 9,
- "ttf_aktuell": 88.5,
+ "ttf_aktuell": 91.4,
  "perzentil_seit_2018": 89,
- "aenderung_30_tage_prozent": 8.6,
+ "aenderung_30_tage_prozent": 8.3,
  "ttf_median_seit_2018": 32.0
 }

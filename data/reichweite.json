@@ -1,80 +1,80 @@
 {
- "stand": "2026-11-23T13:38:55Z",
+ "stand": "2026-11-23T21:16:34Z",
  "annahmen": "Reine Schätzung nur für die Gasspeicher, ohne Importe, LNG und Verbrauchsänderungen. Grundlage: mittlere Ein- und Ausspeicherung der letzten 7 Tage. Mit Wetter: Die Ausspeicherung folgt dem Heizbedarf (Heizgradtage, Basis 15 °C) der Temperaturvorhersage.",
  "deutschland": {
   "name": "Deutschland",
-  "inhalt_twh": 140.089,
+  "inhalt_twh": 139.685,
   "kapazitaet_twh": 247.356,
-  "fuellstand_prozent": 56.6,
-  "ausspeicherung_7t_gwh": 310.1,
-  "einspeicherung_7t_gwh": 70.2,
-  "netto_7t_gwh": 239.9,
-  "tage_aktuell": 584,
+  "fuellstand_prozent": 56.5,
+  "ausspeicherung_7t_gwh": 353.1,
+  "einspeicherung_7t_gwh": 64.6,
+  "netto_7t_gwh": 288.5,
+  "tage_aktuell": 484,
   "projektion": [
    [
     "2026-11-23",
-    56.4
-   ],
-   [
-    "2026-11-24",
     56.2
    ],
    [
-    "2026-11-25",
+    "2026-11-24",
     56.0
    ],
    [
-    "2026-11-26",
+    "2026-11-25",
     55.8
    ],
    [
+    "2026-11-26",
+    55.5
+   ],
+   [
     "2026-11-27",
-    55.6
+    55.2
    ],
    [
     "2026-11-28",
-    55.3
-   ],
-   [
-    "2026-11-29",
-    55.1
-   ],
-   [
-    "2026-11-30",
     55.0
    ],
    [
+    "2026-11-29",
+    54.7
+   ],
+   [
+    "2026-11-30",
+    54.5
+   ],
+   [
     "2026-12-01",
-    54.8
-   ],
-   [
-    "2026-12-02",
-    54.6
-   ],
-   [
-    "2026-12-03",
-    54.4
-   ],
-   [
-    "2026-12-04",
     54.3
    ],
    [
-    "2026-12-05",
+    "2026-12-02",
     54.2
    ],
    [
-    "2026-12-06",
+    "2026-12-03",
     54.1
+   ],
+   [
+    "2026-12-04",
+    53.9
+   ],
+   [
+    "2026-12-05",
+    53.8
+   ],
+   [
+    "2026-12-06",
+    53.7
    ]
   ],
-  "tage_wetter": 555,
+  "tage_wetter": 551,
   "ziel": {
    "prozent": 30,
    "datum": "2027-02-01",
    "tage_bis_stichtag": 70,
-   "tage_bis_marke": 275,
-   "marke_ca_datum": "2027-08-25"
+   "tage_bis_marke": 227,
+   "marke_ca_datum": "2027-07-08"
   }
  },
  "ziel_quelle": "Bundesnetzagentur, Seite „Aktuelle Lage der Gasversorgung“ (Füllstandsvorgabe 30 % zum 1. Februar 2027)",
@@ -87,7 +87,7 @@
    "ausspeicherung_7t_gwh": 1.2,
    "einspeicherung_7t_gwh": 0.2,
    "netto_7t_gwh": 1.0,
-   "tage_aktuell": 872,
+   "tage_aktuell": 875,
    "projektion": [
     [
      "2026-11-23",
@@ -127,26 +127,26 @@
     ],
     [
      "2026-12-02",
-     88.1
+     88.2
     ],
     [
      "2026-12-03",
-     87.9
+     88.1
     ],
     [
      "2026-12-04",
-     87.8
+     87.9
     ],
     [
      "2026-12-05",
-     87.7
+     87.9
     ],
     [
      "2026-12-06",
-     87.6
+     87.8
     ]
    ],
-   "tage_wetter": 890
+   "tage_wetter": 892
   }
  ]
 }
