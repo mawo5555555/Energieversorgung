@@ -1,5 +1,5 @@
 {
- "stand": "2026-11-22T18:32:35Z",
+ "stand": "2026-11-23T00:17:09Z",
  "quelle": "GIE AGSI+ (agsi.gie.eu)",
  "laender": [
   {
@@ -61,16 +61,6 @@
    "kapazitaet_twh": 203.4249,
    "einspeicherung_gwh": 214.62,
    "ausspeicherung_gwh": 554.7
-  },
-  {
-   "code": "PL",
-   "name": "Polen",
-   "gastag": "2026-11-21",
-   "fuellstand_prozent": 95.31,
-   "gas_twh": 35.1214,
-   "kapazitaet_twh": 36.8491,
-   "einspeicherung_gwh": 39.1,
-   "ausspeicherung_gwh": 65.9
   },
   {
    "code": "CZ",
@@ -143,5 +133,7 @@
    "ausspeicherung_gwh": 66.2
   }
  ],
- "ohne_daten": []
+ "ohne_daten": [
+  "PL"
+ ]
 }
