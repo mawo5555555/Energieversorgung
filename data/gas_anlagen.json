@@ -1,5 +1,5 @@
 {
- "stand": "2026-11-22T18:32:35Z",
+ "stand": "2026-11-23T08:58:50Z",
  "quelle": "GIE AGSI+ (agsi.gie.eu)",
  "anlagen": [
   {
@@ -31,16 +31,6 @@
    "kapazitaet_twh": 11.3584,
    "einspeicherung_gwh": 0.0,
    "ausspeicherung_gwh": 12.7
-  },
-  {
-   "name": "Etzel ESE (Uniper Energy Storage)",
-   "firma": "Uniper Energy Storage GmbH",
-   "gastag": "2026-11-21",
-   "fuellstand_prozent": 68.22,
-   "gas_twh": 7.4025,
-   "kapazitaet_twh": 10.8509,
-   "einspeicherung_gwh": 0.0,
-   "ausspeicherung_gwh": 2.8
   },
   {
    "name": "Etzel EKB",
