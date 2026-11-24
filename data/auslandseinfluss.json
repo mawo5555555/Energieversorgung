@@ -1,12 +1,12 @@
 {
- "stand": "2026-11-23T08:58:50Z",
+ "stand": "2026-11-24T05:20:47Z",
  "quelle": "ENTSOG (Importe), Open-Meteo (Wetter)",
- "n": 271,
- "r2": 0.03,
- "koeff_nachbarn": -31.7,
- "t_nachbarn": -2.6,
- "koeff_de": 26.6,
- "t_de": 2.7,
+ "n": 361,
+ "r2": 0.02,
+ "koeff_nachbarn": -22.2,
+ "t_nachbarn": -2.3,
+ "koeff_de": 19.4,
+ "t_de": 2.5,
  "belegt": true,
  "winter": [
   {
@@ -24,6 +24,13 @@
    "tage": 91
   },
   {
+   "winter": "2024/25",
+   "netto_gwh": 1418,
+   "hdd_de": 11.3,
+   "hdd_nachbarn": 9.5,
+   "tage": 90
+  },
+  {
    "winter": "2025/26",
    "netto_gwh": 1561,
    "hdd_de": 11.7,
@@ -32,5 +39,5 @@
   }
  ],
  "kaltwelle_delta_hdd": 5.0,
- "effekt_kaltwelle_gwh": -158.0
+ "effekt_kaltwelle_gwh": -111.0
 }

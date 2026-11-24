@@ -1,11 +1,11 @@
 {
- "stand": "2026-11-23T21:16:34Z",
+ "stand": "2026-11-24T05:20:47Z",
  "rhein": {
   "pegel_cm": 222.0,
   "zustand": "normal",
   "min_30t": 5.0,
   "max_30t": 225.0,
-  "zeit": "2026-11-23T22:15:00+01:00",
+  "zeit": "2026-11-24T06:15:00+01:00",
   "quelle": "Pegelonline (WSV), Pegel Kaub"
  },
  "industrie": {
@@ -67,28 +67,28 @@
  "nachbarn_wetter": [
   {
    "land": "Frankreich",
-   "temp_naechste_7": 3.2,
-   "temp_letzte_7": 11.5
+   "temp_naechste_7": 3.5,
+   "temp_letzte_7": 10.7
   },
   {
    "land": "Polen",
-   "temp_naechste_7": -1.4,
-   "temp_letzte_7": 5.4
+   "temp_naechste_7": -1.7,
+   "temp_letzte_7": 5.0
   },
   {
    "land": "Niederlande",
-   "temp_naechste_7": 0.9,
-   "temp_letzte_7": 7.8
+   "temp_naechste_7": 1.6,
+   "temp_letzte_7": 7.2
   },
   {
    "land": "Österreich",
-   "temp_naechste_7": 0.5,
-   "temp_letzte_7": 8.3
+   "temp_naechste_7": -0.1,
+   "temp_letzte_7": 8.2
   },
   {
    "land": "Italien",
-   "temp_naechste_7": 11.5,
-   "temp_letzte_7": 16.1
+   "temp_naechste_7": 11.0,
+   "temp_letzte_7": 15.8
   }
  ]
 }
