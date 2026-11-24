@@ -118,5 +118,7 @@
   2.5,
   2.42
  ],
- "wind_variable": "wind_speed_10m_mean"
+ "wind_variable": "wind_speed_10m_mean",
+ "fehler": "HTTPError: HTTP Error 429: Too Many Requests",
+ "fehler_stand": "2026-11-24T17:38:02Z"
 }
