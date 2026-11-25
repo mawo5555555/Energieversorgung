@@ -658,7 +658,7 @@
     if (state.alle) renderFaktoren(state.alle);
   }
 
-  var APP_VERSION = "36", APP_DATUM = "25.11.2026";
+  var APP_VERSION = "37", APP_DATUM = "25.11.2026";
   function renderVersion(r) {
     var el = document.getElementById("version"); if (!el) return;
     var m = r[16] && r[16].modell_version, meta = r[0] || {};
