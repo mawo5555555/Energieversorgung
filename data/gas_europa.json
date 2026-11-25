@@ -1,5 +1,5 @@
 {
- "stand": "2026-11-25T18:17:15Z",
+ "stand": "2026-11-25T18:25:59Z",
  "quelle": "GIE AGSI+ (agsi.gie.eu)",
  "laender": [
   {
@@ -93,26 +93,6 @@
    "ausspeicherung_gwh": 185.9
   },
   {
-   "code": "ES",
-   "name": "Spanien",
-   "gastag": "2026-11-23",
-   "fuellstand_prozent": 79.25,
-   "gas_twh": 28.3983,
-   "kapazitaet_twh": 35.8318,
-   "einspeicherung_gwh": 0.0,
-   "ausspeicherung_gwh": 57.6
-  },
-  {
-   "code": "BE",
-   "name": "Belgien",
-   "gastag": "2026-11-23",
-   "fuellstand_prozent": 71.36,
-   "gas_twh": 5.4308,
-   "kapazitaet_twh": 7.61,
-   "einspeicherung_gwh": 16.86,
-   "ausspeicherung_gwh": 0.0
-  },
-  {
    "code": "DK",
    "name": "Dänemark",
    "gastag": "2026-11-23",
@@ -143,5 +123,8 @@
    "ausspeicherung_gwh": 125.2
   }
  ],
- "ohne_daten": []
+ "ohne_daten": [
+  "ES",
+  "BE"
+ ]
 }
