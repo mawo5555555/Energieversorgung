@@ -658,7 +658,7 @@
     if (state.alle) renderFaktoren(state.alle);
   }
 
-  var APP_VERSION = "37", APP_DATUM = "25.11.2026";
+  var APP_VERSION = "38", APP_DATUM = "25.11.2026";
   function renderVersion(r) {
     var el = document.getElementById("version"); if (!el) return;
     var m = r[16] && r[16].modell_version, meta = r[0] || {};
@@ -710,6 +710,45 @@
     set("cRueckblick", '<p style="margin:0 0 6px">So verlief der Winter tatsächlich (Füllstand Deutschland, GIE):</p><table><tr><th>Stichtag</th><th class="n">Füllstand</th></tr>' + ist + "</table>" +
       '<p class="meta">' + esc(d.temperatur || "") + "</p>" + '<h3 style="margin-top:12px">Was vorhergesagt wurde</h3>' + rows +
       '<p class="hint" style="margin-top:10px"><strong>Fazit:</strong> ' + esc(d.fazit || "") + '</p><p class="meta">' + esc(d.hinweis || "") + " Stand " + esc(d.stand || "") + ". Punkte: grün bis 5, orange bis 10, rot über 10 Prozentpunkte Abweichung.</p>");
+  }
+  function renderRisiko(v) {
+    var nd = noData(v, "Risiko"); if (nd) return set("cRisiko", nd);
+    var r = v && v.risiko;
+    if (!r || r.fehler || !r.winter) return set("cRisiko", errNote(v) + hint((r && r.fehler) || "Noch keine Daten."));
+    function pc(x) { return x == null ? "–" : (x === 0 ? "0" : nf0.format(x * 100)) + " %"; }
+    var pz = r.perzentile;
+    var wrows = r.winter.slice().sort(function (a, b) { return b.ziel - a.ziel; }).map(function (w) {
+      return "<tr><td>" + esc(w.winter) + '</td><td class="n">' + nf.format(w.mittel_djf_c) + ' °C</td><td class="n">' + nf0.format(w.ziel) + ' %</td><td class="n">' + nf0.format(w.ende) + " %</td></tr>";
+    }).join("");
+    var h = '<p class="meta" style="margin-top:0">Die aktuelle Lage (Füllstand, Wettervorhersage der nächsten Tage) wird mit dem tatsächlichen Wetter von <strong>' + r.anzahl + " Wintern</strong> (" + esc(r.von) + " bis " + esc(r.bis) + ") durchgerechnet. Das zeigt, wie stark das Wetter das Ergebnis streut. Es sind keine Eintrittswahrscheinlichkeiten im strengen Sinn.</p>" +
+      '<table><tr><th>Füllstand</th><th class="n">ungünstig (10 %)</th><th class="n">mittel</th><th class="n">günstig (90 %)</th></tr>' +
+      '<tr><td>am 1. Februar</td><td class="n">' + nf0.format(pz.ziel.p10) + ' %</td><td class="n"><strong>' + nf0.format(pz.ziel.p50) + ' %</strong></td><td class="n">' + nf0.format(pz.ziel.p90) + " %</td></tr>" +
+      '<tr><td>am 31. März</td><td class="n">' + nf0.format(pz.ende.p10) + ' %</td><td class="n"><strong>' + nf0.format(pz.ende.p50) + ' %</strong></td><td class="n">' + nf0.format(pz.ende.p90) + " %</td></tr></table>" +
+      '<p style="margin:8px 0 0">In <strong>' + pc(r.anteil_unter30_feb) + '</strong> der Winter liegt der Füllstand am 1. Februar unter der Vorgabe von 30 %, in <strong>' + pc(r.anteil_unter20_irgendwann) + "</strong> fällt er unter 20 %.</p>" +
+      '<p class="hint">Vorsicht beim Winterende: Im Rückblick rechnete das Modell das Winterende 2025/26 um 11 Punkte zu niedrig. Die Werte für 31. März und der Anteil mit Fehlmenge (' + pc(r.anteil_fehlmenge) + ") sind daher wahrscheinlich <strong>zu pessimistisch</strong>. Verlässlicher ist der 1. Februar (Abweichung im Rückblick etwa 3 bis 8 Punkte). Die Heizkurve ist auf Daten seit 2018 angepasst, die Winter 2009 bis 2017 liegen teils außerhalb davon.</p>" +
+      '<details style="margin-top:6px"><summary style="cursor:pointer;color:var(--blue)">Alle Winter anzeigen</summary><table><tr><th>Wetter des Winters</th><th class="n">Dez.–Feb.</th><th class="n">1. Feb.</th><th class="n">31. März</th></tr>' + wrows + "</table></details>";
+    var sp = r.sparen || [];
+    if (sp.length) {
+      function sx(x) { return x == null ? "über 60 %" : (x === 0 ? "keine" : nf.format(x * 100) + " %"); }
+      h += '<h3 style="margin-top:14px">Wie viel Einsparung wäre nötig?</h3><p class="meta" style="margin-top:0">Durchschnittliche Einsparung gegenüber dem Winterverbrauch (' + nf0.format(r.verbrauch_basis_gwh) + " GWh/Tag, Bundesnetzagentur 2025) von jetzt bis 31. März, damit der Füllstand am Winterende nicht unter dem Ziel liegt. Zum Vergleich: 2022/23 wurden etwa 17,6 % gespart.</p>" +
+        '<table><tr><th>Ziel am 31. März</th><th class="n">Normal</th><th class="n">Kalt</th><th class="n">ungünstiger Winter</th><th class="n">kältester Winter</th></tr>' +
+        sp.map(function (z) { return "<tr><td>mindestens " + z.ziel_prozent + ' %</td><td class="n">' + sx(z.normal) + '</td><td class="n">' + sx(z.kalt) + '</td><td class="n">' + sx(z.p10_winter) + '<div class="meta" style="margin:0">' + esc(z.p10_name) + '</div></td><td class="n">' + sx(z.kaeltester) + '<div class="meta" style="margin:0">' + esc(z.kaeltester_name) + "</div></td></tr>"; }).join("") + "</table>" +
+        '<p class="meta">Die 20-%-Marke entspricht der Gasmangellage-Anzeige dieser Seite, 30 % dem Vergleichswert, den ENTSOG für das Winterende in Europa verwendet. Die Werte folgen dem Modell und sind beim Winterende wohl eher zu hoch.</p>';
+    }
+    var st = r.spitzentag;
+    if (st) {
+      var zr = (st.zeilen || []).map(function (z) {
+        var kol = z.reserve_tief_gwh != null && z.reserve_tief_gwh < 0 ? "var(--red)" : (z.reserve_tief_gwh != null && z.reserve_tief_gwh < 300 ? "var(--orange)" : "var(--green)");
+        return "<tr><td>" + nf0.format(z.verbrauch_gwh) + '<div class="meta" style="margin:0">' + esc(z.beschreibung) + '</div></td><td class="n">' + nf0.format(z.bedarf_speicher_gwh) + '</td><td class="n">' + nf0.format(z.reserve_hoch_gwh) + '</td><td class="n" style="color:' + kol + '"><strong>' + (z.reserve_tief_gwh == null ? "–" : nf0.format(z.reserve_tief_gwh)) + "</strong></td></tr>";
+      }).join("");
+      var kt = (st.kaelteste_tage || []).slice(0, 4).map(function (k) { return "<tr><td>" + esc(k.tag) + '</td><td class="n">' + nf.format(k.temp_c) + ' °C</td><td class="n">' + nf0.format(k.entnahme_gwh) + '</td><td class="n">' + nf0.format(k.fuellstand) + " %</td></tr>"; }).join("");
+      h += '<h3 style="margin-top:14px">Spitzentag: Reicht die Leistung?</h3><p class="meta" style="margin-top:0">Am kältesten Tag zählt nicht der Füllstand, sondern wie viel pro Tag geliefert werden kann. Zufuhr heute: ' + nf0.format(st.zufuhr_netto_gwh) + " GWh/Tag (Importe, LNG, Förderung abzüglich Export). Ausspeicherleistung: bis " + nf0.format(st.leistung_hoch_gwh) + " GWh/Tag bei gut gefüllten Speichern, etwa " + nf0.format(st.leistung_tief_gwh) + " bei 10 bis 20 % Füllstand.</p>" +
+        '<table><tr><th>Verbrauch (GWh/Tag)</th><th class="n">aus Speichern</th><th class="n">Reserve (voll)</th><th class="n">Reserve (fast leer)</th></tr>' + zr + "</table>" +
+        '<p class="meta">Die Spitzenwerte aus der Tabelle gelten für Tagesmittel. Die höchste je gemessene Entnahme war ' + nf0.format((st.max_entnahme || {}).gwh) + " GWh am " + esc((st.max_entnahme || {}).tag || "") + ". Kälteste Tage seit 2018:</p>" +
+        '<table><tr><th>Tag</th><th class="n">Temperatur</th><th class="n">Entnahme</th><th class="n">Füllstand</th></tr>' + kt + "</table>" +
+        '<p class="hint">Dieser Test nutzt gemessene Leistung und amtliche Verbrauchswerte, nicht die Modellkurve: Sie trifft Extremtage nicht (am 28.2.2018 mit −8,6 °C wurden 3 608 GWh entnommen, das Modell gibt dafür deutlich weniger an, auch weil die Importe damals niedriger waren). Rot: Die Leistung reicht bei fast leeren Speichern nicht.</p>';
+    }
+    set("cRisiko", errNote(v) + h);
   }
   function renderPipe(d) {
     var nd = noData(d, "Pipelines"); if (nd) return set("cPipe", nd);
@@ -781,7 +820,7 @@
       [function () { renderSpeicherDE(r[1]); }, function () { renderSpeicherBB(r[1]); },
         function () { renderLngEin(r[2]); }, function () { renderPipe(r[3]); },
         function () { renderPreis(r[4]); }, function () { renderMix(r[4]); }, function () { renderFreq(r[5]); }, function () { renderKraft(r[6]); },
-        function () { renderOel(r[7]); }, function () { renderReich(r[8], r[16]); }, function () { renderHist(r[9]); }, function () { renderWetter(r[10]); }, function () { renderEuropa(r[11]); }, function () { renderAnlagen(r[12]); }, function () { renderTtf(r[13], r[19]); }, function () { renderLngTanks(r[14]); }, function () { renderUmfeld(r[15]); }, function () { renderVorausschau(r[16], r[20]); }, function () { renderEinsp(r[16]); }, function () { renderUmfeldVor(r[17], r[15]); }, function () { renderStoerungen(r[18]); }, function () { renderUeberblick(r[16], r[17]); }, function () { renderVerstromung(r[16]); }, function () { renderModellFaktoren(r[16], r[21]); }, function () { renderAusland(r[16], r[3], r[22], r[21]); }, function () { renderMassnahmen(r[23], r[16]); }, function () { renderPruefung(r[24]); }, function () { renderPreise(r[25]); }, function () { renderBilanz(r[26], r[3], r[2], r[16], r[9]); }, function () { renderVersion(r); }, function () { renderRueckblick(r[27]); }, function () { state.alle = r; renderFaktoren(r); }, function () { renderVersorgung(r[16], r[17]); }
+        function () { renderOel(r[7]); }, function () { renderReich(r[8], r[16]); }, function () { renderHist(r[9]); }, function () { renderWetter(r[10]); }, function () { renderEuropa(r[11]); }, function () { renderAnlagen(r[12]); }, function () { renderTtf(r[13], r[19]); }, function () { renderLngTanks(r[14]); }, function () { renderUmfeld(r[15]); }, function () { renderVorausschau(r[16], r[20]); }, function () { renderEinsp(r[16]); }, function () { renderUmfeldVor(r[17], r[15]); }, function () { renderStoerungen(r[18]); }, function () { renderUeberblick(r[16], r[17]); }, function () { renderVerstromung(r[16]); }, function () { renderModellFaktoren(r[16], r[21]); }, function () { renderAusland(r[16], r[3], r[22], r[21]); }, function () { renderMassnahmen(r[23], r[16]); }, function () { renderPruefung(r[24]); }, function () { renderPreise(r[25]); }, function () { renderBilanz(r[26], r[3], r[2], r[16], r[9]); }, function () { renderVersion(r); }, function () { renderRueckblick(r[27]); }, function () { renderRisiko(r[16]); }, function () { state.alle = r; renderFaktoren(r); }, function () { renderVersorgung(r[16], r[17]); }
       ].forEach(function (f) { try { f(); } catch (e) { if (window.console) console.error(e); } });
     });
   }

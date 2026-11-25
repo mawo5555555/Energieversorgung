@@ -860,6 +860,8 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None, strom=None,
             extrem_res = []
             sim_start = start_tag + timedelta(days=1)
             for name, tage_e in sorted(extrem["winter"].items()):
+                if name not in ("2009/10", "2010/11"):
+                    continue
                 y = int(name[:4])
 
                 def datum_e(d, y=y):
@@ -890,6 +892,136 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None, strom=None,
                                    "verlauf": sim["verlauf"][::2]})
     except Exception as e:  # noqa: BLE001
         extrem_res = [{"fehler": f"{type(e).__name__}: {e}"[:200]}]
+    # Wahrscheinlichkeiten aus vielen Wetterjahren, nötige Einsparung, Spitzentag
+    risiko = None
+    try:
+        alt = (extrem or {}).get("winter", {}) if extrem else {}
+        sim_start = start_tag + timedelta(days=1)
+        jahre = []
+        for y in range(2009, heute.year):
+            nm = f"{y}/{str(y + 1)[2:]}"
+            quelle_t = temp if y >= 2018 else alt.get(nm)
+            if not quelle_t:
+                continue
+            djf = [d for d in quelle_t if (d[:4] == str(y) and d[5:7] == "12") or (d[:4] == str(y + 1) and d[5:7] in ("01", "02"))]
+            if len(djf) < 80:
+                continue
+            jahre.append((y, nm, quelle_t))
+
+        def tm_von(y, tq):
+            def tm(d):
+                sd = d2s(d)
+                if sd in fc:
+                    return fc[sd]
+                jj = y if d.month >= 7 else y + 1
+                dd = date(jj, d.month, 28 if (d.month == 2 and d.day == 29) else d.day)
+                return tq.get(d2s(dd), normal.get(sd[5:], 5.0))
+            return tm
+
+        def wf_von(y):
+            def wf(d):
+                sd = d2s(d)
+                if sd in modell2["fcw"]:
+                    return modell2["wetter_tag"](d)
+                jj = y if d.month >= 7 else y + 1
+                w_a = modell2["strom"]["wind"].get(d2s(date(jj, d.month, 28 if (d.month == 2 and d.day == 29) else d.day)))
+                return (w_a[0], w_a[1]) if w_a else modell2["wetter_tag"](d)
+            return wf
+
+        cap_k = cap_fn("konstant", hoch, tief)
+        vg = (import_ref or {}).get("verbrauch_winter_gwh") or cfg["jahresverbrauch_twh"] / 365.0 * 1000.0
+
+        def lauf(tm, wf, spar=0.0):
+            ex = modell2["rest_fn"](tm, wf) if modell2 else None
+            return simuliere(sim_start, r0["twh"], r0["kap"], i_tag, tm, bis, fit, cap_k, basis, -vg * spar, ex)
+
+        def noetig(tm, wf, ziel_pct):
+            if lauf(tm, wf, 0.0)["verlauf"][-1][1] >= ziel_pct:
+                return 0.0
+            if lauf(tm, wf, 0.6)["verlauf"][-1][1] < ziel_pct:
+                return None
+            lo, hi = 0.0, 0.6
+            for _ in range(11):
+                mid = (lo + hi) / 2
+                if lauf(tm, wf, mid)["verlauf"][-1][1] >= ziel_pct:
+                    hi = mid
+                else:
+                    lo = mid
+            return round(hi, 3)
+
+        if len(jahre) >= 8:
+            lj = []
+            for y, nm, tq in jahre:
+                tm, wf = tm_von(y, tq), (wf_von(y) if modell2 else None)
+                sim = lauf(tm, wf)
+                djf_t = [tq[t] for t in tq if (t[:4] == str(y) and t[5:7] == "12") or (t[:4] == str(y + 1) and t[5:7] in ("01", "02"))]
+                lj.append({"winter": nm, "mittel_djf_c": round(sum(djf_t) / len(djf_t), 1), "ziel": wert_am(sim["verlauf"], cfg["ziel"]["datum"]), "ende": sim["verlauf"][-1][1],
+                           "tiefster": min(v for _, v in sim["verlauf"]), "fehl_twh": sim["fehl_twh"], "unter20": sim["erreicht"].get(20), "leer": sim["erreicht"].get("leer"), "_tm": tm, "_wf": wf})
+
+            def pz(werte, q):
+                v = sorted(werte)
+                return v[int(round(q * (len(v) - 1)))]
+            n = len(lj)
+            perz = {}
+            for k in ("ziel", "ende"):
+                vals = [x[k] for x in lj if x[k] is not None]
+                perz[k] = {"p10": pz(vals, 0.1), "p50": pz(vals, 0.5), "p90": pz(vals, 0.9), "min": min(vals), "max": max(vals)}
+            sortiert = sorted(lj, key=lambda x: x["ende"])
+            kalt10 = sortiert[max(0, int(round(0.1 * (n - 1))))]
+            med = sortiert[int(round(0.5 * (n - 1)))]
+            # Einsparbedarf: Szenarien (ohne Windvariante, wie in den Hauptszenarien) und Wetterjahre
+            def noetig_sz(name, ziel_pct):
+                def lauf_sz(sp_):
+                    exs = extra_fn_fuer(tmaps[name]) if extra_fn_fuer else None
+                    return simuliere(sim_start, r0["twh"], r0["kap"], i_tag, tmaps[name], bis, fit, cap_k, basis, -vg * sp_, exs)["verlauf"][-1][1]
+                if lauf_sz(0.0) >= ziel_pct:
+                    return 0.0
+                if lauf_sz(0.6) < ziel_pct:
+                    return None
+                lo, hi = 0.0, 0.6
+                for _ in range(11):
+                    mid = (lo + hi) / 2
+                    if lauf_sz(mid) >= ziel_pct:
+                        hi = mid
+                    else:
+                        lo = mid
+                return round(hi, 3)
+            spar = []
+            for ziel_pct in (20, 30):
+                zeile = {"ziel_prozent": ziel_pct, "normal": noetig_sz("normal", ziel_pct), "kalt": noetig_sz("kalt", ziel_pct),
+                         "p10_winter": noetig(kalt10["_tm"], kalt10["_wf"], ziel_pct), "p10_name": kalt10["winter"],
+                         "kaeltester": noetig(sortiert[0]["_tm"], sortiert[0]["_wf"], ziel_pct), "kaeltester_name": sortiert[0]["winter"]}
+                spar.append(zeile)
+            for x in lj:
+                x.pop("_tm", None)
+                x.pop("_wf", None)
+            risiko = {"anzahl": n, "von": lj[0]["winter"] if lj else None, "bis": lj[-1]["winter"] if lj else None, "winter": sorted(lj, key=lambda x: x["ende"]), "perzentile": perz,
+                      "anteil_unter30_feb": round(sum(1 for x in lj if x["ziel"] is not None and x["ziel"] < 30) / n, 2),
+                      "anteil_unter20_ende": round(sum(1 for x in lj if x["ende"] < 20) / n, 2),
+                      "anteil_unter20_irgendwann": round(sum(1 for x in lj if x["tiefster"] < 20) / n, 2),
+                      "anteil_fehlmenge": round(sum(1 for x in lj if x["fehl_twh"] > 0.05) / n, 2), "verbrauch_basis_gwh": round(vg), "sparen": spar}
+        # Spitzentag: gemessene Leistungsgrenzen gegen Verbrauchsniveaus aus amtlichen Quellen (nicht aus der Modellkurve, die an Extremtagen nicht trägt)
+        zuf = (import_ref or {}).get("zufuhr_netto_gesamt") or ((import_ref or {}).get("pipeline_netto") or 0) + ((import_ref or {}).get("lng") or 0)
+        vmax = (import_ref or {}).get("verbrauch_spitze_woche_gwh")
+        stufen = [(3500, "etwa heutiger Wochenverbrauch (Bundesnetzagentur, Woche 46)"), (4100, "Februar 2025 im Monatsmittel (DVGW)")]
+        if vmax:
+            stufen.append((round(vmax), "höchstes Wochenmittel 2018 bis 2021 (Bundesnetzagentur)"))
+        stufen += [(4700, "Januar im Monatsmittel bei Normaltemperatur (INES-Szenario)"), (5200, "Tagesspitze bei strengem Frost (eigene Annahme, +10 % auf INES)")]
+        zeilen = []
+        for v_, lab in sorted(stufen):
+            bed = v_ - zuf
+            zeilen.append({"verbrauch_gwh": v_, "beschreibung": lab, "bedarf_speicher_gwh": round(bed), "reserve_hoch_gwh": round(hoch - bed), "reserve_tief_gwh": round(tief - bed) if tief else None})
+        kalte = []
+        for t_, v_ in sorted(((t, v) for t, v in temp.items() if t in hist and hist[t].get("w") is not None and t[5:7] in ("11", "12", "01", "02", "03")), key=lambda x: x[1])[:6]:
+            kalte.append({"tag": t_, "temp_c": round(v_, 1), "entnahme_gwh": round(hist[t_]["w"]), "fuellstand": round(hist[t_]["full"], 1)})
+        mx = max(((t, r_["w"]) for t, r_ in hist.items() if r_.get("w") is not None), key=lambda x: x[1])
+        if risiko is None:
+            risiko = {}
+        risiko["spitzentag"] = {"leistung_hoch_gwh": round(hoch), "leistung_tief_gwh": round(tief) if tief else None, "zufuhr_netto_gwh": round(zuf) if zuf else None,
+                                "max_entnahme": {"tag": mx[0], "gwh": round(mx[1])}, "zeilen": zeilen, "kaelteste_tage": kalte,
+                                "hinweis": "Speicherbedarf = Verbrauch minus heutige Zufuhr. Reserve = Ausspeicherleistung minus Speicherbedarf. Leistung hoch: beobachteter Höchstwert (99,5 %) bei gut gefüllten Speichern; tief: Höchstwert bei 10 bis 20 % Füllstand (ab 40 % hoch, darunter sinkend, Annahme)."}
+    except Exception as e:  # noqa: BLE001
+        risiko = {"fehler": f"{type(e).__name__}: {e}"[:200]}
     # Übersicht der Faktoren im Modell
     fakt = []
     if modell2:
@@ -925,7 +1057,7 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None, strom=None,
         "szenarien": szen,
         "vorjahre": vor, "vorjahr_verlauf": vorjahr_verlauf,
         "rueckrechnung": rr, "rueckrechnung_mittlerer_fehler_pp": round(sum(fehler) / len(fehler), 1) if fehler else None,
-        "ziel": cfg["ziel"], "einspeicherung": einsp, "analog": analog, "extremwinter": extrem_res, "faktoren_modell": fakt, "einfaches_modell": einfach, "nachfuehrung": {"abweichung_gwh": round(nach_wert), "tage": nach_n}, "importausfall": empf, "sparen": sparen, "verstromung": verstr, "importe_ref": {"pipeline_netto": pn, "lng": lg, "norwegen": nor, "quelle": (import_ref or {}).get("quelle_import"), "verbrauch_winter_gwh": (import_ref or {}).get("verbrauch_winter_gwh")},
+        "ziel": cfg["ziel"], "einspeicherung": einsp, "analog": analog, "extremwinter": extrem_res, "risiko": risiko, "faktoren_modell": fakt, "einfaches_modell": einfach, "nachfuehrung": {"abweichung_gwh": round(nach_wert), "tage": nach_n}, "importausfall": empf, "sparen": sparen, "verstromung": verstr, "importe_ref": {"pipeline_netto": pn, "lng": lg, "norwegen": nor, "quelle": (import_ref or {}).get("quelle_import"), "verbrauch_winter_gwh": (import_ref or {}).get("verbrauch_winter_gwh")},
         "ohne_importe": {"jahresverbrauch_twh": cfg["jahresverbrauch_twh"], "quelle": cfg.get("jahresverbrauch_quelle"), "verbrauch_tag_twh": round(verbrauch_tag, 2),
                          "tage": round(r0["twh"] / verbrauch_tag)},
     }

@@ -3641,6 +3641,309 @@
    ]
   }
  ],
+ "risiko": {
+  "anzahl": 17,
+  "von": "2009/10",
+  "bis": "2025/26",
+  "winter": [
+   {
+    "winter": "2009/10",
+    "mittel_djf_c": -1.1,
+    "ziel": 0.0,
+    "ende": 0.0,
+    "tiefster": 0.0,
+    "fehl_twh": 80.7,
+    "unter20": "2027-01-12",
+    "leer": "2027-02-01"
+   },
+   {
+    "winter": "2010/11",
+    "mittel_djf_c": -0.3,
+    "ziel": 5.4,
+    "ende": 0.0,
+    "tiefster": 0.0,
+    "fehl_twh": 50.34,
+    "unter20": "2027-01-09",
+    "leer": "2027-02-13"
+   },
+   {
+    "winter": "2011/12",
+    "mittel_djf_c": 1.7,
+    "ziel": 20.3,
+    "ende": 0.0,
+    "tiefster": 0.0,
+    "fehl_twh": 21.05,
+    "unter20": "2027-02-02",
+    "leer": "2027-02-25"
+   },
+   {
+    "winter": "2012/13",
+    "mittel_djf_c": 0.7,
+    "ziel": 14.6,
+    "ende": 0.0,
+    "tiefster": 0.0,
+    "fehl_twh": 64.85,
+    "unter20": "2027-01-24",
+    "leer": "2027-02-21"
+   },
+   {
+    "winter": "2014/15",
+    "mittel_djf_c": 2.3,
+    "ziel": 20.5,
+    "ende": 0.0,
+    "tiefster": 0.0,
+    "fehl_twh": 11.98,
+    "unter20": "2027-02-02",
+    "leer": "2027-03-11"
+   },
+   {
+    "winter": "2017/18",
+    "mittel_djf_c": 2.2,
+    "ziel": 24.3,
+    "ende": 0.0,
+    "tiefster": 0.0,
+    "fehl_twh": 31.62,
+    "unter20": "2027-02-07",
+    "leer": "2027-03-03"
+   },
+   {
+    "winter": "2024/25",
+    "mittel_djf_c": 2.7,
+    "ziel": 19.3,
+    "ende": 0.0,
+    "tiefster": 0.0,
+    "fehl_twh": 9.64,
+    "unter20": "2027-01-31",
+    "leer": "2027-03-11"
+   },
+   {
+    "winter": "2025/26",
+    "mittel_djf_c": 2.1,
+    "ziel": 12.3,
+    "ende": 0.0,
+    "tiefster": 0.0,
+    "fehl_twh": 16.06,
+    "unter20": "2027-01-23",
+    "leer": "2027-02-20"
+   },
+   {
+    "winter": "2016/17",
+    "mittel_djf_c": 1.3,
+    "ziel": 10.0,
+    "ende": 0.1,
+    "tiefster": 0.0,
+    "fehl_twh": 20.93,
+    "unter20": "2027-01-21",
+    "leer": "2027-02-17"
+   },
+   {
+    "winter": "2020/21",
+    "mittel_djf_c": 2.3,
+    "ziel": 17.5,
+    "ende": 0.1,
+    "tiefster": 0.0,
+    "fehl_twh": 20.13,
+    "unter20": "2027-01-29",
+    "leer": "2027-03-06"
+   },
+   {
+    "winter": "2015/16",
+    "mittel_djf_c": 4.1,
+    "ziel": 23.5,
+    "ende": 0.4,
+    "tiefster": 0.4,
+    "fehl_twh": 0.0,
+    "unter20": "2027-02-12",
+    "leer": null
+   },
+   {
+    "winter": "2018/19",
+    "mittel_djf_c": 3.2,
+    "ziel": 17.2,
+    "ende": 1.2,
+    "tiefster": 1.2,
+    "fehl_twh": 0.0,
+    "unter20": "2027-01-28",
+    "leer": null
+   },
+   {
+    "winter": "2022/23",
+    "mittel_djf_c": 3.4,
+    "ziel": 21.5,
+    "ende": 1.5,
+    "tiefster": 1.4,
+    "fehl_twh": 0.0,
+    "unter20": "2027-02-05",
+    "leer": null
+   },
+   {
+    "winter": "2021/22",
+    "mittel_djf_c": 3.7,
+    "ziel": 20.8,
+    "ende": 2.6,
+    "tiefster": 2.6,
+    "fehl_twh": 0.0,
+    "unter20": "2027-02-03",
+    "leer": null
+   },
+   {
+    "winter": "2013/14",
+    "mittel_djf_c": 3.7,
+    "ziel": 22.3,
+    "ende": 7.1,
+    "tiefster": 7.0,
+    "fehl_twh": 0.0,
+    "unter20": "2027-02-05",
+    "leer": null
+   },
+   {
+    "winter": "2019/20",
+    "mittel_djf_c": 4.7,
+    "ziel": 25.7,
+    "ende": 11.2,
+    "tiefster": 11.2,
+    "fehl_twh": 0.0,
+    "unter20": "2027-02-24",
+    "leer": null
+   },
+   {
+    "winter": "2023/24",
+    "mittel_djf_c": 4.3,
+    "ziel": 23.6,
+    "ende": 14.2,
+    "tiefster": 14.1,
+    "fehl_twh": 0.0,
+    "unter20": "2027-02-24",
+    "leer": null
+   }
+  ],
+  "perzentile": {
+   "ziel": {
+    "p10": 10.0,
+    "p50": 20.3,
+    "p90": 23.6,
+    "min": 0.0,
+    "max": 25.7
+   },
+   "ende": {
+    "p10": 0.0,
+    "p50": 0.1,
+    "p90": 7.1,
+    "min": 0.0,
+    "max": 14.2
+   }
+  },
+  "anteil_unter30_feb": 1.0,
+  "anteil_unter20_ende": 1.0,
+  "anteil_unter20_irgendwann": 1.0,
+  "anteil_fehlmenge": 0.59,
+  "verbrauch_basis_gwh": 3553,
+  "sparen": [
+   {
+    "ziel_prozent": 20,
+    "normal": 0.105,
+    "kalt": 0.136,
+    "p10_winter": 0.182,
+    "p10_name": "2011/12",
+    "kaeltester": 0.332,
+    "kaeltester_name": "2009/10"
+   },
+   {
+    "ziel_prozent": 30,
+    "normal": 0.166,
+    "kalt": 0.196,
+    "p10_winter": 0.262,
+    "p10_name": "2011/12",
+    "kaeltester": 0.408,
+    "kaeltester_name": "2009/10"
+   }
+  ],
+  "spitzentag": {
+   "leistung_hoch_gwh": 3018,
+   "leistung_tief_gwh": 1845,
+   "zufuhr_netto_gwh": 2812,
+   "max_entnahme": {
+    "tag": "2018-02-27",
+    "gwh": 3809
+   },
+   "zeilen": [
+    {
+     "verbrauch_gwh": 3500,
+     "beschreibung": "etwa heutiger Wochenverbrauch (Bundesnetzagentur, Woche 46)",
+     "bedarf_speicher_gwh": 688,
+     "reserve_hoch_gwh": 2330,
+     "reserve_tief_gwh": 1157
+    },
+    {
+     "verbrauch_gwh": 4100,
+     "beschreibung": "Februar 2025 im Monatsmittel (DVGW)",
+     "bedarf_speicher_gwh": 1288,
+     "reserve_hoch_gwh": 1730,
+     "reserve_tief_gwh": 557
+    },
+    {
+     "verbrauch_gwh": 4700,
+     "beschreibung": "Januar im Monatsmittel bei Normaltemperatur (INES-Szenario)",
+     "bedarf_speicher_gwh": 1888,
+     "reserve_hoch_gwh": 1130,
+     "reserve_tief_gwh": -43
+    },
+    {
+     "verbrauch_gwh": 5200,
+     "beschreibung": "Tagesspitze bei strengem Frost (eigene Annahme, +10 % auf INES)",
+     "bedarf_speicher_gwh": 2388,
+     "reserve_hoch_gwh": 630,
+     "reserve_tief_gwh": -543
+    },
+    {
+     "verbrauch_gwh": 5712,
+     "beschreibung": "höchstes Wochenmittel 2018 bis 2021 (Bundesnetzagentur)",
+     "bedarf_speicher_gwh": 2900,
+     "reserve_hoch_gwh": 118,
+     "reserve_tief_gwh": -1055
+    }
+   ],
+   "kaelteste_tage": [
+    {
+     "tag": "2018-02-28",
+     "temp_c": -8.6,
+     "entnahme_gwh": 3608,
+     "fuellstand": 26.6
+    },
+    {
+     "tag": "2021-02-12",
+     "temp_c": -7.4,
+     "entnahme_gwh": 2748,
+     "fuellstand": 35.6
+    },
+    {
+     "tag": "2018-02-27",
+     "temp_c": -7.2,
+     "entnahme_gwh": 3809,
+     "fuellstand": 28.1
+    },
+    {
+     "tag": "2021-02-13",
+     "temp_c": -7.1,
+     "entnahme_gwh": 2359,
+     "fuellstand": 34.6
+    },
+    {
+     "tag": "2021-02-10",
+     "temp_c": -7.0,
+     "entnahme_gwh": 3077,
+     "fuellstand": 37.8
+    },
+    {
+     "tag": "2021-02-09",
+     "temp_c": -6.6,
+     "entnahme_gwh": 2926,
+     "fuellstand": 39.0
+    }
+   ],
+   "hinweis": "Speicherbedarf = Verbrauch minus heutige Zufuhr. Reserve = Ausspeicherleistung minus Speicherbedarf. Leistung hoch: beobachteter Höchstwert (99,5 %) bei gut gefüllten Speichern; tief: Höchstwert bei 10 bis 20 % Füllstand (ab 40 % hoch, darunter sinkend, Annahme)."
+  }
+ },
  "faktoren_modell": [
   {
    "name": "Wochentag und Feiertage",
@@ -4106,8 +4409,8 @@
   "verbrauch_tag_twh": 2.48,
   "tage": 55
  },
- "stand": "2026-11-25T18:32:04Z",
- "modell_version": 8,
+ "stand": "2026-11-25T18:54:31Z",
+ "modell_version": 10,
  "gegenprobe": {
   "bis3": 0.2,
   "bis7": 0.6,

@@ -700,7 +700,7 @@ def agsi_de_historie(key, ab_jahr=2018, extra=""):
     return out
 
 
-EXTREM_WINTER = (("2009/10", "2009-11-01", "2010-03-31"), ("2010/11", "2010-11-01", "2011-03-31"))
+EXTREM_WINTER = tuple((f"{y}/{str(y + 1)[2:]}", f"{y}-11-01", f"{y + 1}-03-31") for y in range(2009, 2018))
 
 
 def temp_extremwinter():
@@ -1142,7 +1142,7 @@ def gas_vorausschau():
     old = read("gas_vorausschau.json", {})
     try:
         alt = datetime.strptime(old["stand"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
-        if NOW - alt < timedelta(hours=5) and old.get("szenarien") and old.get("einspeicherung") and old.get("importausfall") and "abweichung_letzte_tage_gwh" in (old.get("verstromung") or {}) and old.get("modell_version") == 8 and read("gas_preisanalyse.json", {}).get("jahre") and read("gas_umfeld_vorausschau.json", {}).get("anlagen") and not old.get("fehler"):
+        if NOW - alt < timedelta(hours=5) and old.get("szenarien") and old.get("einspeicherung") and old.get("importausfall") and "abweichung_letzte_tage_gwh" in (old.get("verstromung") or {}) and old.get("modell_version") == 10 and read("gas_preisanalyse.json", {}).get("jahre") and read("gas_umfeld_vorausschau.json", {}).get("anlagen") and not old.get("fehler"):
             return None  # aufwendig (Historie seit 2018), deshalb nur alle paar Stunden
     except (KeyError, ValueError):
         pass
@@ -1170,7 +1170,12 @@ def gas_vorausschau():
         extrem_daten = None
     bn = read("bnetza_gas.json", {})
     bn_ok = bool(bn.get("tag")) and (NOW.date() - datetime.strptime(bn["tag"], "%Y-%m-%d").date()).days <= 4 and bn.get("netto_pipeline")
-    vw = None
+    vw, vmax = None, None
+    try:
+        mx_ = (bn.get("verbrauch", {}).get("gesamt_w", {}) or {}).get("max_1821") or []
+        vmax = max([x for x in mx_ if x], default=None)
+    except Exception:  # noqa: BLE001
+        vmax = None
     try:
         g25 = (bn.get("verbrauch", {}).get("gesamt_w", {}) or {}).get("2025") or []
         zeit = [x for x in g25[45:52] + g25[0:13] if x]
@@ -1180,12 +1185,12 @@ def gas_vorausschau():
         vw = None
     res, ctx = modell.vorausschau(hist, temp, read("wetter.json", {}), cfg, max(hist),
                                   {"pipeline_netto": bn["netto_pipeline"] if bn_ok else pipe.get("summe_netto"), "lng": (bn.get("import_lng") if bn_ok else None) or lng.get("summe"),
-                                   "quelle_import": "Bundesnetzagentur" if bn_ok else "ENTSOG", "verbrauch_winter_gwh": vw,
+                                   "quelle_import": "Bundesnetzagentur" if bn_ok else "ENTSOG", "verbrauch_winter_gwh": vw, "zufuhr_netto_gesamt": (bn.get("netto_gesamt") if bn_ok else None), "verbrauch_spitze_woche_gwh": vmax,
                                    "norwegen": (bn.get("import_land", {}).get("Norwegen") if bn_ok else None) or next((g["netto"] for g in pipe.get("gruppen", []) if g.get("name") == "Norwegen"), None),
                                    "kaelte_ausland_gwh": (-ausl["effekt_kaltwelle_gwh"] if ausl.get("effekt_kaltwelle_gwh") and ausl["effekt_kaltwelle_gwh"] < 0 else None),
                                    "kaelte_ausland_beleg": bool(ausl.get("belegt"))}, strom_daten, extrem_daten)
     res["stand"] = stamp()
-    res["modell_version"] = 8
+    res["modell_version"] = 10
     # Verlauf der Prognose festhalten, damit sichtbar wird, wie sie sich mit dem tatsächlichen Verlauf ändert
     try:
         pv = read("prognose_verlauf.json", {"eintraege": []}).get("eintraege", [])
