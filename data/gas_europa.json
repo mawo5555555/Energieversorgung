@@ -1,139 +1,147 @@
 {
- "stand": "2026-11-24T17:38:02Z",
+ "stand": "2026-11-25T02:22:32Z",
  "quelle": "GIE AGSI+ (agsi.gie.eu)",
  "laender": [
   {
    "code": "EU",
    "name": "Europäische Union",
-   "gastag": "2026-11-22",
-   "fuellstand_prozent": 68.91,
-   "gas_twh": 780.2556,
+   "gastag": "2026-11-23",
+   "fuellstand_prozent": 68.41,
+   "gas_twh": 774.6959,
    "kapazitaet_twh": 1132.3616,
-   "einspeicherung_gwh": 533.06,
-   "ausspeicherung_gwh": 3289.7
+   "einspeicherung_gwh": 187.96,
+   "ausspeicherung_gwh": 5795.1
   },
   {
    "code": "DE",
    "name": "Deutschland",
-   "gastag": "2026-11-22",
-   "fuellstand_prozent": 56.48,
-   "gas_twh": 139.7079,
+   "gastag": "2026-11-23",
+   "fuellstand_prozent": 55.9,
+   "gas_twh": 138.2603,
    "kapazitaet_twh": 247.3563,
-   "einspeicherung_gwh": 62.86,
-   "ausspeicherung_gwh": 457.8
+   "einspeicherung_gwh": 26.3,
+   "ausspeicherung_gwh": 1471.8
   },
   {
    "code": "NL",
    "name": "Niederlande",
-   "gastag": "2026-11-22",
-   "fuellstand_prozent": 59.09,
-   "gas_twh": 85.1168,
+   "gastag": "2026-11-23",
+   "fuellstand_prozent": 58.64,
+   "gas_twh": 84.4708,
    "kapazitaet_twh": 144.0428,
-   "einspeicherung_gwh": 11.11,
-   "ausspeicherung_gwh": 545.5
+   "einspeicherung_gwh": 7.89,
+   "ausspeicherung_gwh": 653.9
   },
   {
    "code": "AT",
    "name": "Österreich",
-   "gastag": "2026-11-22",
-   "fuellstand_prozent": 62.86,
-   "gas_twh": 63.038,
+   "gastag": "2026-11-23",
+   "fuellstand_prozent": 62.53,
+   "gas_twh": 62.6995,
    "kapazitaet_twh": 100.2789,
-   "einspeicherung_gwh": 129.54,
-   "ausspeicherung_gwh": 141.6
+   "einspeicherung_gwh": 84.64,
+   "ausspeicherung_gwh": 423.1
   },
   {
    "code": "FR",
    "name": "Frankreich",
-   "gastag": "2026-11-22",
-   "fuellstand_prozent": 73.15,
-   "gas_twh": 90.6156,
+   "gastag": "2026-11-23",
+   "fuellstand_prozent": 72.2,
+   "gas_twh": 89.4347,
    "kapazitaet_twh": 123.8779,
-   "einspeicherung_gwh": 152.24,
-   "ausspeicherung_gwh": 725.7
+   "einspeicherung_gwh": 30.28,
+   "ausspeicherung_gwh": 1211.2
   },
   {
    "code": "IT",
    "name": "Italien",
-   "gastag": "2026-11-22",
-   "fuellstand_prozent": 85.27,
-   "gas_twh": 173.4652,
+   "gastag": "2026-11-23",
+   "fuellstand_prozent": 84.82,
+   "gas_twh": 172.5519,
    "kapazitaet_twh": 203.4249,
-   "einspeicherung_gwh": 99.15,
-   "ausspeicherung_gwh": 645.5
+   "einspeicherung_gwh": 0.27,
+   "ausspeicherung_gwh": 962.1
   },
   {
    "code": "PL",
    "name": "Polen",
-   "gastag": "2026-11-22",
-   "fuellstand_prozent": 95.25,
-   "gas_twh": 35.0989,
+   "gastag": "2026-11-23",
+   "fuellstand_prozent": 94.95,
+   "gas_twh": 34.9894,
    "kapazitaet_twh": 36.8491,
-   "einspeicherung_gwh": 32.58,
-   "ausspeicherung_gwh": 55.1
+   "einspeicherung_gwh": 8.77,
+   "ausspeicherung_gwh": 118.2
   },
   {
    "code": "CZ",
    "name": "Tschechien",
-   "gastag": "2026-11-22",
-   "fuellstand_prozent": 68.74,
-   "gas_twh": 31.1447,
+   "gastag": "2026-11-23",
+   "fuellstand_prozent": 68.13,
+   "gas_twh": 30.8682,
    "kapazitaet_twh": 45.3059,
-   "einspeicherung_gwh": 19.73,
-   "ausspeicherung_gwh": 231.3
+   "einspeicherung_gwh": 4.72,
+   "ausspeicherung_gwh": 282.2
   },
   {
    "code": "HU",
    "name": "Ungarn",
-   "gastag": "2026-11-22",
-   "fuellstand_prozent": 74.03,
-   "gas_twh": 50.3986,
+   "gastag": "2026-11-23",
+   "fuellstand_prozent": 73.77,
+   "gas_twh": 50.2186,
    "kapazitaet_twh": 68.0767,
-   "einspeicherung_gwh": 7.36,
-   "ausspeicherung_gwh": 102.8
+   "einspeicherung_gwh": 5.88,
+   "ausspeicherung_gwh": 185.9
+  },
+  {
+   "code": "ES",
+   "name": "Spanien",
+   "gastag": "2026-11-23",
+   "fuellstand_prozent": 79.25,
+   "gas_twh": 28.3984,
+   "kapazitaet_twh": 35.8318,
+   "einspeicherung_gwh": 0.0,
+   "ausspeicherung_gwh": 57.5
   },
   {
    "code": "BE",
    "name": "Belgien",
-   "gastag": "2026-11-22",
-   "fuellstand_prozent": 71.14,
-   "gas_twh": 5.414,
+   "gastag": "2026-11-23",
+   "fuellstand_prozent": 71.36,
+   "gas_twh": 5.4308,
    "kapazitaet_twh": 7.61,
-   "einspeicherung_gwh": 12.4,
+   "einspeicherung_gwh": 16.86,
    "ausspeicherung_gwh": 0.0
   },
   {
    "code": "DK",
    "name": "Dänemark",
-   "gastag": "2026-11-22",
-   "fuellstand_prozent": 85.79,
-   "gas_twh": 7.0262,
+   "gastag": "2026-11-23",
+   "fuellstand_prozent": 84.75,
+   "gas_twh": 6.9412,
    "kapazitaet_twh": 8.19,
    "einspeicherung_gwh": 0.0,
-   "ausspeicherung_gwh": 59.7
+   "ausspeicherung_gwh": 85.0
   },
   {
    "code": "SK",
    "name": "Slowakei",
-   "gastag": "2026-11-22",
-   "fuellstand_prozent": 47.5,
-   "gas_twh": 17.9548,
+   "gastag": "2026-11-23",
+   "fuellstand_prozent": 47.13,
+   "gas_twh": 17.8179,
    "kapazitaet_twh": 37.803,
-   "einspeicherung_gwh": 3.12,
-   "ausspeicherung_gwh": 110.5
+   "einspeicherung_gwh": 1.77,
+   "ausspeicherung_gwh": 138.7
   },
   {
    "code": "RO",
    "name": "Rumänien",
-   "gastag": "2026-11-22",
-   "fuellstand_prozent": 82.96,
-   "gas_twh": 28.0937,
+   "gastag": "2026-11-23",
+   "fuellstand_prozent": 82.59,
+   "gas_twh": 27.9685,
    "kapazitaet_twh": 33.8636,
    "einspeicherung_gwh": 0.0,
-   "ausspeicherung_gwh": 86.7
+   "ausspeicherung_gwh": 125.2
   }
  ],
- "ohne_daten": [
-  "ES"
- ]
+ "ohne_daten": []
 }

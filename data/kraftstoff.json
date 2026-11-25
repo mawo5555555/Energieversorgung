@@ -127,5 +127,7 @@
    }
   ]
  ],
- "quelle": "Tankerkönig.de (Markttransparenzstelle für Kraftstoffe), CC BY 4.0"
+ "quelle": "Tankerkönig.de (Markttransparenzstelle für Kraftstoffe), CC BY 4.0",
+ "fehler": "URLError: <urlopen error [Errno 111] Connection refused>",
+ "fehler_stand": "2026-11-25T02:22:32Z"
 }
