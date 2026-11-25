@@ -1,0 +1,94 @@
+{
+ "stand": "2026-11-25",
+ "hinweis": "Handgepflegte Auswertung. Tatsächliche Füllstände aus GIE AGSI+ (gas_historie.json). Prognosen aus den genannten Quellen; wo nur eine Zusammenfassung in der Presse oder einem Blog vorlag, steht das dabei und das Urteil ist vorläufig.",
+ "tatsaechlich": [
+  [
+   "1. Nov. 2025",
+   75.1
+  ],
+  [
+   "1. Jan. 2026",
+   56.2
+  ],
+  [
+   "1. Feb. 2026",
+   31.9
+  ],
+  [
+   "1. März 2026",
+   20.8
+  ],
+  [
+   "Tiefpunkt 21. Feb. 2026",
+   20.5
+  ],
+  [
+   "1. April 2026",
+   21.8
+  ],
+  [
+   "30. April 2026",
+   25.7
+  ]
+ ],
+ "temperatur": "Januar 2026 im Mittel −0,4 °C (laut INES), also kälter als normal, aber deutlich wärmer als im Szenario Kältejahr 2010 (−4,6 °C).",
+ "eintraege": [
+  {
+   "quelle": "INES, Januar-Update 2026 (Originaldokument gelesen)",
+   "prognose": "Normaltemperaturen (Wetterjahr 2016), Start 57 % am 1. Jan.: Ende April 18 %",
+   "tatsaechlich": "25,7 % am 30. April",
+   "abweichung_pp": 7.7,
+   "urteil": "Gut. Etwa 8 Prozentpunkte zu niedrig, Richtung und Größenordnung stimmten."
+  },
+  {
+   "quelle": "INES, Januar-Update 2026 (Originaldokument gelesen)",
+   "prognose": "Warmer Winter (Wetterjahr 2020): Anfang April 41 %",
+   "tatsaechlich": "21,8 % am 1. April",
+   "abweichung_pp": -19.2,
+   "urteil": "Der Winter war deutlich kälter als in diesem Szenario, die Rechnung passte also nicht zum Verlauf."
+  },
+  {
+   "quelle": "INES, Januar-Update 2026 (Originaldokument gelesen)",
+   "prognose": "Extrem kalt (Wetterjahr 2010): Speicher Mitte Februar leer, Gasmangel",
+   "tatsaechlich": "Tiefpunkt 20,5 % am 21. Feb., keine Mangellage",
+   "abweichung_pp": null,
+   "urteil": "Nicht eingetreten. INES selbst nannte das Szenario unwahrscheinlicher; der Januar war 4 Grad wärmer als dort angenommen."
+  },
+  {
+   "quelle": "INES, Januar-Update 2026 (Originaldokument gelesen)",
+   "prognose": "Normal und warm: Vorgabe 30 % am 1. Februar wird eingehalten",
+   "tatsaechlich": "31,9 % am 1. Februar",
+   "abweichung_pp": null,
+   "urteil": "Zutreffend, aber knapp (1,9 Punkte)."
+  },
+  {
+   "quelle": "INES, November-Update 2025 (nur aus Presseberichten, Original nicht gelesen)",
+   "prognose": "Normalwinter: grob 20 % Ende März; Kältefall: Unterdeckung ab Mitte Januar",
+   "tatsaechlich": "21,8 % am 1. April; keine Unterdeckung",
+   "abweichung_pp": 1.8,
+   "urteil": "Vorläufig gut für den Normalfall. Zuordnung der 20 % in der Presse unklar."
+  },
+  {
+   "quelle": "DVGW (nur aus einem Blog zitiert, Original nicht gefunden)",
+   "prognose": "Rund 10 % Ende März 2026, Versorgung bis Ende April gesichert",
+   "tatsaechlich": "21,8 % am 1. April",
+   "abweichung_pp": -11.8,
+   "urteil": "Vorläufig zu pessimistisch um etwa 12 Prozentpunkte. Quelle nicht geprüft."
+  },
+  {
+   "quelle": "Bundesnetzagentur / Bundesregierung (ohne Zahl)",
+   "prognose": "Versorgung stabil, niedriger Endstand wahrscheinlich, keine Gasmangellage",
+   "tatsaechlich": "Keine Mangellage, Tiefpunkt 20,5 %",
+   "abweichung_pp": null,
+   "urteil": "Zutreffend, aber ohne Zahl nicht messbar."
+  },
+  {
+   "quelle": "Dieses Modell (Rückrechnung mit den echten Temperaturen des Winters, Start 12. Nov.)",
+   "prognose": "1. Februar 29,1 %, 31. März 10,9 %",
+   "tatsaechlich": "31,9 % am 1. Februar, 22,2 % am 31. März",
+   "abweichung_pp": -11.3,
+   "urteil": "Anfang Februar gut (−2,8), Ende März zu pessimistisch (−11,3). Hinweis: Das Modell wurde auf diesen Winterdaten angepasst, die Prüfung ist also eher wohlwollend."
+  }
+ ],
+ "fazit": "INES lag im Normalfall am nächsten (etwa 8 Punkte zu niedrig), das Kälteszenario traf nicht ein. DVGW (vorläufig) und dieses Modell rechneten das Winterende zu niedrig: Der Füllstand blieb bei etwa 20 bis 22 % stehen, weil die Ausspeicherung bei niedrigem Füllstand nachließ und Importe und Einsparungen reagierten. Das spricht dafür, dass auch die 2 % am 31. März in unserer Normal-Rechnung eher zu niedrig sind. Mit einem Winter als Beleg ändere ich das Modell aber noch nicht."
+}

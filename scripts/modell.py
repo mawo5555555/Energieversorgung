@@ -752,7 +752,7 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None, strom=None,
                                "fehl_twh": sim["fehl_twh"], "fehl_tage": sim["fehl_tage"], "fehl_erster": sim["fehl_erster"], "fehl_spitze_gwh": sim["fehl_spitze_gwh"]}
         empf.append(eintrag_f)
     # Was bringt Sparen? Verbrauch um x % unter dem Jahresmittel (negativer Zusatzbedarf), bis Winterende
-    verbrauch_gwh = cfg["jahresverbrauch_twh"] / 365.0 * 1000.0
+    verbrauch_gwh = (import_ref or {}).get("verbrauch_winter_gwh") or cfg["jahresverbrauch_twh"] / 365.0 * 1000.0  # Winterverbrauch laut Bundesnetzagentur (Nov. bis März), sonst Jahresmittel
     sparen = []
     for text, anteil in (("5 % weniger Verbrauch", 0.05), ("10 % weniger Verbrauch", 0.10), ("17,6 % weniger Verbrauch (so viel wie 2022)", 0.176)):
         e_ = {"fall": text, "anteil": anteil, "gwh_tag": round(verbrauch_gwh * anteil)}
@@ -925,7 +925,7 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None, strom=None,
         "szenarien": szen,
         "vorjahre": vor, "vorjahr_verlauf": vorjahr_verlauf,
         "rueckrechnung": rr, "rueckrechnung_mittlerer_fehler_pp": round(sum(fehler) / len(fehler), 1) if fehler else None,
-        "ziel": cfg["ziel"], "einspeicherung": einsp, "analog": analog, "extremwinter": extrem_res, "faktoren_modell": fakt, "einfaches_modell": einfach, "nachfuehrung": {"abweichung_gwh": round(nach_wert), "tage": nach_n}, "importausfall": empf, "sparen": sparen, "verstromung": verstr, "importe_ref": {"pipeline_netto": pn, "lng": lg, "norwegen": nor},
+        "ziel": cfg["ziel"], "einspeicherung": einsp, "analog": analog, "extremwinter": extrem_res, "faktoren_modell": fakt, "einfaches_modell": einfach, "nachfuehrung": {"abweichung_gwh": round(nach_wert), "tage": nach_n}, "importausfall": empf, "sparen": sparen, "verstromung": verstr, "importe_ref": {"pipeline_netto": pn, "lng": lg, "norwegen": nor, "quelle": (import_ref or {}).get("quelle_import"), "verbrauch_winter_gwh": (import_ref or {}).get("verbrauch_winter_gwh")},
         "ohne_importe": {"jahresverbrauch_twh": cfg["jahresverbrauch_twh"], "quelle": cfg.get("jahresverbrauch_quelle"), "verbrauch_tag_twh": round(verbrauch_tag, 2),
                          "tage": round(r0["twh"] / verbrauch_tag)},
     }

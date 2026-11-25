@@ -1142,7 +1142,7 @@ def gas_vorausschau():
     old = read("gas_vorausschau.json", {})
     try:
         alt = datetime.strptime(old["stand"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
-        if NOW - alt < timedelta(hours=5) and old.get("szenarien") and old.get("einspeicherung") and old.get("importausfall") and "abweichung_letzte_tage_gwh" in (old.get("verstromung") or {}) and old.get("modell_version") == 7 and read("gas_preisanalyse.json", {}).get("jahre") and read("gas_umfeld_vorausschau.json", {}).get("anlagen") and not old.get("fehler"):
+        if NOW - alt < timedelta(hours=5) and old.get("szenarien") and old.get("einspeicherung") and old.get("importausfall") and "abweichung_letzte_tage_gwh" in (old.get("verstromung") or {}) and old.get("modell_version") == 8 and read("gas_preisanalyse.json", {}).get("jahre") and read("gas_umfeld_vorausschau.json", {}).get("anlagen") and not old.get("fehler"):
             return None  # aufwendig (Historie seit 2018), deshalb nur alle paar Stunden
     except (KeyError, ValueError):
         pass
@@ -1168,13 +1168,24 @@ def gas_vorausschau():
         extrem_daten = temp_extremwinter()
     except Exception:  # noqa: BLE001
         extrem_daten = None
+    bn = read("bnetza_gas.json", {})
+    bn_ok = bool(bn.get("tag")) and (NOW.date() - datetime.strptime(bn["tag"], "%Y-%m-%d").date()).days <= 4 and bn.get("netto_pipeline")
+    vw = None
+    try:
+        g25 = (bn.get("verbrauch", {}).get("gesamt_w", {}) or {}).get("2025") or []
+        zeit = [x for x in g25[45:52] + g25[0:13] if x]
+        if len(zeit) >= 18:
+            vw = round(sum(zeit) / len(zeit))
+    except Exception:  # noqa: BLE001
+        vw = None
     res, ctx = modell.vorausschau(hist, temp, read("wetter.json", {}), cfg, max(hist),
-                                  {"pipeline_netto": pipe.get("summe_netto"), "lng": lng.get("summe"),
-                                   "norwegen": next((g["netto"] for g in pipe.get("gruppen", []) if g.get("name") == "Norwegen"), None),
+                                  {"pipeline_netto": bn["netto_pipeline"] if bn_ok else pipe.get("summe_netto"), "lng": (bn.get("import_lng") if bn_ok else None) or lng.get("summe"),
+                                   "quelle_import": "Bundesnetzagentur" if bn_ok else "ENTSOG", "verbrauch_winter_gwh": vw,
+                                   "norwegen": (bn.get("import_land", {}).get("Norwegen") if bn_ok else None) or next((g["netto"] for g in pipe.get("gruppen", []) if g.get("name") == "Norwegen"), None),
                                    "kaelte_ausland_gwh": (-ausl["effekt_kaltwelle_gwh"] if ausl.get("effekt_kaltwelle_gwh") and ausl["effekt_kaltwelle_gwh"] < 0 else None),
                                    "kaelte_ausland_beleg": bool(ausl.get("belegt"))}, strom_daten, extrem_daten)
     res["stand"] = stamp()
-    res["modell_version"] = 7
+    res["modell_version"] = 8
     # Verlauf der Prognose festhalten, damit sichtbar wird, wie sie sich mit dem tatsächlichen Verlauf ändert
     try:
         pv = read("prognose_verlauf.json", {"eintraege": []}).get("eintraege", [])
@@ -1294,6 +1305,113 @@ def reichweite():
     return out
 
 
+# ---------- Bundesnetzagentur: Gasbilanz und Verbrauch (amtliche Tageswerte, in die Seite eingebettet) ----------
+BNETZA_URL = "https://www.bundesnetzagentur.de/DE/Fachthemen/ElektrizitaetundGas/Versorgungssicherheit/aktuelle_gasversorgung/_svg/Gasverbrauch_Gesamt_woechentlich/Gasverbrauch_Gesamt_W_2023.html"
+BNETZA_ABSCHNITTE = {
+    "importe": "Gasimporte in GWh/Tag", "exporte": "Gasexporte in GWh/Tag", "foerderung": "Gasförderung in Deutschland in GWh/Tag",
+    "industrie_w": "Gasverbrauch Industriekunden, wöchentlicher Mittelwert", "haushalt_w": "Gasverbrauch Haushalts- und Gewerbekunden, wöchentlicher Mittelwert",
+    "gesamt_w": "Gasverbrauch in Deutschland, wöchentlicher Mittelwert", "temp_w": "Temperatur in °C, wöchentlicher Mittelwert",
+}
+
+
+def bnetza_gas():
+    import re
+    t = http(BNETZA_URL, timeout=90)
+    pos = {}
+    for k, ueb in BNETZA_ABSCHNITTE.items():
+        m = re.search(r"<h[2-5][^>]*>\s*" + re.escape(ueb) + r"\s*</h[2-5]>", t)
+        if not m:
+            raise ValueError("Abschnitt nicht gefunden: " + ueb)
+        pos[k] = m.start()
+    ende = len(t)
+    grenzen = sorted(pos.values()) + [ende]
+
+    def abschnitt(k):
+        a = pos[k]
+        b = next(x for x in grenzen if x > a)
+        seg = t[a:b]
+        m1 = re.search(r"labels:\s*\[", seg)
+        if m1:  # nur das erste Diagramm des Abschnitts, nicht spätere Varianten (Wochenwerte)
+            m2 = re.search(r"labels:\s*\[", seg[m1.end():])
+            seg = seg[:m1.end() + m2.start()] if m2 else seg
+        lab = re.search(r"labels:\s*\[([^\]]*)\]", seg)
+        xs = re.findall(r"'([^']*)'", lab.group(1)) if lab else []
+        reihen = {}
+        for l, d in re.findall(r"label:\s*'([^']*)',\s*data:\s*\[([^\]]*)\]", seg):
+            w = []
+            for x in d.split(","):
+                x = x.strip()
+                try:
+                    w.append(float(x))
+                except ValueError:
+                    w.append(None)
+            reihen.setdefault(l, w)
+        return xs, reihen
+
+    out = {"stand": stamp(), "quelle": "Bundesnetzagentur, Aktuelle Lage Gasversorgung (Tageswerte aus den Grafiken)", "einheit": "GWh/Tag"}
+    xs, imp = abschnitt("importe")
+    if not xs or "Deutschland Import" not in imp:
+        raise ValueError("Importdaten unvollständig")
+    xe, exp = abschnitt("exporte")
+    xf, foe = abschnitt("foerderung")
+    if "Produktion" not in foe or not exp:
+        raise ValueError("Export- oder Förderdaten unvollständig")
+    if "Deutschland Exporte" not in exp:
+        exp["Deutschland Exporte"] = [round(sum(exp[k][i] or 0 for k in exp), 1) for i in range(len(xe))]
+
+    def letzte(w, n=1):
+        return [x for x in w if x is not None][-n:]
+
+    def tag_von(x):
+        return x[6:10] + "-" + x[3:5] + "-" + x[0:2]
+    # Der letzte Tag, für den alle drei Reihen Werte haben
+    tag = tag_von(xs[-1])
+    i_i = len(xs) - 1
+    i_e = xe.index(xs[-1]) if xs[-1] in xe else None
+    i_f = xf.index(xs[-1]) if xs[-1] in xf else None
+    if i_e is None or i_f is None:
+        raise ValueError("Tage der Reihen passen nicht zusammen")
+    tag_werte = {k: imp[k][i_i] for k in imp}
+    out["tag"] = tag
+    out["import_land"] = {k: v for k, v in tag_werte.items() if k not in ("Deutschland Import", "LNG")}
+    out["import_lng"] = tag_werte.get("LNG")
+    out["import_gesamt"] = tag_werte["Deutschland Import"]
+    out["export_land"] = {k: v[i_e] for k, v in exp.items() if k != "Deutschland Exporte"}
+    out["export_gesamt"] = exp["Deutschland Exporte"][i_e]
+    out["foerderung"] = foe["Produktion"][i_f]
+    out["summe_pruefung"] = round(sum(v for k, v in tag_werte.items() if k not in ("Deutschland Import",) and v is not None) - tag_werte["Deutschland Import"], 1)
+    out["netto_pipeline"] = round(out["import_gesamt"] - (out["import_lng"] or 0) - out["export_gesamt"], 1)
+    out["netto_gesamt"] = round(out["import_gesamt"] - out["export_gesamt"] + out["foerderung"], 1)
+    verlauf = []
+    for k in range(max(0, len(xs) - 14), len(xs)):
+        d = xs[k]
+        if d in xe and d in xf and imp["Deutschland Import"][k] is not None and exp["Deutschland Exporte"][xe.index(d)] is not None:
+            verlauf.append([tag_von(d), round(imp["Deutschland Import"][k] - exp["Deutschland Exporte"][xe.index(d)] + (foe["Produktion"][xf.index(d)] or 0))])
+    out["verlauf_netto"] = verlauf
+    # Verbrauch (Wochenmittel in GWh/Tag): laufendes Jahr gegen 2025, 2024 und Mittel/Minimum/Maximum 2018 bis 2021
+    ver = {}
+    for k in ("gesamt_w", "industrie_w", "haushalt_w", "temp_w"):
+        xw, rw = abschnitt(k)
+        jahr = str(NOW.year)
+        if jahr not in rw:
+            raise ValueError("Verbrauch " + k + ": Reihe " + jahr + " fehlt")
+        akt = rw[jahr]
+        n = max((i for i, x in enumerate(akt) if x is not None), default=-1)
+        ver[k] = {"woche": n + 1, "jahr": [x for x in akt[:n + 1]]}
+        for l, w in rw.items():
+            kl = l.lower()
+            if l in ("2025", "2024"):
+                ver[k][l] = w
+            elif "durchschnitt" in kl and "2018" in kl and "mittel" not in ver[k]:
+                ver[k]["mittel_1821"] = w
+            elif kl.startswith("minimum"):
+                ver[k]["min_1821"] = w
+            elif kl.startswith("maximum"):
+                ver[k]["max_1821"] = w
+    out["verbrauch"] = ver
+    return out
+
+
 def main():
     nur = set(sys.argv[1:])
     jobs = [
@@ -1301,7 +1419,7 @@ def main():
         ("gas_lng.json", gas_lng), ("gas_speicher.json", gas_speicher), ("kraftstoff.json", kraftstoff), ("rohoel.json", rohoel),
         ("wetter.json", wetter), ("gas_historie.json", gas_historie), ("reichweite.json", reichweite),
         ("gas_europa.json", gas_europa), ("gas_anlagen.json", gas_anlagen),
-        ("gaspreis.json", gaspreis), ("lng_tanks.json", lng_tanks), ("gas_umfeld.json", gas_umfeld), ("gas_stoerungen.json", gas_stoerungen), ("faktoren_extra.json", faktoren_extra), ("auslandseinfluss.json", auslandseinfluss), ("verbraucherpreise.json", verbraucherpreise), ("gas_vorausschau.json", gas_vorausschau),
+        ("gaspreis.json", gaspreis), ("lng_tanks.json", lng_tanks), ("gas_umfeld.json", gas_umfeld), ("gas_stoerungen.json", gas_stoerungen), ("faktoren_extra.json", faktoren_extra), ("auslandseinfluss.json", auslandseinfluss), ("verbraucherpreise.json", verbraucherpreise), ("bnetza_gas.json", bnetza_gas), ("gas_vorausschau.json", gas_vorausschau),
     ]
     for name, fn in jobs:
         if nur and name.split(".")[0] not in nur:
