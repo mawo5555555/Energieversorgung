@@ -1,10 +1,10 @@
 {
- "stand": "2026-11-25T18:25:59Z",
+ "stand": "2026-11-25T18:32:04Z",
  "daten_stand_ms": 1795628700000,
  "erzeugung_mw": {
   "Braunkohle": 11338,
-  "Steinkohle": 6232,
-  "Erdgas": 16692,
+  "Steinkohle": 6269,
+  "Erdgas": 16682,
   "Kernenergie": 0,
   "Wind offshore": 7769,
   "Wind onshore": 19926,

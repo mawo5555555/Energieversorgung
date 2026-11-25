@@ -1,152 +1,152 @@
 {
- "stand": "2026-11-25T18:25:59Z",
+ "stand": "2026-11-25T18:32:04Z",
  "annahmen": "Reine Schätzung nur für die Gasspeicher, ohne Importe, LNG und Verbrauchsänderungen. Grundlage: mittlere Ein- und Ausspeicherung der letzten 7 Tage. Mit Wetter: Die Ausspeicherung folgt dem Heizbedarf (Heizgradtage, Basis 15 °C) der Temperaturvorhersage.",
  "deutschland": {
   "name": "Deutschland",
-  "inhalt_twh": 138.26,
+  "inhalt_twh": 136.668,
   "kapazitaet_twh": 247.356,
-  "fuellstand_prozent": 55.9,
-  "ausspeicherung_7t_gwh": 512.4,
-  "einspeicherung_7t_gwh": 51.1,
-  "netto_7t_gwh": 461.4,
-  "tage_aktuell": 300,
+  "fuellstand_prozent": 55.3,
+  "ausspeicherung_7t_gwh": 703.8,
+  "einspeicherung_7t_gwh": 44.0,
+  "netto_7t_gwh": 659.8,
+  "tage_aktuell": 207,
   "projektion": [
    [
     "2026-11-25",
-    55.6
+    54.8
    ],
    [
     "2026-11-26",
-    55.3
-   ],
-   [
-    "2026-11-27",
-    55.0
-   ],
-   [
-    "2026-11-28",
-    54.7
-   ],
-   [
-    "2026-11-29",
     54.4
    ],
    [
+    "2026-11-27",
+    54.0
+   ],
+   [
+    "2026-11-28",
+    53.6
+   ],
+   [
+    "2026-11-29",
+    53.1
+   ],
+   [
     "2026-11-30",
-    54.1
+    52.7
    ],
    [
     "2026-12-01",
-    53.8
+    52.3
    ],
    [
     "2026-12-02",
-    53.5
+    51.8
    ],
    [
     "2026-12-03",
-    53.2
+    51.5
    ],
    [
     "2026-12-04",
-    53.0
+    51.2
    ],
    [
     "2026-12-05",
-    52.8
+    50.9
    ],
    [
     "2026-12-06",
-    52.6
+    50.6
    ],
    [
     "2026-12-07",
-    52.4
+    50.3
    ],
    [
     "2026-12-08",
-    52.2
+    50.1
    ]
   ],
-  "tage_wetter": 275,
+  "tage_wetter": 265,
   "ziel": {
    "prozent": 30,
    "datum": "2027-02-01",
    "tage_bis_stichtag": 68,
-   "tage_bis_marke": 139,
-   "marke_ca_datum": "2027-04-13"
+   "tage_bis_marke": 95,
+   "marke_ca_datum": "2027-02-28"
   }
  },
  "ziel_quelle": "Bundesnetzagentur, Seite „Aktuelle Lage der Gasversorgung“ (Füllstandsvorgabe 30 % zum 1. Februar 2027)",
  "brandenburg": [
   {
    "name": "Rüdersdorf H (EWE)",
-   "inhalt_twh": 0.887,
+   "inhalt_twh": 0.889,
    "kapazitaet_twh": 0.999,
-   "fuellstand_prozent": 88.8,
+   "fuellstand_prozent": 89.0,
    "ausspeicherung_7t_gwh": 2.8,
-   "einspeicherung_7t_gwh": 0.2,
-   "netto_7t_gwh": 2.6,
-   "tage_aktuell": 340,
+   "einspeicherung_7t_gwh": 0.4,
+   "netto_7t_gwh": 2.4,
+   "tage_aktuell": 369,
    "projektion": [
     [
      "2026-11-25",
-     88.5
+     88.6
     ],
     [
      "2026-11-26",
-     88.1
+     88.3
     ],
     [
      "2026-11-27",
-     87.7
+     87.9
     ],
     [
      "2026-11-28",
-     87.2
+     87.5
     ],
     [
      "2026-11-29",
-     86.8
+     87.0
     ],
     [
      "2026-11-30",
-     86.4
+     86.6
     ],
     [
      "2026-12-01",
-     85.9
+     86.2
     ],
     [
      "2026-12-02",
-     85.4
+     85.8
     ],
     [
      "2026-12-03",
-     85.2
+     85.5
     ],
     [
      "2026-12-04",
-     84.8
+     85.2
     ],
     [
      "2026-12-05",
-     84.5
+     84.9
     ],
     [
      "2026-12-06",
-     84.2
+     84.6
     ],
     [
      "2026-12-07",
-     84.0
+     84.4
     ],
     [
      "2026-12-08",
-     83.7
+     84.1
     ]
    ],
-   "tage_wetter": 293
+   "tage_wetter": 294
   }
  ]
 }
