@@ -1988,7 +1988,7 @@
  },
  "gesamt_kapazitaet_twh": 42.35,
  "gesamt_gas_twh": 28.51,
- "stand": "2026-11-25T18:47:43Z",
+ "stand": "2026-11-25T18:54:31Z",
  "quelle": "GIE AGSI+ (je Anlage seit 2018), Open-Meteo, eigene Berechnung",
  "ziel": {
   "prozent": 30,

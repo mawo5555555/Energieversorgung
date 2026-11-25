@@ -3861,51 +3861,87 @@
   "spitzentag": {
    "leistung_hoch_gwh": 3018,
    "leistung_tief_gwh": 1845,
-   "zufuhr_netto_gwh": 2707,
+   "zufuhr_netto_gwh": 2812,
+   "max_entnahme": {
+    "tag": "2018-02-27",
+    "gwh": 3809
+   },
    "zeilen": [
     {
-     "temp_c": 5,
-     "bedarf_speicher_gwh": 0,
-     "verbrauch_gwh": 2707,
-     "reserve_hoch_gwh": 3018,
-     "reserve_tief_gwh": 1845
+     "verbrauch_gwh": 3500,
+     "beschreibung": "etwa heutiger Wochenverbrauch (Bundesnetzagentur, Woche 46)",
+     "bedarf_speicher_gwh": 688,
+     "reserve_hoch_gwh": 2330,
+     "reserve_tief_gwh": 1157
     },
     {
-     "temp_c": 0,
-     "bedarf_speicher_gwh": 90,
-     "verbrauch_gwh": 2797,
-     "reserve_hoch_gwh": 2927,
-     "reserve_tief_gwh": 1755
+     "verbrauch_gwh": 4100,
+     "beschreibung": "Februar 2025 im Monatsmittel (DVGW)",
+     "bedarf_speicher_gwh": 1288,
+     "reserve_hoch_gwh": 1730,
+     "reserve_tief_gwh": 557
     },
     {
-     "temp_c": -5,
-     "bedarf_speicher_gwh": 597,
-     "verbrauch_gwh": 3304,
-     "reserve_hoch_gwh": 2421,
-     "reserve_tief_gwh": 1248
+     "verbrauch_gwh": 4700,
+     "beschreibung": "Januar im Monatsmittel bei Normaltemperatur (INES-Szenario)",
+     "bedarf_speicher_gwh": 1888,
+     "reserve_hoch_gwh": 1130,
+     "reserve_tief_gwh": -43
     },
     {
-     "temp_c": -10,
-     "bedarf_speicher_gwh": 1103,
-     "verbrauch_gwh": 3810,
-     "reserve_hoch_gwh": 1915,
-     "reserve_tief_gwh": 742
+     "verbrauch_gwh": 5200,
+     "beschreibung": "Tagesspitze bei strengem Frost (eigene Annahme, +10 % auf INES)",
+     "bedarf_speicher_gwh": 2388,
+     "reserve_hoch_gwh": 630,
+     "reserve_tief_gwh": -543
     },
     {
-     "temp_c": -15,
-     "bedarf_speicher_gwh": 1609,
-     "verbrauch_gwh": 4316,
-     "reserve_hoch_gwh": 1408,
-     "reserve_tief_gwh": 236
+     "verbrauch_gwh": 5712,
+     "beschreibung": "höchstes Wochenmittel 2018 bis 2021 (Bundesnetzagentur)",
+     "bedarf_speicher_gwh": 2900,
+     "reserve_hoch_gwh": 118,
+     "reserve_tief_gwh": -1055
     }
    ],
-   "kaeltester_tag": {
-    "tag": "2018-02-28",
-    "temp_c": -8.6,
-    "entnahme_gwh": 3608,
-    "modell_gwh": 963
-   },
-   "hinweis": "Bedarf = Entnahme aus den Speichern laut Modell (a + b mal Heizgradtage, ohne Zusatzfaktoren wie Wind und Kältenachwirkung). Verbrauch = Bedarf plus aktuelle Zufuhr."
+   "kaelteste_tage": [
+    {
+     "tag": "2018-02-28",
+     "temp_c": -8.6,
+     "entnahme_gwh": 3608,
+     "fuellstand": 26.6
+    },
+    {
+     "tag": "2021-02-12",
+     "temp_c": -7.4,
+     "entnahme_gwh": 2748,
+     "fuellstand": 35.6
+    },
+    {
+     "tag": "2018-02-27",
+     "temp_c": -7.2,
+     "entnahme_gwh": 3809,
+     "fuellstand": 28.1
+    },
+    {
+     "tag": "2021-02-13",
+     "temp_c": -7.1,
+     "entnahme_gwh": 2359,
+     "fuellstand": 34.6
+    },
+    {
+     "tag": "2021-02-10",
+     "temp_c": -7.0,
+     "entnahme_gwh": 3077,
+     "fuellstand": 37.8
+    },
+    {
+     "tag": "2021-02-09",
+     "temp_c": -6.6,
+     "entnahme_gwh": 2926,
+     "fuellstand": 39.0
+    }
+   ],
+   "hinweis": "Speicherbedarf = Verbrauch minus heutige Zufuhr. Reserve = Ausspeicherleistung minus Speicherbedarf. Leistung hoch: beobachteter Höchstwert (99,5 %) bei gut gefüllten Speichern; tief: Höchstwert bei 10 bis 20 % Füllstand (ab 40 % hoch, darunter sinkend, Annahme)."
   }
  },
  "faktoren_modell": [
@@ -4373,8 +4409,8 @@
   "verbrauch_tag_twh": 2.48,
   "tage": 55
  },
- "stand": "2026-11-25T18:47:43Z",
- "modell_version": 9,
+ "stand": "2026-11-25T18:54:31Z",
+ "modell_version": 10,
  "gegenprobe": {
   "bis3": 0.2,
   "bis7": 0.6,
