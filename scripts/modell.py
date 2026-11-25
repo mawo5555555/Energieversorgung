@@ -1000,21 +1000,26 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None, strom=None,
                       "anteil_unter20_ende": round(sum(1 for x in lj if x["ende"] < 20) / n, 2),
                       "anteil_unter20_irgendwann": round(sum(1 for x in lj if x["tiefster"] < 20) / n, 2),
                       "anteil_fehlmenge": round(sum(1 for x in lj if x["fehl_twh"] > 0.05) / n, 2), "verbrauch_basis_gwh": round(vg), "sparen": spar}
-        # Spitzentag: Bedarf an Speicherentnahme bei Tagesmitteltemperatur gegen die beobachtete Leistung
-        pn_, lg_ = (import_ref or {}).get("pipeline_netto") or 0, (import_ref or {}).get("lng") or 0
+        # Spitzentag: gemessene Leistungsgrenzen gegen Verbrauchsniveaus aus amtlichen Quellen (nicht aus der Modellkurve, die an Extremtagen nicht trägt)
+        zuf = (import_ref or {}).get("zufuhr_netto_gesamt") or ((import_ref or {}).get("pipeline_netto") or 0) + ((import_ref or {}).get("lng") or 0)
+        vmax = (import_ref or {}).get("verbrauch_spitze_woche_gwh")
+        stufen = [(3500, "etwa heutiger Wochenverbrauch (Bundesnetzagentur, Woche 46)"), (4100, "Februar 2025 im Monatsmittel (DVGW)")]
+        if vmax:
+            stufen.append((round(vmax), "höchstes Wochenmittel 2018 bis 2021 (Bundesnetzagentur)"))
+        stufen += [(4700, "Januar im Monatsmittel bei Normaltemperatur (INES-Szenario)"), (5200, "Tagesspitze bei strengem Frost (eigene Annahme, +10 % auf INES)")]
         zeilen = []
-        for tt in (5, 0, -5, -10, -15):
-            bed = max(0.0, fit["a"] + fit["b"] * hdd(float(tt), basis))
-            zeilen.append({"temp_c": tt, "bedarf_speicher_gwh": round(bed), "verbrauch_gwh": round(bed + pn_ + lg_) if (pn_ or lg_) else None,
-                           "reserve_hoch_gwh": round(hoch - bed), "reserve_tief_gwh": round(tief - bed) if tief else None})
-        kalt_tag = min(((t, v) for t, v in temp.items() if t in hist and hist[t].get("w") is not None and t[5:7] in ("11", "12", "01", "02", "03")), key=lambda x: x[1])
-        pt = hist[kalt_tag[0]]["w"]
-        pred = fit["a"] + fit["b"] * hdd(kalt_tag[1], basis)
+        for v_, lab in sorted(stufen):
+            bed = v_ - zuf
+            zeilen.append({"verbrauch_gwh": v_, "beschreibung": lab, "bedarf_speicher_gwh": round(bed), "reserve_hoch_gwh": round(hoch - bed), "reserve_tief_gwh": round(tief - bed) if tief else None})
+        kalte = []
+        for t_, v_ in sorted(((t, v) for t, v in temp.items() if t in hist and hist[t].get("w") is not None and t[5:7] in ("11", "12", "01", "02", "03")), key=lambda x: x[1])[:6]:
+            kalte.append({"tag": t_, "temp_c": round(v_, 1), "entnahme_gwh": round(hist[t_]["w"]), "fuellstand": round(hist[t_]["full"], 1)})
+        mx = max(((t, r_["w"]) for t, r_ in hist.items() if r_.get("w") is not None), key=lambda x: x[1])
         if risiko is None:
             risiko = {}
-        risiko["spitzentag"] = {"leistung_hoch_gwh": round(hoch), "leistung_tief_gwh": round(tief) if tief else None, "zufuhr_netto_gwh": round(pn_ + lg_) if (pn_ or lg_) else None,
-                                "zeilen": zeilen, "kaeltester_tag": {"tag": kalt_tag[0], "temp_c": round(kalt_tag[1], 1), "entnahme_gwh": round(pt), "modell_gwh": round(pred)},
-                                "hinweis": "Bedarf = Entnahme aus den Speichern laut Modell (a + b mal Heizgradtage, ohne Zusatzfaktoren wie Wind und Kältenachwirkung). Verbrauch = Bedarf plus aktuelle Zufuhr."}
+        risiko["spitzentag"] = {"leistung_hoch_gwh": round(hoch), "leistung_tief_gwh": round(tief) if tief else None, "zufuhr_netto_gwh": round(zuf) if zuf else None,
+                                "max_entnahme": {"tag": mx[0], "gwh": round(mx[1])}, "zeilen": zeilen, "kaelteste_tage": kalte,
+                                "hinweis": "Speicherbedarf = Verbrauch minus heutige Zufuhr. Reserve = Ausspeicherleistung minus Speicherbedarf. Leistung hoch: beobachteter Höchstwert (99,5 %) bei gut gefüllten Speichern; tief: Höchstwert bei 10 bis 20 % Füllstand (ab 40 % hoch, darunter sinkend, Annahme)."}
     except Exception as e:  # noqa: BLE001
         risiko = {"fehler": f"{type(e).__name__}: {e}"[:200]}
     # Übersicht der Faktoren im Modell
