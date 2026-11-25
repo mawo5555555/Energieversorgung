@@ -108,3 +108,12 @@ body.scope-bb [data-scope="de"], body.scope-de [data-scope="bb"] { display: none
 .fk-w { font-size: 14px; }
 @media (max-width: 560px) { .fk { grid-template-columns: 14px 1fr; } .fk-w { grid-column: 2; } }
 .fk strong, .fk-w { overflow-wrap: anywhere; hyphens: auto; }
+
+/* Einklappbare Kacheln: Überschrift antippen */
+.card.fold > h3 { cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 0; -webkit-user-select: none; user-select: none; }
+.card.fold > h3::after { content: "›"; flex: none; font-size: 22px; line-height: 1; color: var(--muted); transform: rotate(90deg); transition: transform .2s; }
+.card.fold.open > h3 { margin-bottom: 8px; }
+.card.fold.open > h3::after { transform: rotate(-90deg); }
+.card.fold:not(.open) > .body { display: none; }
+.foldbar { display: flex; gap: 8px; justify-content: flex-end; margin: 14px 0 0; }
+.foldbar button { font: inherit; font-size: 13px; padding: 6px 12px; border: 0; border-radius: 999px; background: var(--fill); color: var(--label); cursor: pointer; }

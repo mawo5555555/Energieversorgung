@@ -167,7 +167,7 @@
       pvx = '<h3 style="margin-top:14px">Wie sich die Prognose verändert hat</h3>' + (es.length < 2 ? '<p class="meta" style="margin-top:0">Die Prognose wird ab jetzt täglich festgehalten, hier erscheint dann der Verlauf.</p>' : '<table><tr><th>Stand</th><th class="n">Füllstand</th><th class="n">1.2. normal</th><th class="n">1.2. kalt</th><th class="n">31.3. normal</th></tr>' + es.map(function (e) { return "<tr><td>" + new Date(e.tag + "T12:00:00").toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" }) + '</td><td class="n">' + nf.format(e.fuellstand) + ' %</td><td class="n">' + nf0.format(e.normal_feb) + ' %</td><td class="n">' + nf0.format(e.kalt_feb) + ' %</td><td class="n">' + nf0.format(e.normal_ende) + " %</td></tr>"; }).join("") + "</table>") + '<p class="meta">Die Berechnung nutzt täglich den neuesten Speicherstand und die neueste Wettervorhersage und passt sich dadurch an.</p>' + (d.gegenprobe && d.gegenprobe.anzahl ? '<p style="margin:6px 0 0"><strong>Gegenprobe mit der Wirklichkeit:</strong> Frühere Vorhersagen lagen im Mittel ' + (d.gegenprobe.bis3 != null ? "nach bis zu 3 Tagen um " + nf.format(d.gegenprobe.bis3) + " Prozentpunkte" : "") + (d.gegenprobe.bis7 != null ? ", bis 7 Tagen um " + nf.format(d.gegenprobe.bis7) : "") + (d.gegenprobe.bis14 != null ? ", bis 14 Tagen um " + nf.format(d.gegenprobe.bis14) : "") + " daneben (" + d.gegenprobe.anzahl + " Vergleiche).</p>" : '<p class="meta">Die Gegenprobe (frühere Vorhersagen gegen den tatsächlichen Verlauf) beginnt mit den täglich gespeicherten Prognosen und füllt sich in den nächsten Tagen.</p>');
     }
     if (!d.szenarien) return set("cVorausschau", errNote(d) + hint(d.hinweis || "Keine Daten."));
-    var W = 340, H = 170, L = 28, T0 = 8, B = 22, pw = W - L - 8, ph = H - T0 - B;
+    var W = 340, H = 270, L = 28, T0 = 8, B = 22, pw = W - L - 8, ph = H - T0 - B;
     var t0 = new Date("2026-11-10T12:00:00").getTime(), t1 = new Date(d.ziel.datum.slice(0, 4) === "2027" ? "2027-03-31T12:00:00" : "2027-03-31T12:00:00").getTime();
     function X(s) { return L + (new Date(s + "T12:00:00").getTime() - t0) / (t1 - t0) * pw; }
     function Y(v) { return T0 + (100 - v) / 100 * ph; }
@@ -223,12 +223,12 @@
     var q = bb ? u : v, ok = q && (bb ? q.gesamt : q.szenarien);
     if (!ok) return set("cUeberblick", noData(q, "Überblick") || hint("Noch keine Prognose verfügbar."));
     var sz = bb ? q.gesamt : q.szenarien, jetzt = bb ? q.gesamt_gas_twh / q.gesamt_kapazitaet_twh * 100 : q.ausgangslage.fuellstand_prozent;
-    var W = 340, H = 140, L = 24, T0 = 8, B = 18, pw = W - L - 8, ph = H - T0 - B, t0 = new Date("2026-11-10T12:00:00").getTime(), t1 = new Date("2027-04-30T12:00:00").getTime();
-    function X(s) { return L + (new Date(s + "T12:00:00").getTime() - t0) / (t1 - t0) * pw; } function Y(x) { return T0 + (100 - x) / 100 * ph; }
+    var W = 340, H = 250, L = 24, T0 = 8, B = 18, pw = W - L - 8, ph = H - T0 - B, t0 = new Date("2026-11-10T12:00:00").getTime(), t1 = new Date("2027-04-30T12:00:00").getTime();
+    function X(s) { return L + (new Date(s + "T12:00:00").getTime() - t0) / (t1 - t0) * pw; } function Y(x) { return T0 + (70 - Math.min(70, x)) / 70 * ph; }
     function dat(s) { return new Date(s + "T12:00:00").toLocaleDateString("de-DE", { day: "numeric", month: "long" }); }
     var farben = { mild: "var(--green)", normal: "var(--blue)", kalt: "var(--red)" }, namen = { mild: "Mild", normal: "Normal", kalt: "Kalt" };
     var g = '<rect x="' + L + '" y="' + Y(20) + '" width="' + pw + '" height="' + (Y(0) - Y(20)) + '" fill="var(--red)" opacity="0.10"/>';
-    [0, 20, 50, 100].forEach(function (x) { g += '<line x1="' + L + '" x2="' + (W - 8) + '" y1="' + Y(x) + '" y2="' + Y(x) + '" stroke="' + (x === 20 ? "var(--red)" : "var(--sep)") + '" stroke-width="' + (x === 20 ? 0.9 : 0.6) + '"' + (x === 20 ? ' stroke-dasharray="3 3"' : "") + '/><text x="' + (L - 3) + '" y="' + (Y(x) + 3) + '" text-anchor="end" font-size="8" fill="var(--muted)">' + x + "</text>"; });
+    [0, 20, 50, 70].forEach(function (x) { g += '<line x1="' + L + '" x2="' + (W - 8) + '" y1="' + Y(x) + '" y2="' + Y(x) + '" stroke="' + (x === 20 ? "var(--red)" : "var(--sep)") + '" stroke-width="' + (x === 20 ? 0.9 : 0.6) + '"' + (x === 20 ? ' stroke-dasharray="3 3"' : "") + '/><text x="' + (L - 3) + '" y="' + (Y(x) + 3) + '" text-anchor="end" font-size="8" fill="var(--muted)">' + x + "</text>"; });
     [["2026-12-01", "Dez"], ["2027-01-01", "Jan"], ["2027-02-01", "Feb"], ["2027-03-01", "Mär"], ["2027-04-01", "Apr"]].forEach(function (m) { g += '<text x="' + (X(m[0]) + 1) + '" y="' + (H - 5) + '" font-size="8" fill="var(--muted)">' + m[1] + "</text>"; });
     var an = !bb && v && v.analog && v.analog.band ? v.analog : null;
     if (an) {
@@ -629,7 +629,28 @@
   function applyScope(sc) {
     state.scope = sc;
     document.body.classList.toggle("scope-bb", sc === "bb"); document.body.classList.toggle("scope-de", sc === "de");
-    document.querySelectorAll(".seg button").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.ansicht === sc ? "true" : "false"); });
+  
+  // Einklappbare Kacheln: Zustand merken, beim Anspringen automatisch öffnen
+  function foldInit() {
+    var saved = {}; try { saved = JSON.parse(localStorage.getItem("energie.offen") || "{}"); } catch (e) {}
+    var cards = [].slice.call(document.querySelectorAll(".card.fold"));
+    function save() { var o = {}; cards.forEach(function (c) { if (c.id && c.classList.contains("open")) o[c.id] = 1; }); try { localStorage.setItem("energie.offen", JSON.stringify(o)); } catch (e) {} }
+    cards.forEach(function (c) {
+      if (saved[c.id]) c.classList.add("open");
+      var h = c.querySelector("h3"); if (!h) return;
+      h.setAttribute("role", "button"); h.tabIndex = 0;
+      function t() { c.classList.toggle("open"); save(); }
+      h.addEventListener("click", t);
+      h.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); t(); } });
+    });
+    var bar = document.createElement("div"); bar.className = "foldbar";
+    bar.innerHTML = '<button type="button" data-a="auf">Alle Details öffnen</button><button type="button" data-a="zu">Alle schließen</button>';
+    bar.addEventListener("click", function (e) { var a = e.target.getAttribute("data-a"); if (!a) return; cards.forEach(function (c) { c.classList.toggle("open", a === "auf"); }); save(); });
+    var main = document.querySelector("main"); main.insertBefore(bar, main.firstChild);
+    window.addEventListener("hashchange", function () { var el = document.querySelector(location.hash.length > 1 ? location.hash : "#x"); if (el && el.classList && el.classList.contains("fold")) { el.classList.add("open"); save(); } });
+  }
+  foldInit();
+  document.querySelectorAll(".seg button").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.ansicht === sc ? "true" : "false"); });
     try { localStorage.setItem("energie.ansicht", sc); } catch (e) {}
     if (state.wetter) renderWetter(state.wetter);
     if (state.ueber) renderUeberblick(state.ueber[0], state.ueber[1]);
