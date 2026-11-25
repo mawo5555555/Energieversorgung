@@ -1,13 +1,13 @@
 {
- "stand": "2026-11-25T18:57:03Z",
+ "stand": "2026-11-25T22:29:01Z",
  "quelle": "GIE ALSI (alsi.gie.eu)",
  "deutschland": {
   "name": "Deutschland gesamt",
   "firma": "",
   "gastag": "2026-11-24",
   "fuellstand_prozent": null,
-  "inhalt_gwh": 1976.55,
-  "ausspeisung_gwh": 333.8,
+  "inhalt_gwh": 1974.29,
+  "ausspeisung_gwh": 334.0,
   "anlieferung_schiffe": null,
   "verlauf": [
    [
@@ -94,8 +94,8 @@
    "firma": "Deutsche ReGas GmbH & Co. KGaA",
    "gastag": "2026-11-24",
    "fuellstand_prozent": null,
-   "inhalt_gwh": 155.83,
-   "ausspeisung_gwh": 1.8,
+   "inhalt_gwh": 153.56,
+   "ausspeisung_gwh": 2.0,
    "anlieferung_schiffe": null
   }
  ]
