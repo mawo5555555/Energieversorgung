@@ -1,23 +1,23 @@
 {
- "stand": "2026-11-24T17:38:02Z",
+ "stand": "2026-11-25T12:46:54Z",
  "preise": {
   "diesel": {
    "min": 1.929,
-   "median": 1.979,
+   "median": 2.209,
    "max": 2.889,
-   "anzahl": 325
+   "anzahl": 332
   },
   "e5": {
-   "min": 1.779,
-   "median": 1.839,
+   "min": 1.769,
+   "median": 2.079,
    "max": 2.709,
-   "anzahl": 319
+   "anzahl": 326
   },
   "e10": {
-   "min": 1.719,
-   "median": 1.779,
+   "min": 1.709,
+   "median": 2.019,
    "max": 2.699,
-   "anzahl": 314
+   "anzahl": 319
   }
  },
  "stationen": 332,
@@ -125,9 +125,15 @@
     "e5": 1.869,
     "e10": 1.819
    }
+  ],
+  [
+   1795564800,
+   {
+    "diesel": 2.209,
+    "e5": 2.079,
+    "e10": 2.019
+   }
   ]
  ],
- "quelle": "Tankerkönig.de (Markttransparenzstelle für Kraftstoffe), CC BY 4.0",
- "fehler": "URLError: <urlopen error [Errno 111] Connection refused>",
- "fehler_stand": "2026-11-25T02:22:32Z"
+ "quelle": "Tankerkönig.de (Markttransparenzstelle für Kraftstoffe), CC BY 4.0"
 }

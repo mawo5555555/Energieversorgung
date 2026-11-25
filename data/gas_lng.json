@@ -1,34 +1,30 @@
 {
- "stand": "2026-11-25T02:22:32Z",
+ "stand": "2026-11-25T12:46:54Z",
  "einheit": "GWh/Tag",
- "tag": "2026-11-23",
- "neuester_tag_in_daten": "2026-11-24",
+ "tag": "2026-11-24",
+ "neuester_tag_in_daten": "2026-11-25",
  "terminals": [
   {
    "name": "Wilhelmshaven",
-   "einspeisung": 121.6,
+   "einspeisung": 121.9,
    "ausfuhr": null,
-   "netto": 121.6
+   "netto": 121.9
   },
   {
    "name": "Brunsbüttel",
-   "einspeisung": 98.2,
+   "einspeisung": 91.7,
    "ausfuhr": null,
-   "netto": 98.2
+   "netto": 91.7
   },
   {
    "name": "Stade",
-   "einspeisung": 120.7,
+   "einspeisung": 118.5,
    "ausfuhr": null,
-   "netto": 120.7
+   "netto": 118.5
   }
  ],
- "summe": 340.5,
+ "summe": 332.1,
  "verlauf": [
-  [
-   "2026-11-14",
-   191.2
-  ],
   [
    "2026-11-15",
    203.5
@@ -64,6 +60,10 @@
   [
    "2026-11-23",
    340.5
+  ],
+  [
+   "2026-11-24",
+   332.1
   ]
  ],
  "ohne_daten": [],
