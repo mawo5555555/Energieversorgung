@@ -320,7 +320,8 @@
     // Importe
     if (pi.summe_netto != null) {
       var ei10 = (v.importausfall || []).filter(function (e) { return /10 %/.test(e.fall); })[0];
-      add("Importe (Pipeline netto + LNG)", nf0.format(pi.summe_netto + (lng.summe || 0)) + " GWh/Tag", "Davon Norwegen " + nf0.format(((pi.gruppen || []).filter(function (g) { return g.name === "Norwegen"; })[0] || {}).netto || 0) + ", LNG " + nf0.format(lng.summe || 0) + ". " + (ei10 ? "Importe −10 %: Füllstand 1. Februar " + nf0.format(ei10.normal.fuellstand_ziel_tag) + " % statt " + nf0.format(v.szenarien.normal.konstant.fuellstand_ziel_tag) + " %." : ""), "", "ENTSOG, GIE ALSI");
+      var bnz = r[26] && r[26].netto_pipeline ? r[26] : null;
+      add("Importe (Pipeline netto + LNG)", nf0.format(bnz ? bnz.netto_pipeline + (bnz.import_lng || 0) : pi.summe_netto + (lng.summe || 0)) + " GWh/Tag", "Davon Norwegen " + nf0.format(bnz ? (bnz.import_land.Norwegen || 0) : (((pi.gruppen || []).filter(function (g) { return g.name === "Norwegen"; })[0] || {}).netto || 0)) + ", LNG " + nf0.format(bnz ? (bnz.import_lng || 0) : (lng.summe || 0)) + ". " + (ei10 ? "Importe −10 %: Füllstand 1. Februar " + nf0.format(ei10.normal.fuellstand_ziel_tag) + " % statt " + nf0.format(v.szenarien.normal.konstant.fuellstand_ziel_tag) + " %." : ""), "", bnz ? "Bundesnetzagentur, ENTSOG, GIE ALSI" : "ENTSOG, GIE ALSI");
     }
     // Preis
     if (ttf.ttf_aktuell != null) add("Gaspreis (TTF)", nf.format(ttf.ttf_aktuell) + " €/MWh", "Höher als an " + ttf.perzentil_seit_2018 + " % der Tage seit 2018. Hohe Preise verteuern die Einspeicherung und dämpfen den Verbrauch, ein klarer Effekt auf die Einspeicherung ist in den Daten nicht belegt.", ttf.perzentil_seit_2018 > 80 ? "warn" : "", "Yahoo Finance");
@@ -657,6 +658,48 @@
     if (state.alle) renderFaktoren(state.alle);
   }
 
+  var APP_VERSION = "35", APP_DATUM = "25.11.2026";
+  function renderVersion(r) {
+    var el = document.getElementById("version"); if (!el) return;
+    var m = r[16] && r[16].modell_version, meta = r[0] || {};
+    var st = meta.letzter_lauf ? new Date(meta.letzter_lauf).toLocaleString("de-DE", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : "–";
+    el.textContent = "Version " + APP_VERSION + " (" + APP_DATUM + ")" + (m ? " · Modell " + m : "") + " · Daten vom " + st;
+  }
+  function renderBilanz(b, pipe, lng, v, hist) {
+    var nd = noData(b, "Bundesnetzagentur"); if (nd) return set("cBilanz", nd);
+    if (!b.tag) return set("cBilanz", errNote(b) + hint("Die Daten der Bundesnetzagentur werden gerade geholt."));
+    var land = Object.keys(b.import_land || {}).filter(function (k) { return b.import_land[k] > 0; }).sort(function (x, y) { return b.import_land[y] - b.import_land[x]; });
+    var rows = land.map(function (k) { return "<tr><td>" + esc(k) + '</td><td class="n">' + nf0.format(b.import_land[k]) + "</td></tr>"; }).join("") +
+      "<tr><td>LNG-Terminals</td><td class=\"n\">" + nf0.format(b.import_lng || 0) + "</td></tr>" +
+      "<tr><td><strong>Importe gesamt</strong></td><td class=\"n\"><strong>" + nf0.format(b.import_gesamt) + "</strong></td></tr>" +
+      "<tr><td>abzüglich Exporte</td><td class=\"n\">−" + nf0.format(b.export_gesamt) + "</td></tr>" +
+      "<tr><td>zuzüglich inländische Förderung</td><td class=\"n\">+" + nf0.format(b.foerderung) + "</td></tr>" +
+      "<tr><td><strong>Zufuhr netto</strong></td><td class=\"n\"><strong>" + nf0.format(b.netto_gesamt) + "</strong></td></tr>";
+    var ours = (pipe && pipe.summe_netto != null ? pipe.summe_netto : 0) + (lng && lng.summe ? lng.summe : 0);
+    var vb = (b.verbrauch || {}).gesamt_w || {}, wk = vb.woche, vj = vb.jahr || [], last = vj[vj.length - 1], vorj = (vb["2025"] || [])[wk - 1], mit = (vb.mittel_1821 || [])[wk - 1];
+    var test = "";
+    var ja = hist && hist.jahre && hist.jahre[String(hist.aktuelles_jahr)], kapT = v && v.ausgangslage && v.ausgangslage.kapazitaet_twh;
+    if (ja && ja.length >= 9 && kapT && b.verlauf_netto && b.verlauf_netto.length >= 7) {
+      var hl = ja[ja.length - 1], h0 = ja[ja.length - 8], hd = new Date(hist.aktuelles_jahr, 0, hl[0]);
+      var hs = hd.getFullYear() + "-" + ("0" + (hd.getMonth() + 1)).slice(-2) + "-" + ("0" + hd.getDate()).slice(-2);
+      var vz = b.verlauf_netto.filter(function (p) { return p[0] <= hs; }).slice(-7);
+      if (vz.length === 7) {
+        var z7 = vz.reduce(function (a1, p) { return a1 + p[1]; }, 0) / 7, aus7 = (h0[1] - hl[1]) / 7 * kapT * 10, impl = z7 + aus7, ours7 = ours + (b.foerderung || 0) + aus7;
+        test = '<h3 style="margin-top:12px">Gegenprobe: Geht die Rechnung auf?</h3><p class="meta" style="margin-top:0">Verbrauch = Zufuhr + Ausspeicherung aus den Speichern. Die Ausspeicherung kommt unabhängig von GIE (Füllstand), der Verbrauch unabhängig von der Bundesnetzagentur.</p>' +
+          '<table><tr><th>Mittel der 7 Tage bis ' + esc(hs) + '</th><th class="n">GWh/Tag</th></tr>' +
+          "<tr><td>Zufuhr netto laut Bundesnetzagentur</td><td class=\"n\">" + nf0.format(z7) + "</td></tr>" +
+          "<tr><td>plus Ausspeicherung aus den Speichern (GIE)</td><td class=\"n\">" + nf0.format(aus7) + "</td></tr>" +
+          "<tr><td><strong>= rechnerischer Verbrauch</strong></td><td class=\"n\"><strong>" + nf0.format(impl) + "</strong></td></tr>" +
+          "<tr><td>Verbrauch laut Bundesnetzagentur (Woche " + wk + ")" + (vj.length > 1 ? ", Woche davor " + nf0.format(vj[vj.length - 2]) : "") + "</td><td class=\"n\">" + nf0.format(last) + "</td></tr>" +
+          "<tr><td>Rechnung mit unserer ENTSOG-Zufuhr (" + nf0.format(ours + (b.foerderung || 0)) + " statt " + nf0.format(z7) + ")</td><td class=\"n\">" + nf0.format(ours7) + "</td></tr></table>" +
+          '<p class="meta">Mit den Zahlen der Bundesnetzagentur geht die Bilanz auf, mit unserer ENTSOG-Summe nicht: ' + nf0.format(ours7) + ' GWh/Tag Verbrauch im November sind nicht plausibel. Die Unterschiede: bei Norwegen ist nur ein Einspeisepunkt öffentlich (Dornum), und an den virtuellen Handelspunkten mit Belgien und den Niederlanden sind Einspeisung und Ausfuhr nicht sauber trennbar. Deshalb rechnet die Prognose mit den Importen der Bundesnetzagentur. Unsere ENTSOG-Messpunkte bleiben als Detail in der Kachel „Pipeline-Importe nach Herkunft“.</p>';
+      }
+    }
+    var jahr = vorj != null ? '<p class="meta" style="margin-top:8px">Verbrauch Woche ' + wk + ": " + nf0.format(last) + " GWh/Tag" + " (Vorjahr " + nf0.format(vorj) + (mit != null ? ", Mittel 2018 bis 2021: " + nf0.format(mit) : "") + ").</p>" : "";
+    set("cBilanz", errNote(b) + '<p style="margin:0 0 6px">Amtliche Tageswerte der Bundesnetzagentur für den <strong>' + esc(b.tag) + "</strong> in GWh/Tag.</p>" +
+      '<table><tr><th>Zufuhr</th><th class="n">GWh/Tag</th></tr>' + rows + "</table>" + jahr + test +
+      '<p class="meta">Quelle: Bundesnetzagentur, Aktuelle Lage der Gasversorgung (Werte aus den Grafiken ausgelesen). Der Wochenverbrauch ist ein Mittelwert je Tag; Industrie und Haushalte/Gewerbe addieren sich dort nicht genau zum Gesamtwert.</p>');
+  }
   function renderPipe(d) {
     var nd = noData(d, "Pipelines"); if (nd) return set("cPipe", nd);
     if (!d.gruppen || !d.gruppen.length || d.gruppen[0].netto === undefined) return set("cPipe", errNote(d) + hint("Die Pipeline-Daten werden gerade neu berechnet."));
@@ -722,12 +765,12 @@
   }
 
   function load() {
-    Promise.all(["meta.json", "gas_speicher.json", "gas_lng.json", "gas_pipeline.json", "strom.json", "frequenz.json", "kraftstoff.json", "rohoel.json", "reichweite.json", "gas_historie.json", "wetter.json", "gas_europa.json", "gas_anlagen.json", "gaspreis.json", "lng_tanks.json", "gas_umfeld.json", "gas_vorausschau.json", "gas_umfeld_vorausschau.json", "gas_stoerungen.json", "gas_preisanalyse.json", "prognose_verlauf.json", "faktoren_extra.json", "auslandseinfluss.json", "massnahmen.json", "modellpruefung.json", "verbraucherpreise.json"].map(get)).then(function (r) {
+    Promise.all(["meta.json", "gas_speicher.json", "gas_lng.json", "gas_pipeline.json", "strom.json", "frequenz.json", "kraftstoff.json", "rohoel.json", "reichweite.json", "gas_historie.json", "wetter.json", "gas_europa.json", "gas_anlagen.json", "gaspreis.json", "lng_tanks.json", "gas_umfeld.json", "gas_vorausschau.json", "gas_umfeld_vorausschau.json", "gas_stoerungen.json", "gas_preisanalyse.json", "prognose_verlauf.json", "faktoren_extra.json", "auslandseinfluss.json", "massnahmen.json", "modellpruefung.json", "verbraucherpreise.json", "bnetza_gas.json"].map(get)).then(function (r) {
       document.getElementById("stand").textContent = r[0] && r[0].letzter_lauf ? "Letzter Datenabruf: " + when(r[0].letzter_lauf) : "Noch kein Datenabruf.";
       [function () { renderSpeicherDE(r[1]); }, function () { renderSpeicherBB(r[1]); },
         function () { renderLngEin(r[2]); }, function () { renderPipe(r[3]); },
         function () { renderPreis(r[4]); }, function () { renderMix(r[4]); }, function () { renderFreq(r[5]); }, function () { renderKraft(r[6]); },
-        function () { renderOel(r[7]); }, function () { renderReich(r[8], r[16]); }, function () { renderHist(r[9]); }, function () { renderWetter(r[10]); }, function () { renderEuropa(r[11]); }, function () { renderAnlagen(r[12]); }, function () { renderTtf(r[13], r[19]); }, function () { renderLngTanks(r[14]); }, function () { renderUmfeld(r[15]); }, function () { renderVorausschau(r[16], r[20]); }, function () { renderEinsp(r[16]); }, function () { renderUmfeldVor(r[17], r[15]); }, function () { renderStoerungen(r[18]); }, function () { renderUeberblick(r[16], r[17]); }, function () { renderVerstromung(r[16]); }, function () { renderModellFaktoren(r[16], r[21]); }, function () { renderAusland(r[16], r[3], r[22], r[21]); }, function () { renderMassnahmen(r[23], r[16]); }, function () { renderPruefung(r[24]); }, function () { renderPreise(r[25]); }, function () { state.alle = r; renderFaktoren(r); }, function () { renderVersorgung(r[16], r[17]); }
+        function () { renderOel(r[7]); }, function () { renderReich(r[8], r[16]); }, function () { renderHist(r[9]); }, function () { renderWetter(r[10]); }, function () { renderEuropa(r[11]); }, function () { renderAnlagen(r[12]); }, function () { renderTtf(r[13], r[19]); }, function () { renderLngTanks(r[14]); }, function () { renderUmfeld(r[15]); }, function () { renderVorausschau(r[16], r[20]); }, function () { renderEinsp(r[16]); }, function () { renderUmfeldVor(r[17], r[15]); }, function () { renderStoerungen(r[18]); }, function () { renderUeberblick(r[16], r[17]); }, function () { renderVerstromung(r[16]); }, function () { renderModellFaktoren(r[16], r[21]); }, function () { renderAusland(r[16], r[3], r[22], r[21]); }, function () { renderMassnahmen(r[23], r[16]); }, function () { renderPruefung(r[24]); }, function () { renderPreise(r[25]); }, function () { renderBilanz(r[26], r[3], r[2], r[16], r[9]); }, function () { renderVersion(r); }, function () { state.alle = r; renderFaktoren(r); }, function () { renderVersorgung(r[16], r[17]); }
       ].forEach(function (f) { try { f(); } catch (e) { if (window.console) console.error(e); } });
     });
   }
