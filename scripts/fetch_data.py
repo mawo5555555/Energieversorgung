@@ -152,7 +152,9 @@ def gruppen_auswertung(gruppen, mit_ausfuhr):
     ein = {g: {t: summe_gruppe(best, pts, "entry", t) for t in tage} for g, pts in gruppen.items()}
     aus = {g: {t: summe_gruppe(best, pts, "exit", t) for t in tage} for g, pts in gruppen.items()}
     letzte = tage[-7:]
-    aktiv = [g for g in gruppen if any(ein[g][t] is not None for t in letzte)]
+    # Regelmäßig meldende Gruppen bestimmen den "vollständigen" Tag; selten meldende (z. B. Frankreich) zählen als 0, damit der Tag nicht Tage zurückfällt
+    aktiv = [g for g in gruppen if sum(ein[g][t] is not None for t in letzte) >= 5]
+    selten = [g for g in gruppen if g not in aktiv and any(ein[g][t] is not None for t in letzte)]
     vollstaendig = [t for t in tage if all(ein[g][t] is not None for g in aktiv)]
     if not vollstaendig:
         raise ValueError("kein Tag mit vollständigen Meldungen")
@@ -165,7 +167,7 @@ def gruppen_auswertung(gruppen, mit_ausfuhr):
                     "netto": (round(e - ((a or 0) if mit_ausfuhr else 0), 1) or 0.0) if e is not None else None})
     for t in vollstaendig[-10:]:
         verlauf.append([t, round(sum(ein[g][t] - ((aus[g][t] or 0) if mit_ausfuhr else 0) for g in aktiv), 1)])
-    return tag, out, verlauf, [g for g in gruppen if g not in aktiv], tage[-1]
+    return tag, out, verlauf, [g for g in gruppen if g not in aktiv and g not in selten], tage[-1]
 
 
 def gas_pipeline():
@@ -698,6 +700,31 @@ def agsi_de_historie(key, ab_jahr=2018, extra=""):
     return out
 
 
+EXTREM_WINTER = (("2009/10", "2009-11-01", "2010-03-31"), ("2010/11", "2010-11-01", "2011-03-31"))
+
+
+def temp_extremwinter():
+    """Reale Tagestemperaturen zweier kalter Winter (Deutschland, 6 Großstädte), einmal geladen und dann aus dem Cache."""
+    cache = read("temp_extremwinter.json", {"winter": {}})
+    w = cache.get("winter", {})
+    for name, a, b in EXTREM_WINTER:
+        if len(w.get(name, {})) >= 140:
+            continue
+        q = urllib.parse.urlencode({"latitude": ",".join(str(o[0]) for o in STAEDTE_DE), "longitude": ",".join(str(o[1]) for o in STAEDTE_DE),
+                                    "start_date": a, "end_date": b, "daily": "temperature_2m_mean", "timezone": "Europe/Berlin"})
+        d = get_json("https://archive-api.open-meteo.com/v1/archive?" + q, timeout=120)
+        if isinstance(d, dict):
+            d = [d]
+        tage = {}
+        for i, t in enumerate(d[0]["daily"]["time"]):
+            v = [x["daily"]["temperature_2m_mean"][i] for x in d if x["daily"]["temperature_2m_mean"][i] is not None]
+            if v:
+                tage[t] = round(sum(v) / len(v), 2)
+        w[name] = tage
+    write("temp_extremwinter.json", {"stand": stamp(), "quelle": "Open-Meteo Archiv (CC BY 4.0), Mittel aus 6 Großstädten", "winter": w})
+    return {"winter": w}
+
+
 def temp_historie():
     """Tagesmitteltemperatur Deutschland (Mittel aus 6 Großstädten), wächst bei jedem Lauf nur um die neuen Tage."""
     old = read("temp_historie.json", {"tage": {}})
@@ -1115,7 +1142,7 @@ def gas_vorausschau():
     old = read("gas_vorausschau.json", {})
     try:
         alt = datetime.strptime(old["stand"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
-        if NOW - alt < timedelta(hours=5) and old.get("szenarien") and old.get("einspeicherung") and old.get("importausfall") and "abweichung_letzte_tage_gwh" in (old.get("verstromung") or {}) and old.get("modell_version") == 6 and read("gas_preisanalyse.json", {}).get("jahre") and read("gas_umfeld_vorausschau.json", {}).get("anlagen") and not old.get("fehler"):
+        if NOW - alt < timedelta(hours=5) and old.get("szenarien") and old.get("einspeicherung") and old.get("importausfall") and "abweichung_letzte_tage_gwh" in (old.get("verstromung") or {}) and old.get("modell_version") == 7 and read("gas_preisanalyse.json", {}).get("jahre") and read("gas_umfeld_vorausschau.json", {}).get("anlagen") and not old.get("fehler"):
             return None  # aufwendig (Historie seit 2018), deshalb nur alle paar Stunden
     except (KeyError, ValueError):
         pass
@@ -1137,13 +1164,17 @@ def gas_vorausschau():
                 strom_daten[schluessel + "_fehler"] = f"{type(e2).__name__}: {e2}"[:120]
     except Exception as e:  # noqa: BLE001
         strom_daten["fehler"] = f"{type(e).__name__}: {e}"[:200]
+    try:
+        extrem_daten = temp_extremwinter()
+    except Exception:  # noqa: BLE001
+        extrem_daten = None
     res, ctx = modell.vorausschau(hist, temp, read("wetter.json", {}), cfg, max(hist),
                                   {"pipeline_netto": pipe.get("summe_netto"), "lng": lng.get("summe"),
                                    "norwegen": next((g["netto"] for g in pipe.get("gruppen", []) if g.get("name") == "Norwegen"), None),
                                    "kaelte_ausland_gwh": (-ausl["effekt_kaltwelle_gwh"] if ausl.get("effekt_kaltwelle_gwh") and ausl["effekt_kaltwelle_gwh"] < 0 else None),
-                                   "kaelte_ausland_beleg": bool(ausl.get("belegt"))}, strom_daten)
+                                   "kaelte_ausland_beleg": bool(ausl.get("belegt"))}, strom_daten, extrem_daten)
     res["stand"] = stamp()
-    res["modell_version"] = 6
+    res["modell_version"] = 7
     # Verlauf der Prognose festhalten, damit sichtbar wird, wie sie sich mit dem tatsächlichen Verlauf ändert
     try:
         pv = read("prognose_verlauf.json", {"eintraege": []}).get("eintraege", [])
