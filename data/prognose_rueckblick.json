@@ -62,18 +62,46 @@
    "urteil": "Zutreffend, aber knapp (1,9 Punkte)."
   },
   {
-   "quelle": "INES, November-Update 2025 (nur aus Presseberichten, Original nicht gelesen)",
-   "prognose": "Normalwinter: grob 20 % Ende März; Kältefall: Unterdeckung ab Mitte Januar",
-   "tatsaechlich": "21,8 % am 1. April; keine Unterdeckung",
-   "abweichung_pp": 1.8,
-   "urteil": "Vorläufig gut für den Normalfall. Zuordnung der 20 % in der Presse unklar."
+   "quelle": "INES, November-Update 2025, Dokumentation vom 18.11.2025 (Original gelesen)",
+   "prognose": "Start 75 %, Normaltemperaturen (Wetterjahr 2016): Ende April 2026 auf 20 % entleert",
+   "tatsaechlich": "Start 75,1 %; 25,7 % am 30. April",
+   "abweichung_pp": 5.7,
+   "urteil": "Gut. Etwa 6 Prozentpunkte zu niedrig. Der Startwert stimmte genau."
   },
   {
-   "quelle": "DVGW (nur aus einem Blog zitiert, Original nicht gefunden)",
-   "prognose": "Rund 10 % Ende März 2026, Versorgung bis Ende April gesichert",
+   "quelle": "INES, November-Update 2025 (Original gelesen)",
+   "prognose": "Warmer Winter (Wetterjahr 2020): Anfang April 47 %",
    "tatsaechlich": "21,8 % am 1. April",
-   "abweichung_pp": -11.8,
-   "urteil": "Vorläufig zu pessimistisch um etwa 12 Prozentpunkte. Quelle nicht geprüft."
+   "abweichung_pp": -25.2,
+   "urteil": "Der Winter war deutlich kälter als dieses Szenario, es passte nicht zum Verlauf."
+  },
+  {
+   "quelle": "INES, November-Update 2025 (Original gelesen)",
+   "prognose": "Extrem kalt (Wetterjahr 2010): Speicher bis Mitte Januar 2026 leer, Gasmangel",
+   "tatsaechlich": "Tiefpunkt 20,5 % am 21. Feb., keine Mangellage",
+   "abweichung_pp": null,
+   "urteil": "Nicht eingetreten. Im Januar-Update schrieb INES selbst, das Szenario sei weniger wahrscheinlich."
+  },
+  {
+   "quelle": "INES, November-Update 2025 (Original gelesen)",
+   "prognose": "Normal und warm: Vorgabe 30 % am 1. Februar wird eingehalten",
+   "tatsaechlich": "31,9 % am 1. Februar",
+   "abweichung_pp": null,
+   "urteil": "Zutreffend, aber knapp (1,9 Punkte)."
+  },
+  {
+   "quelle": "DVGW, Fachbeitrag in energie | wasser-praxis 08/2025 (Original gelesen)",
+   "prognose": "Bedingte Szenarien (Start 70 oder 80 % am 1. Nov.): Bei Nettoimporten auf Vorjahresniveau liegt der Füllstand am 1. Feb. unter 31 % und die Speicher laufen im Frühjahr leer. Bei höheren Nettoimporten (2,4 bis 2,7 TWh/Tag) wird 31 % am 1. Feb. erreicht, nur bei kaltem Winter droht Leerlaufen.",
+   "tatsaechlich": "Start 75 %, 31,9 % am 1. Feb., kein Leerlaufen",
+   "abweichung_pp": null,
+   "urteil": "Die Variante mit höheren Importen traf zu, die mit Vorjahres-Importen nicht. Es war keine Punktprognose, daher keine Abweichung in Prozentpunkten."
+  },
+  {
+   "quelle": "DVGW-Reichweitentool, nur aus Pressezitaten (Original nicht abrufbar, Datum unklar)",
+   "prognose": "Standardszenario: Minimum 6,6 % bundesweit, erreicht Ende April; andere Zitate 7 bis 8 %",
+   "tatsaechlich": "Tiefpunkt 20,5 % am 21. Feb., 25,7 % am 30. April",
+   "abweichung_pp": -19.1,
+   "urteil": "Vorläufig zu pessimistisch um 15 bis 19 Prozentpunkte. Nicht geprüft: Zeitpunkt der Rechnung und Annahmen sind unbekannt. Eine frühere Angabe von 10 % Ende März aus einem Blog fand ich im Original nicht und habe sie entfernt."
   },
   {
    "quelle": "Bundesnetzagentur / Bundesregierung (ohne Zahl)",
@@ -90,5 +118,5 @@
    "urteil": "Anfang Februar gut (−2,8), Ende März zu pessimistisch (−11,3). Hinweis: Das Modell wurde auf diesen Winterdaten angepasst, die Prüfung ist also eher wohlwollend."
   }
  ],
- "fazit": "INES lag im Normalfall am nächsten (etwa 8 Punkte zu niedrig), das Kälteszenario traf nicht ein. DVGW (vorläufig) und dieses Modell rechneten das Winterende zu niedrig: Der Füllstand blieb bei etwa 20 bis 22 % stehen, weil die Ausspeicherung bei niedrigem Füllstand nachließ und Importe und Einsparungen reagierten. Das spricht dafür, dass auch die 2 % am 31. März in unserer Normal-Rechnung eher zu niedrig sind. Mit einem Winter als Beleg ändere ich das Modell aber noch nicht."
+ "fazit": "INES lag im Normalfall am nächsten: im November-Update etwa 6, im Januar-Update etwa 8 Prozentpunkte zu niedrig am Ende April, bei exaktem Startwert. Die Kälteszenarien (Wetterjahr 2010) traten nicht ein, die Warm-Szenarien passten nicht zum tatsächlich kälteren Winter. Die DVGW-Szenarien waren bedingt formuliert und in der Richtung richtig (höhere Importe, kein Leerlaufen). Die Zitate zum DVGW-Reichweitentool (unter 10 % im Frühjahr) lagen vorläufig deutlich zu niedrig. Dieses Modell rechnete das Winterende ebenfalls zu niedrig (Ende März 11 Punkte): Der Füllstand blieb bei 20 bis 22 % stehen, weil die Ausspeicherung bei niedrigem Füllstand nachließ und Importe und Einsparungen reagierten. Das spricht dafür, dass auch die Ende-März-Werte in unserer Normal-Rechnung eher zu niedrig sind. Mit einem Winter als Beleg ändere ich das Modell aber noch nicht."
 }
