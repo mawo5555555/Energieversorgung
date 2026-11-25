@@ -658,7 +658,7 @@
     if (state.alle) renderFaktoren(state.alle);
   }
 
-  var APP_VERSION = "35", APP_DATUM = "25.11.2026";
+  var APP_VERSION = "36", APP_DATUM = "25.11.2026";
   function renderVersion(r) {
     var el = document.getElementById("version"); if (!el) return;
     var m = r[16] && r[16].modell_version, meta = r[0] || {};
@@ -699,6 +699,17 @@
     set("cBilanz", errNote(b) + '<p style="margin:0 0 6px">Amtliche Tageswerte der Bundesnetzagentur für den <strong>' + esc(b.tag) + "</strong> in GWh/Tag.</p>" +
       '<table><tr><th>Zufuhr</th><th class="n">GWh/Tag</th></tr>' + rows + "</table>" + jahr + test +
       '<p class="meta">Quelle: Bundesnetzagentur, Aktuelle Lage der Gasversorgung (Werte aus den Grafiken ausgelesen). Der Wochenverbrauch ist ein Mittelwert je Tag; Industrie und Haushalte/Gewerbe addieren sich dort nicht genau zum Gesamtwert.</p>');
+  }
+  function renderRueckblick(d) {
+    var nd = noData(d, "Rückblick"); if (nd) return set("cRueckblick", nd);
+    var ist = (d.tatsaechlich || []).map(function (x) { return "<tr><td>" + esc(x[0]) + '</td><td class="n">' + nf.format(x[1]) + " %</td></tr>"; }).join("");
+    var rows = (d.eintraege || []).map(function (e) {
+      var col = e.abweichung_pp == null ? "var(--muted)" : (Math.abs(e.abweichung_pp) <= 5 ? "var(--green)" : (Math.abs(e.abweichung_pp) <= 10 ? "var(--orange)" : "var(--red)"));
+      return '<div class="fk" style="grid-template-columns:14px 1fr"><span class="dot" style="background:' + col + '"></span><div><strong>' + esc(e.quelle) + '</strong><div class="fk-w">Prognose: ' + esc(e.prognose) + '</div><div class="fk-w">Tatsächlich: ' + esc(e.tatsaechlich) + (e.abweichung_pp != null ? " (Abweichung " + (e.abweichung_pp > 0 ? "+" : "") + nf.format(e.abweichung_pp) + " Punkte)" : "") + '</div><div class="fk-j">' + esc(e.urteil) + "</div></div></div>";
+    }).join("");
+    set("cRueckblick", '<p style="margin:0 0 6px">So verlief der Winter tatsächlich (Füllstand Deutschland, GIE):</p><table><tr><th>Stichtag</th><th class="n">Füllstand</th></tr>' + ist + "</table>" +
+      '<p class="meta">' + esc(d.temperatur || "") + "</p>" + '<h3 style="margin-top:12px">Was vorhergesagt wurde</h3>' + rows +
+      '<p class="hint" style="margin-top:10px"><strong>Fazit:</strong> ' + esc(d.fazit || "") + '</p><p class="meta">' + esc(d.hinweis || "") + " Stand " + esc(d.stand || "") + ". Punkte: grün bis 5, orange bis 10, rot über 10 Prozentpunkte Abweichung.</p>");
   }
   function renderPipe(d) {
     var nd = noData(d, "Pipelines"); if (nd) return set("cPipe", nd);
@@ -765,12 +776,12 @@
   }
 
   function load() {
-    Promise.all(["meta.json", "gas_speicher.json", "gas_lng.json", "gas_pipeline.json", "strom.json", "frequenz.json", "kraftstoff.json", "rohoel.json", "reichweite.json", "gas_historie.json", "wetter.json", "gas_europa.json", "gas_anlagen.json", "gaspreis.json", "lng_tanks.json", "gas_umfeld.json", "gas_vorausschau.json", "gas_umfeld_vorausschau.json", "gas_stoerungen.json", "gas_preisanalyse.json", "prognose_verlauf.json", "faktoren_extra.json", "auslandseinfluss.json", "massnahmen.json", "modellpruefung.json", "verbraucherpreise.json", "bnetza_gas.json"].map(get)).then(function (r) {
+    Promise.all(["meta.json", "gas_speicher.json", "gas_lng.json", "gas_pipeline.json", "strom.json", "frequenz.json", "kraftstoff.json", "rohoel.json", "reichweite.json", "gas_historie.json", "wetter.json", "gas_europa.json", "gas_anlagen.json", "gaspreis.json", "lng_tanks.json", "gas_umfeld.json", "gas_vorausschau.json", "gas_umfeld_vorausschau.json", "gas_stoerungen.json", "gas_preisanalyse.json", "prognose_verlauf.json", "faktoren_extra.json", "auslandseinfluss.json", "massnahmen.json", "modellpruefung.json", "verbraucherpreise.json", "bnetza_gas.json", "prognose_rueckblick.json"].map(get)).then(function (r) {
       document.getElementById("stand").textContent = r[0] && r[0].letzter_lauf ? "Letzter Datenabruf: " + when(r[0].letzter_lauf) : "Noch kein Datenabruf.";
       [function () { renderSpeicherDE(r[1]); }, function () { renderSpeicherBB(r[1]); },
         function () { renderLngEin(r[2]); }, function () { renderPipe(r[3]); },
         function () { renderPreis(r[4]); }, function () { renderMix(r[4]); }, function () { renderFreq(r[5]); }, function () { renderKraft(r[6]); },
-        function () { renderOel(r[7]); }, function () { renderReich(r[8], r[16]); }, function () { renderHist(r[9]); }, function () { renderWetter(r[10]); }, function () { renderEuropa(r[11]); }, function () { renderAnlagen(r[12]); }, function () { renderTtf(r[13], r[19]); }, function () { renderLngTanks(r[14]); }, function () { renderUmfeld(r[15]); }, function () { renderVorausschau(r[16], r[20]); }, function () { renderEinsp(r[16]); }, function () { renderUmfeldVor(r[17], r[15]); }, function () { renderStoerungen(r[18]); }, function () { renderUeberblick(r[16], r[17]); }, function () { renderVerstromung(r[16]); }, function () { renderModellFaktoren(r[16], r[21]); }, function () { renderAusland(r[16], r[3], r[22], r[21]); }, function () { renderMassnahmen(r[23], r[16]); }, function () { renderPruefung(r[24]); }, function () { renderPreise(r[25]); }, function () { renderBilanz(r[26], r[3], r[2], r[16], r[9]); }, function () { renderVersion(r); }, function () { state.alle = r; renderFaktoren(r); }, function () { renderVersorgung(r[16], r[17]); }
+        function () { renderOel(r[7]); }, function () { renderReich(r[8], r[16]); }, function () { renderHist(r[9]); }, function () { renderWetter(r[10]); }, function () { renderEuropa(r[11]); }, function () { renderAnlagen(r[12]); }, function () { renderTtf(r[13], r[19]); }, function () { renderLngTanks(r[14]); }, function () { renderUmfeld(r[15]); }, function () { renderVorausschau(r[16], r[20]); }, function () { renderEinsp(r[16]); }, function () { renderUmfeldVor(r[17], r[15]); }, function () { renderStoerungen(r[18]); }, function () { renderUeberblick(r[16], r[17]); }, function () { renderVerstromung(r[16]); }, function () { renderModellFaktoren(r[16], r[21]); }, function () { renderAusland(r[16], r[3], r[22], r[21]); }, function () { renderMassnahmen(r[23], r[16]); }, function () { renderPruefung(r[24]); }, function () { renderPreise(r[25]); }, function () { renderBilanz(r[26], r[3], r[2], r[16], r[9]); }, function () { renderVersion(r); }, function () { renderRueckblick(r[27]); }, function () { state.alle = r; renderFaktoren(r); }, function () { renderVersorgung(r[16], r[17]); }
       ].forEach(function (f) { try { f(); } catch (e) { if (window.console) console.error(e); } });
     });
   }
