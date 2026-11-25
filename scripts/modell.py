@@ -491,7 +491,7 @@ def umfeld_vorausschau(anlagen, nat_hist, nat_fit, temp, tmaps, start, bis, ziel
             "gesamt_gas_twh": round(sum(a["gas_twh"] for a in res), 2)}
 
 
-def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None, strom=None):
+def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None, strom=None, extrem=None):
     """Hauptfunktion: Szenarien mild/normal/kalt, je mit konstanter und fallender Ausspeicherleistung."""
     basis = cfg.get("heizgrenze_c", 15)
     fit = fit_entnahme(hist, temp, basis)
@@ -853,6 +853,43 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None, strom=None)
                       "unter20": {"frueh": u20[0] if u20 else None, "spaet": u20[-1] if u20 else None, "anzahl": len(u20)}}
     except Exception as e:  # noqa: BLE001
         analog = {"fehler": f"{type(e).__name__}: {e}"[:200]}
+    # Extremwinter: reale Temperaturen kalter Winter (Open-Meteo Archiv) ab Ende der Wettervorhersage durchgerechnet, nicht als Modellannahme
+    extrem_res = None
+    try:
+        if extrem and extrem.get("winter"):
+            extrem_res = []
+            sim_start = start_tag + timedelta(days=1)
+            for name, tage_e in sorted(extrem["winter"].items()):
+                y = int(name[:4])
+
+                def datum_e(d, y=y):
+                    jj = y if d.month >= 7 else y + 1
+                    return date(jj, d.month, 28 if (d.month == 2 and d.day == 29) else d.day)
+
+                def tm_e(d, tage_e=tage_e):
+                    sd = d2s(d)
+                    if sd in fc:
+                        return fc[sd]
+                    return tage_e.get(d2s(datum_e(d)), normal.get(sd[5:], 5.0))
+
+                wf_e = None
+                if modell2:
+                    def wf_e(d):
+                        sd = d2s(d)
+                        return modell2["wetter_tag"](d)  # Wind/Strahlung: Durchschnitt, für 2009 bis 2011 liegen keine passenden Winddaten vor
+                ex_e = modell2["rest_fn"](tm_e, wf_e) if modell2 else None
+                sim = simuliere(sim_start, r0["twh"], r0["kap"], i_tag, tm_e, bis, fit, cap_fn("konstant", hoch, tief), basis, 0.0, ex_e)
+                djf = [tage_e[t] for t in tage_e if t[5:7] in ("12", "01", "02")]
+                djf_n = [normal.get(t[5:], None) for t in tage_e if t[5:7] in ("12", "01", "02")]
+                djf_n = [x for x in djf_n if x is not None]
+                extrem_res.append({"winter": name, "mittel_djf_c": round(sum(djf) / len(djf), 1) if djf else None,
+                                   "normal_djf_c": round(sum(djf_n) / len(djf_n), 1) if djf_n else None,
+                                   "ziel": wert_am(sim["verlauf"], cfg["ziel"]["datum"]), "ende": sim["verlauf"][-1][1],
+                                   "unter20": sim["erreicht"].get(20), "leer": sim["erreicht"].get("leer"),
+                                   "fehl_twh": sim["fehl_twh"], "fehl_tage": sim["fehl_tage"], "fehl_erster": sim["fehl_erster"], "fehl_spitze_gwh": sim["fehl_spitze_gwh"],
+                                   "verlauf": sim["verlauf"][::2]})
+    except Exception as e:  # noqa: BLE001
+        extrem_res = [{"fehler": f"{type(e).__name__}: {e}"[:200]}]
     # Übersicht der Faktoren im Modell
     fakt = []
     if modell2:
@@ -888,7 +925,7 @@ def vorausschau(hist, temp, wetter, cfg, stand_tag, import_ref=None, strom=None)
         "szenarien": szen,
         "vorjahre": vor, "vorjahr_verlauf": vorjahr_verlauf,
         "rueckrechnung": rr, "rueckrechnung_mittlerer_fehler_pp": round(sum(fehler) / len(fehler), 1) if fehler else None,
-        "ziel": cfg["ziel"], "einspeicherung": einsp, "analog": analog, "faktoren_modell": fakt, "einfaches_modell": einfach, "nachfuehrung": {"abweichung_gwh": round(nach_wert), "tage": nach_n}, "importausfall": empf, "sparen": sparen, "verstromung": verstr, "importe_ref": {"pipeline_netto": pn, "lng": lg, "norwegen": nor},
+        "ziel": cfg["ziel"], "einspeicherung": einsp, "analog": analog, "extremwinter": extrem_res, "faktoren_modell": fakt, "einfaches_modell": einfach, "nachfuehrung": {"abweichung_gwh": round(nach_wert), "tage": nach_n}, "importausfall": empf, "sparen": sparen, "verstromung": verstr, "importe_ref": {"pipeline_netto": pn, "lng": lg, "norwegen": nor},
         "ohne_importe": {"jahresverbrauch_twh": cfg["jahresverbrauch_twh"], "quelle": cfg.get("jahresverbrauch_quelle"), "verbrauch_tag_twh": round(verbrauch_tag, 2),
                          "tage": round(r0["twh"] / verbrauch_tag)},
     }
