@@ -192,7 +192,7 @@
         d.extremwinter.map(function (e) {
           var fm = e.fehl_twh > 0.05 ? nf.format(e.fehl_twh) + " TWh" + (e.fehl_erster ? " ab " + dat(e.fehl_erster) : "") + (e.fehl_spitze_gwh ? ", Spitze " + nf0.format(e.fehl_spitze_gwh) + " GWh/Tag" : "") : "keine";
           return "<tr><td>" + esc(e.winter) + '</td><td class="n">' + (e.mittel_djf_c != null ? nf.format(e.mittel_djf_c) + " °C" : "–") + (e.normal_djf_c != null ? '<div class="meta" style="margin:0">normal ' + nf.format(e.normal_djf_c) + " °C</div>" : "") + '</td><td class="n">' + (e.ziel != null ? nf0.format(e.ziel) + " %" : "–") + '</td><td class="n">' + nf0.format(e.ende) + ' %</td><td class="n">' + fm + "</td></tr>";
-        }).join("") + '</table><p class="meta">Zum Vergleich: Die Initiative Energien Speichern (INES) rechnet für den Winter 2026/27 beim Kältejahr 2010 mit Fehlmengen von bis zu 6,6 TWh im Monat (Quelle: topagrar, 11.11.2026). Das ist ein anderes Modell mit eigenen Annahmen, die Zahlen sind nur grob vergleichbar.</p>';
+        }).join("") + '</table><p class="meta">Zum Vergleich: Die Initiative Energien Speichern (INES) rechnet für den Winter 2026/27 beim Kältejahr 2010 mit Fehlmengen von bis zu 6,6 TWh im Monat (Quelle: topagrar, 11.11.2026). Unsere Fehlmengen sind <strong>deutlich größer</strong>. Mögliche Gründe: Die Modellkurve wird hier über den Bereich hinaus verlängert, den die Daten seit 2018 belegen (kältester Winter dort im Mittel 1,6 °C, hier etwa −1 °C), und wir rechnen keine zusätzlichen Importe aus Nachbarspeichern ein, INES schon. Lies die Werte als <strong>Obergrenze eines extremen Falls</strong>, nicht als Erwartung.</p>';
     }
     var oi = d.ohne_importe;
     set("cVorausschau", errNote(d) +
