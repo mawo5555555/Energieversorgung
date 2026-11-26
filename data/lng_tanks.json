@@ -1,13 +1,13 @@
 {
- "stand": "2026-11-26T15:08:41Z",
+ "stand": "2026-11-26T23:48:55Z",
  "quelle": "GIE ALSI (alsi.gie.eu)",
  "deutschland": {
   "name": "Deutschland gesamt",
   "firma": "",
-  "gastag": "2026-11-24",
+  "gastag": "2026-11-26",
   "fuellstand_prozent": null,
-  "inhalt_gwh": 1974.29,
-  "ausspeisung_gwh": 334.0,
+  "inhalt_gwh": 1639.74,
+  "ausspeisung_gwh": 336.2,
   "anlieferung_schiffe": null,
   "verlauf": [
    [
@@ -45,6 +45,14 @@
    [
     "2026-11-24",
     null
+   ],
+   [
+    "2026-11-25",
+    null
+   ],
+   [
+    "2026-11-26",
+    null
    ]
   ]
  },
@@ -52,46 +60,46 @@
   {
    "name": "Wilhelmshaven LNG Terminal 1 (FSRU Hoegh Esperanza)",
    "firma": "Deutsche Energy Terminal GmbH",
-   "gastag": "2026-11-24",
+   "gastag": "2026-11-26",
    "fuellstand_prozent": null,
-   "inhalt_gwh": 51.67,
-   "ausspeisung_gwh": 1.0,
+   "inhalt_gwh": 50.09,
+   "ausspeisung_gwh": 1.5,
    "anlieferung_schiffe": null
   },
   {
    "name": "Brunsbuettel LNG Terminal 1 (FSRU Hoegh Gannet)",
    "firma": "Deutsche Energy Terminal GmbH",
-   "gastag": "2026-11-24",
+   "gastag": "2026-11-26",
    "fuellstand_prozent": null,
-   "inhalt_gwh": 609.31,
-   "ausspeisung_gwh": 91.7,
+   "inhalt_gwh": 518.64,
+   "ausspeisung_gwh": 91.1,
    "anlieferung_schiffe": null
   },
   {
    "name": "Stade LNG Terminal 1 (FSRU Energos Force)",
    "firma": "Deutsche Energy Terminal GmbH",
-   "gastag": "2026-11-24",
+   "gastag": "2026-11-26",
    "fuellstand_prozent": null,
-   "inhalt_gwh": 596.69,
-   "ausspeisung_gwh": 118.5,
+   "inhalt_gwh": 479.71,
+   "ausspeisung_gwh": 121.1,
    "anlieferung_schiffe": null
   },
   {
    "name": "Wilhelmshaven LNG Terminal 2 (FSRU Excelerate Excelsior)",
    "firma": "Deutsche Energy Terminal GmbH",
-   "gastag": "2026-11-24",
+   "gastag": "2026-11-26",
    "fuellstand_prozent": null,
-   "inhalt_gwh": 563.06,
-   "ausspeisung_gwh": 120.9,
+   "inhalt_gwh": 439.82,
+   "ausspeisung_gwh": 120.6,
    "anlieferung_schiffe": null
   },
   {
    "name": "Mukran LNG Terminal (FSRU Neptune / FSRU Energos Power)",
    "firma": "Deutsche ReGas GmbH & Co. KGaA",
-   "gastag": "2026-11-24",
+   "gastag": "2026-11-26",
    "fuellstand_prozent": null,
-   "inhalt_gwh": 153.56,
-   "ausspeisung_gwh": 2.0,
+   "inhalt_gwh": 151.48,
+   "ausspeisung_gwh": 1.9,
    "anlieferung_schiffe": null
   }
  ]
