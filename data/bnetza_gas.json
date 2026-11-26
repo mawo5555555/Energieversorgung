@@ -1214,5 +1214,7 @@
     0.1
    ]
   }
- }
+ },
+ "fehler": "ValueError: Verbrauch haushalt_w: Reihe 2026 fehlt",
+ "fehler_stand": "2026-11-26T13:07:57Z"
 }

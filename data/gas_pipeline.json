@@ -1,49 +1,49 @@
 {
- "stand": "2026-11-26T04:59:11Z",
+ "stand": "2026-11-26T13:07:57Z",
  "einheit": "GWh/Tag",
- "tag": "2026-11-24",
- "neuester_tag_in_daten": "2026-11-25",
+ "tag": "2026-11-25",
+ "neuester_tag_in_daten": "2026-11-26",
  "gruppen": [
   {
    "name": "Norwegen",
-   "einspeisung": 755.6,
+   "einspeisung": 716.3,
    "ausfuhr": 0.0,
-   "netto": 755.6
+   "netto": 716.3
   },
   {
    "name": "Niederlande",
-   "einspeisung": 548.5,
-   "ausfuhr": 524.1,
-   "netto": 24.5
+   "einspeisung": 418.0,
+   "ausfuhr": 550.4,
+   "netto": -132.5
   },
   {
    "name": "Belgien",
-   "einspeisung": 484.0,
-   "ausfuhr": 484.0,
+   "einspeisung": 453.1,
+   "ausfuhr": 453.1,
    "netto": 0.0
   },
   {
    "name": "Tschechien",
-   "einspeisung": 29.5,
-   "ausfuhr": 29.5,
+   "einspeisung": 44.4,
+   "ausfuhr": 44.4,
    "netto": 0.0
   },
   {
    "name": "Österreich",
-   "einspeisung": 78.9,
-   "ausfuhr": 1.2,
-   "netto": 77.7
+   "einspeisung": 61.6,
+   "ausfuhr": 0.8,
+   "netto": 60.8
   },
   {
    "name": "Polen",
-   "einspeisung": 42.5,
-   "ausfuhr": 42.5,
+   "einspeisung": 42.6,
+   "ausfuhr": 42.6,
    "netto": 0.0
   },
   {
    "name": "Dänemark",
-   "einspeisung": 2.2,
-   "ausfuhr": 2.1,
+   "einspeisung": 26.6,
+   "ausfuhr": 26.5,
    "netto": 0.1
   },
   {
@@ -53,13 +53,9 @@
    "netto": null
   }
  ],
- "summe_einspeisung": 1941.2,
- "summe_netto": 857.9,
+ "summe_einspeisung": 1762.6,
+ "summe_netto": 644.7,
  "verlauf": [
-  [
-   "2026-11-15",
-   886.3
-  ],
   [
    "2026-11-16",
    916.4
@@ -95,9 +91,15 @@
   [
    "2026-11-24",
    857.9
+  ],
+  [
+   "2026-11-25",
+   644.6
   ]
  ],
- "ohne_daten": [],
+ "ohne_daten": [
+  "Frankreich"
+ ],
  "quelle": "ENTSOG Transparency Platform",
  "hinweis": "ENTSOG-Messpunkte (Physical Flow). Pro Punkt, Richtung und Tag gilt der höchste gemeldete Wert, weil beide Netzbetreiber dieselbe Menge melden. Es werden virtuelle Handelspunkte (VIP) genutzt, wo es sie gibt, und keine Speicheranbindungen. Netto = Einspeisung nach Deutschland minus Ausfuhr aus Deutschland an denselben Punkten. Norwegen kommt über den Punkt Dornum GASPOOL, die alten Punkte Emden/Dornum EPT melden nichts mehr."
 }
