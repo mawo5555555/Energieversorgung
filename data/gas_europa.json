@@ -1,13 +1,13 @@
 {
- "stand": "2026-11-26T23:48:55Z",
+ "stand": "2026-11-27T08:22:26Z",
  "quelle": "GIE AGSI+ (agsi.gie.eu)",
  "laender": [
   {
    "code": "EU",
    "name": "Europäische Union",
-   "gastag": "2026-11-26",
-   "fuellstand_prozent": 66.57,
-   "gas_twh": 753.8601,
+   "gastag": "2026-11-25",
+   "fuellstand_prozent": 67.2,
+   "gas_twh": 760.9685,
    "kapazitaet_twh": 1132.3616,
    "einspeicherung_gwh": 124.48,
    "ausspeicherung_gwh": 7232.8
@@ -15,9 +15,9 @@
   {
    "code": "DE",
    "name": "Deutschland",
-   "gastag": "2026-11-26",
-   "fuellstand_prozent": 53.66,
-   "gas_twh": 132.7214,
+   "gastag": "2026-11-25",
+   "fuellstand_prozent": 54.45,
+   "gas_twh": 134.6918,
    "kapazitaet_twh": 247.3563,
    "einspeicherung_gwh": 3.98,
    "ausspeicherung_gwh": 1974.3
@@ -25,9 +25,9 @@
   {
    "code": "NL",
    "name": "Niederlande",
-   "gastag": "2026-11-26",
-   "fuellstand_prozent": 56.72,
-   "gas_twh": 81.6982,
+   "gastag": "2026-11-25",
+   "fuellstand_prozent": 57.34,
+   "gas_twh": 82.594,
    "kapazitaet_twh": 144.0428,
    "einspeicherung_gwh": 29.82,
    "ausspeicherung_gwh": 925.7
@@ -35,9 +35,9 @@
   {
    "code": "AT",
    "name": "Österreich",
-   "gastag": "2026-11-26",
-   "fuellstand_prozent": 60.99,
-   "gas_twh": 61.1586,
+   "gastag": "2026-11-25",
+   "fuellstand_prozent": 61.52,
+   "gas_twh": 61.6964,
    "kapazitaet_twh": 100.2789,
    "einspeicherung_gwh": 0.0,
    "ausspeicherung_gwh": 537.8
@@ -45,9 +45,9 @@
   {
    "code": "FR",
    "name": "Frankreich",
-   "gastag": "2026-11-26",
-   "fuellstand_prozent": 68.98,
-   "gas_twh": 85.4529,
+   "gastag": "2026-11-25",
+   "fuellstand_prozent": 70.05,
+   "gas_twh": 86.7788,
    "kapazitaet_twh": 123.8779,
    "einspeicherung_gwh": 19.6,
    "ausspeicherung_gwh": 1345.5
@@ -55,9 +55,9 @@
   {
    "code": "IT",
    "name": "Italien",
-   "gastag": "2026-11-26",
-   "fuellstand_prozent": 83.52,
-   "gas_twh": 169.8969,
+   "gastag": "2026-11-25",
+   "fuellstand_prozent": 83.95,
+   "gas_twh": 170.7833,
    "kapazitaet_twh": 203.4249,
    "einspeicherung_gwh": 39.67,
    "ausspeicherung_gwh": 926.1
@@ -65,29 +65,49 @@
   {
    "code": "PL",
    "name": "Polen",
-   "gastag": "2026-11-26",
-   "fuellstand_prozent": 93.22,
-   "gas_twh": 34.3502,
+   "gastag": "2026-11-25",
+   "fuellstand_prozent": 93.82,
+   "gas_twh": 34.5701,
    "kapazitaet_twh": 36.8491,
    "einspeicherung_gwh": 0.0,
    "ausspeicherung_gwh": 219.9
   },
   {
+   "code": "CZ",
+   "name": "Tschechien",
+   "gastag": "2026-11-25",
+   "fuellstand_prozent": 66.57,
+   "gas_twh": 30.1594,
+   "kapazitaet_twh": 45.3059,
+   "einspeicherung_gwh": 1.67,
+   "ausspeicherung_gwh": 377.4
+  },
+  {
    "code": "HU",
    "name": "Ungarn",
-   "gastag": "2026-11-26",
-   "fuellstand_prozent": 72.54,
-   "gas_twh": 49.3862,
+   "gastag": "2026-11-25",
+   "fuellstand_prozent": 72.97,
+   "gas_twh": 49.6775,
    "kapazitaet_twh": 68.0767,
    "einspeicherung_gwh": 5.77,
    "ausspeicherung_gwh": 297.1
   },
   {
+   "code": "ES",
+   "name": "Spanien",
+   "gastag": "2026-11-25",
+   "fuellstand_prozent": 78.64,
+   "gas_twh": 28.1766,
+   "kapazitaet_twh": 35.8318,
+   "einspeicherung_gwh": 0.0,
+   "ausspeicherung_gwh": 82.5
+  },
+  {
    "code": "BE",
    "name": "Belgien",
-   "gastag": "2026-11-26",
-   "fuellstand_prozent": 69.12,
-   "gas_twh": 5.2601,
+   "gastag": "2026-11-25",
+   "fuellstand_prozent": 70.11,
+   "gas_twh": 5.3355,
    "kapazitaet_twh": 7.61,
    "einspeicherung_gwh": 0.0,
    "ausspeicherung_gwh": 75.4
@@ -95,9 +115,9 @@
   {
    "code": "DK",
    "name": "Dänemark",
-   "gastag": "2026-11-26",
-   "fuellstand_prozent": 83.13,
-   "gas_twh": 6.8083,
+   "gastag": "2026-11-25",
+   "fuellstand_prozent": 83.74,
+   "gas_twh": 6.8583,
    "kapazitaet_twh": 8.19,
    "einspeicherung_gwh": 0.4,
    "ausspeicherung_gwh": 50.4
@@ -105,9 +125,9 @@
   {
    "code": "SK",
    "name": "Slowakei",
-   "gastag": "2026-11-26",
-   "fuellstand_prozent": 45.82,
-   "gas_twh": 17.3218,
+   "gastag": "2026-11-25",
+   "fuellstand_prozent": 46.26,
+   "gas_twh": 17.4878,
    "kapazitaet_twh": 37.803,
    "einspeicherung_gwh": 1.53,
    "ausspeicherung_gwh": 167.5
@@ -115,16 +135,13 @@
   {
    "code": "RO",
    "name": "Rumänien",
-   "gastag": "2026-11-26",
-   "fuellstand_prozent": 81.23,
-   "gas_twh": 27.5071,
+   "gastag": "2026-11-25",
+   "fuellstand_prozent": 81.68,
+   "gas_twh": 27.6589,
    "kapazitaet_twh": 33.8636,
    "einspeicherung_gwh": 0.0,
    "ausspeicherung_gwh": 151.8
   }
  ],
- "ohne_daten": [
-  "CZ",
-  "ES"
- ]
+ "ohne_daten": []
 }

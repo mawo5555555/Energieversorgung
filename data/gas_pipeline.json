@@ -1,50 +1,50 @@
 {
- "stand": "2026-11-26T23:48:55Z",
+ "stand": "2026-11-27T08:22:26Z",
  "einheit": "GWh/Tag",
- "tag": "2026-11-25",
- "neuester_tag_in_daten": "2026-11-26",
+ "tag": "2026-11-26",
+ "neuester_tag_in_daten": "2026-11-27",
  "gruppen": [
   {
    "name": "Norwegen",
-   "einspeisung": 716.3,
+   "einspeisung": 734.4,
    "ausfuhr": 0.0,
-   "netto": 716.3
+   "netto": 734.4
   },
   {
    "name": "Niederlande",
-   "einspeisung": 632.9,
-   "ausfuhr": 550.4,
-   "netto": 82.5
+   "einspeisung": 0.0,
+   "ausfuhr": 516.2,
+   "netto": -516.2
   },
   {
    "name": "Belgien",
-   "einspeisung": 453.1,
-   "ausfuhr": 453.1,
-   "netto": 0.0
+   "einspeisung": 607.9,
+   "ausfuhr": 0.0,
+   "netto": 607.9
   },
   {
    "name": "Tschechien",
-   "einspeisung": 44.4,
-   "ausfuhr": 44.4,
-   "netto": 0.0
+   "einspeisung": 39.1,
+   "ausfuhr": 39.0,
+   "netto": 0.1
   },
   {
    "name": "Österreich",
-   "einspeisung": 61.6,
-   "ausfuhr": 0.8,
-   "netto": 60.8
+   "einspeisung": 94.2,
+   "ausfuhr": 0.0,
+   "netto": 94.2
   },
   {
    "name": "Polen",
-   "einspeisung": 42.6,
-   "ausfuhr": 42.6,
+   "einspeisung": 42.7,
+   "ausfuhr": 42.7,
    "netto": 0.0
   },
   {
    "name": "Dänemark",
-   "einspeisung": 26.6,
-   "ausfuhr": 26.5,
-   "netto": 0.1
+   "einspeisung": 0.0,
+   "ausfuhr": 39.4,
+   "netto": -39.4
   },
   {
    "name": "Frankreich",
@@ -53,13 +53,9 @@
    "netto": null
   }
  ],
- "summe_einspeisung": 1977.5,
- "summe_netto": 859.7,
+ "summe_einspeisung": 1518.3,
+ "summe_netto": 881.0,
  "verlauf": [
-  [
-   "2026-11-16",
-   916.4
-  ],
   [
    "2026-11-17",
    958.2
@@ -95,6 +91,10 @@
   [
    "2026-11-25",
    859.6
+  ],
+  [
+   "2026-11-26",
+   881.0
   ]
  ],
  "ohne_daten": [
