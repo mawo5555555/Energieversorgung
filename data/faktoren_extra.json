@@ -1,11 +1,11 @@
 {
- "stand": "2026-11-27T08:22:26Z",
+ "stand": "2026-11-27T13:06:07Z",
  "rhein": {
-  "pegel_cm": 197.0,
+  "pegel_cm": 194.0,
   "zustand": "normal",
   "min_30t": 5.0,
   "max_30t": 242.0,
-  "zeit": "2026-11-27T09:15:00+01:00",
+  "zeit": "2026-11-27T14:00:00+01:00",
   "quelle": "Pegelonline (WSV), Pegel Kaub"
  },
  "industrie": {
@@ -64,31 +64,6 @@
   ],
   "quelle": "Eurostat, Produktion im produzierenden Gewerbe (saisonbereinigt, 2021=100)"
  },
- "nachbarn_wetter": [
-  {
-   "land": "Frankreich",
-   "temp_naechste_7": 4.0,
-   "temp_letzte_7": 7.0
-  },
-  {
-   "land": "Polen",
-   "temp_naechste_7": -2.5,
-   "temp_letzte_7": 2.4
-  },
-  {
-   "land": "Niederlande",
-   "temp_naechste_7": 3.0,
-   "temp_letzte_7": 3.8
-  },
-  {
-   "land": "Österreich",
-   "temp_naechste_7": -1.5,
-   "temp_letzte_7": 3.9
-  },
-  {
-   "land": "Italien",
-   "temp_naechste_7": 8.5,
-   "temp_letzte_7": 13.9
-  }
- ]
+ "nachbarn_wetter": [],
+ "nachbarn_wetter_fehler": "URLError: <urlopen error _ssl.c:994: The handshake operation timed out>"
 }
