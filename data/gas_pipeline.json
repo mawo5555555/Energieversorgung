@@ -1,5 +1,5 @@
 {
- "stand": "2026-11-27T13:06:07Z",
+ "stand": "2026-11-27T18:55:18Z",
  "einheit": "GWh/Tag",
  "tag": "2026-11-26",
  "neuester_tag_in_daten": "2026-11-27",
@@ -12,9 +12,9 @@
   },
   {
    "name": "Niederlande",
-   "einspeisung": 429.0,
+   "einspeisung": 634.7,
    "ausfuhr": 516.2,
-   "netto": -87.1
+   "netto": 118.5
   },
   {
    "name": "Belgien",
@@ -48,13 +48,13 @@
   },
   {
    "name": "Frankreich",
-   "einspeisung": null,
-   "ausfuhr": null,
-   "netto": null
+   "einspeisung": 0.0,
+   "ausfuhr": 0.0,
+   "netto": 0.0
   }
  ],
- "summe_einspeisung": 1986.8,
- "summe_netto": 741.8,
+ "summe_einspeisung": 2192.5,
+ "summe_netto": 947.4,
  "verlauf": [
   [
    "2026-11-17",
@@ -94,12 +94,10 @@
   ],
   [
    "2026-11-26",
-   741.6
+   947.3
   ]
  ],
- "ohne_daten": [
-  "Frankreich"
- ],
+ "ohne_daten": [],
  "quelle": "ENTSOG Transparency Platform",
  "hinweis": "ENTSOG-Messpunkte (Physical Flow). Pro Punkt, Richtung und Tag gilt der höchste gemeldete Wert, weil beide Netzbetreiber dieselbe Menge melden. Es werden virtuelle Handelspunkte (VIP) genutzt, wo es sie gibt, und keine Speicheranbindungen. Netto = Einspeisung nach Deutschland minus Ausfuhr aus Deutschland an denselben Punkten. Norwegen kommt über den Punkt Dornum GASPOOL, die alten Punkte Emden/Dornum EPT melden nichts mehr."
 }
