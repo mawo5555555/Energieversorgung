@@ -39,5 +39,7 @@
   }
  ],
  "kaltwelle_delta_hdd": 5.0,
- "effekt_kaltwelle_gwh": -111.0
+ "effekt_kaltwelle_gwh": -111.0,
+ "fehler": "ValueError: zu wenig Tage (0)",
+ "fehler_stand": "2026-11-28T01:56:35Z"
 }
