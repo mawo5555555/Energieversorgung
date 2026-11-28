@@ -1,5 +1,5 @@
 {
- "stand": "2026-11-28T01:56:35Z",
+ "stand": "2026-11-28T10:20:50Z",
  "quelle": "GIE AGSI+ (agsi.gie.eu)",
  "anlagen": [
   {
@@ -91,16 +91,6 @@
    "kapazitaet_twh": 9.389,
    "einspeicherung_gwh": 0.0,
    "ausspeicherung_gwh": 24.6
-  },
-  {
-   "name": "STASSFURT-RWEGSWEST",
-   "firma": "RWE Gas Storage West GmbH",
-   "gastag": "2026-11-26",
-   "fuellstand_prozent": 81.08,
-   "gas_twh": 5.1842,
-   "kapazitaet_twh": 6.3936,
-   "einspeicherung_gwh": 0.0,
-   "ausspeicherung_gwh": 13.9
   },
   {
    "name": "Inzenham-West",
@@ -261,16 +251,6 @@
    "kapazitaet_twh": 1.785,
    "einspeicherung_gwh": 0.0,
    "ausspeicherung_gwh": 21.6
-  },
-  {
-   "name": "Epe-NL-RWEGSWEST",
-   "firma": "RWE Gas Storage West GmbH",
-   "gastag": "2026-11-26",
-   "fuellstand_prozent": 86.75,
-   "gas_twh": 1.4707,
-   "kapazitaet_twh": 1.6954,
-   "einspeicherung_gwh": 0.0,
-   "ausspeicherung_gwh": 30.6
   },
   {
    "name": "Lesum",
