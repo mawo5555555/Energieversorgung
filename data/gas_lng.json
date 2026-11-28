@@ -1,7 +1,7 @@
 {
- "stand": "2026-11-28T10:20:50Z",
+ "stand": "2026-11-28T12:20:14Z",
  "einheit": "GWh/Tag",
- "tag": "2026-11-26",
+ "tag": "2026-11-27",
  "neuester_tag_in_daten": "2026-11-28",
  "terminals": [
   {
@@ -12,23 +12,19 @@
   },
   {
    "name": "Brunsbüttel",
-   "einspeisung": 100.3,
+   "einspeisung": 92.5,
    "ausfuhr": null,
-   "netto": 100.3
+   "netto": 92.5
   },
   {
    "name": "Stade",
-   "einspeisung": 121.4,
+   "einspeisung": 122.4,
    "ausfuhr": null,
-   "netto": 121.4
+   "netto": 122.4
   }
  ],
- "summe": 344.0,
+ "summe": 337.2,
  "verlauf": [
-  [
-   "2026-11-17",
-   308.1
-  ],
   [
    "2026-11-18",
    277.1
@@ -64,6 +60,10 @@
   [
    "2026-11-26",
    344.0
+  ],
+  [
+   "2026-11-27",
+   337.2
   ]
  ],
  "ohne_daten": [],

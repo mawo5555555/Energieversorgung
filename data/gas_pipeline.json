@@ -1,5 +1,5 @@
 {
- "stand": "2026-11-28T10:20:50Z",
+ "stand": "2026-11-28T12:20:14Z",
  "einheit": "GWh/Tag",
  "tag": "2026-11-27",
  "neuester_tag_in_daten": "2026-11-28",
@@ -12,9 +12,9 @@
   },
   {
    "name": "Niederlande",
-   "einspeisung": 197.0,
+   "einspeisung": 534.0,
    "ausfuhr": 460.4,
-   "netto": -263.4
+   "netto": 73.6
   },
   {
    "name": "Belgien",
@@ -42,9 +42,9 @@
   },
   {
    "name": "Dänemark",
-   "einspeisung": 0.0,
+   "einspeisung": 9.7,
    "ausfuhr": 9.7,
-   "netto": -9.7
+   "netto": 0.0
   },
   {
    "name": "Frankreich",
@@ -53,8 +53,8 @@
    "netto": null
   }
  ],
- "summe_einspeisung": 1686.9,
- "summe_netto": 574.2,
+ "summe_einspeisung": 2033.6,
+ "summe_netto": 920.9,
  "verlauf": [
   [
    "2026-11-18",
@@ -94,7 +94,7 @@
   ],
   [
    "2026-11-27",
-   574.1
+   920.8
   ]
  ],
  "ohne_daten": [],
